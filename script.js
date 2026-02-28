@@ -58,11 +58,12 @@
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
+        // Stagger children if multiple arrive at once
         entry.target.classList.add('visible');
         revealObserver.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  }, { threshold: 0.05, rootMargin: '0px 0px 0px 0px' });
 
   revealEls.forEach(el => revealObserver.observe(el));
 
@@ -122,22 +123,22 @@
   let W, H, particles = [], animFrameId;
 
   function resize() {
-    W = canvas.width  = window.innerWidth;
+    W = canvas.width = window.innerWidth;
     H = canvas.height = window.innerHeight;
   }
 
   class Particle {
     constructor() { this.reset(true); }
     reset(initial = false) {
-      this.x  = Math.random() * W;
-      this.y  = initial ? Math.random() * H : H + 10;
+      this.x = Math.random() * W;
+      this.y = initial ? Math.random() * H : H + 10;
       this.vy = -(0.15 + Math.random() * 0.4);
       this.vx = (Math.random() - 0.5) * 0.2;
-      this.size   = 1 + Math.random() * 1.5;
-      this.alpha  = 0;
+      this.size = 1 + Math.random() * 1.5;
+      this.alpha = 0;
       this.alphaMax = 0.15 + Math.random() * 0.35;
-      this.fade   = 'in';
-      this.life   = 0;
+      this.fade = 'in';
+      this.life = 0;
       this.maxLife = 200 + Math.random() * 300;
     }
     update() {
@@ -243,10 +244,10 @@
   loop();
 
   /* ── CONTACT FORM ──────────────────────────── */
-  const form      = document.getElementById('contactForm');
+  const form = document.getElementById('contactForm');
   const submitBtn = document.getElementById('submitBtn');
-  const btnText   = document.getElementById('btnText');
-  const btnArrow  = document.getElementById('btnArrow');
+  const btnText = document.getElementById('btnText');
+  const btnArrow = document.getElementById('btnArrow');
   const btnLoader = document.getElementById('btnLoader');
   const formSuccess = document.getElementById('formSuccess');
 
@@ -270,8 +271,8 @@
 
   if (form) {
     // Live validation on blur
-    const nameInput    = document.getElementById('name');
-    const emailInput   = document.getElementById('email');
+    const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('email');
     const serviceInput = document.getElementById('service');
     const messageInput = document.getElementById('message');
 
@@ -326,9 +327,9 @@
   /* ── SMOOTH HOVER GLOW FOLLOW (cards) ──────── */
   document.querySelectorAll('.service-card, .equipment-card, .testi-card').forEach(card => {
     card.addEventListener('mousemove', (e) => {
-      const rect  = card.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width)  * 100;
-      const y = ((e.clientY - rect.top)  / rect.height) * 100;
+      const rect = card.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
       card.style.setProperty('--mouse-x', x + '%');
       card.style.setProperty('--mouse-y', y + '%');
     });
