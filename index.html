@@ -560,6 +560,35 @@
     </div>
   </section>
 
+  <!-- =================== LIGHTBOX =================== -->
+  <div id="lightbox" class="lightbox" aria-hidden="true">
+    <div class="lightbox-backdrop"></div>
+    <button class="lightbox-close" aria-label="Bezárás">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
+    <button class="lightbox-arrow lightbox-prev" aria-label="Előző">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6" />
+      </svg>
+    </button>
+    <button class="lightbox-arrow lightbox-next" aria-label="Következő">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="9 6 15 12 9 18" />
+      </svg>
+    </button>
+    <div class="lightbox-content">
+      <img id="lightboxImg" class="lightbox-img" src="" alt="" />
+      <div class="lightbox-info">
+        <span class="lightbox-cat" id="lightboxCat"></span>
+        <h3 id="lightboxTitle"></h3>
+        <p id="lightboxDesc"></p>
+      </div>
+    </div>
+    <div class="lightbox-counter" id="lightboxCounter"></div>
+  </div>
+
   <!-- =================== FOOTER =================== -->
   <footer class="footer">
     <div class="footer-top">
@@ -641,6 +670,22 @@
     </div>
   </footer>
 
+  <!-- =================== COOKIE BANNER =================== -->
+  <div id="cookieBanner" class="cookie-banner" aria-hidden="true">
+    <div class="cookie-inner">
+      <div class="cookie-text">
+        <p>Ez a weboldal sütiket használ a legjobb felhasználói élmény biztosítása érdekében. A böngészés
+          folytatásával Ön elfogadja a <a href="#">sütikezelési szabályzatunkat</a>.</p>
+      </div>
+      <div class="cookie-actions">
+        <button class="cookie-btn cookie-btn-accept" id="cookieAccept">Elfogadom</button>
+        <button class="cookie-btn cookie-btn-decline" id="cookieDecline">Elutasítom</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script src="script.js"></script>
 </body>
 
