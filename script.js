@@ -1,7 +1,8 @@
 /* =============================================
    LORICATUS – Premium Drone Company
    JavaScript: Animations, Parallax, Counters,
-   Form Validation, Hero Canvas, Nav
+   Form Validation, Hero Canvas, Nav,
+   Lightbox, EmailJS, Cookie Banner
    ============================================= */
 
 (function () {
@@ -58,7 +59,6 @@
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        // Stagger children if multiple arrive at once
         entry.target.classList.add('visible');
         revealObserver.unobserve(entry.target);
       }
@@ -102,7 +102,6 @@
     }, { threshold: 0.5 });
     statsObserver.observe(heroStats);
   } else {
-    // Fallback: start counters after 800ms
     setTimeout(animateCounters, 800);
   }
 
@@ -166,7 +165,6 @@
     }
   }
 
-  // Grid lines
   function drawGrid() {
     const spacing = 80;
     ctx.save();
@@ -181,7 +179,6 @@
     ctx.restore();
   }
 
-  // Draw connecting lines between nearby particles
   function drawConnections() {
     const maxDist = 100;
     for (let i = 0; i < particles.length; i++) {
@@ -220,7 +217,6 @@
     animFrameId = requestAnimationFrame(loop);
   }
 
-  // Stop canvas animation when hero is not visible
   const heroSection = document.getElementById('hero');
   const canvasObserver = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting) {
@@ -243,7 +239,121 @@
   initCanvas();
   loop();
 
-  /* ── CONTACT FORM ──────────────────────────── */
+  /* ── PORTFOLIO LIGHTBOX ─────────────────────── */
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxCat = document.getElementById('lightboxCat');
+  const lightboxTitle = document.getElementById('lightboxTitle');
+  const lightboxDesc = document.getElementById('lightboxDesc');
+  const lightboxCounter = document.getElementById('lightboxCounter');
+  const portfolioCards = document.querySelectorAll('.portfolio-card');
+
+  let lightboxItems = [];
+  let lightboxIndex = 0;
+
+  // Collect portfolio data
+  portfolioCards.forEach((card) => {
+    const img = card.querySelector('.portfolio-img');
+    const cat = card.querySelector('.portfolio-cat');
+    const title = card.querySelector('.portfolio-overlay h3');
+    const desc = card.querySelector('.portfolio-overlay p');
+
+    lightboxItems.push({
+      src: img ? img.src : '',
+      alt: img ? img.alt : '',
+      cat: cat ? cat.textContent : '',
+      title: title ? title.innerHTML : '',
+      desc: desc ? desc.textContent : ''
+    });
+
+    card.addEventListener('click', () => {
+      lightboxIndex = lightboxItems.indexOf(
+        lightboxItems.find(item => item.src === img.src && item.title === title.innerHTML)
+      );
+      openLightbox();
+    });
+  });
+
+  function openLightbox() {
+    updateLightboxContent();
+    lightbox.classList.add('active');
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('active');
+    lightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  function updateLightboxContent() {
+    const item = lightboxItems[lightboxIndex];
+    if (!item) return;
+    lightboxImg.src = item.src;
+    lightboxImg.alt = item.alt;
+    lightboxCat.textContent = item.cat;
+    lightboxTitle.innerHTML = item.title;
+    lightboxDesc.textContent = item.desc;
+    lightboxCounter.textContent = (lightboxIndex + 1) + ' / ' + lightboxItems.length;
+  }
+
+  function lightboxPrev() {
+    lightboxIndex = (lightboxIndex - 1 + lightboxItems.length) % lightboxItems.length;
+    updateLightboxContent();
+  }
+
+  function lightboxNext() {
+    lightboxIndex = (lightboxIndex + 1) % lightboxItems.length;
+    updateLightboxContent();
+  }
+
+  if (lightbox) {
+    lightbox.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
+    lightbox.querySelector('.lightbox-backdrop').addEventListener('click', closeLightbox);
+    lightbox.querySelector('.lightbox-prev').addEventListener('click', lightboxPrev);
+    lightbox.querySelector('.lightbox-next').addEventListener('click', lightboxNext);
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!lightbox.classList.contains('active')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') lightboxPrev();
+      if (e.key === 'ArrowRight') lightboxNext();
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    lightbox.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    lightbox.addEventListener('touchend', (e) => {
+      const diff = e.changedTouches[0].screenX - touchStartX;
+      if (Math.abs(diff) > 60) {
+        if (diff > 0) lightboxPrev();
+        else lightboxNext();
+      }
+    }, { passive: true });
+  }
+
+  /* ── CONTACT FORM (EmailJS) ────────────────── */
+  // ── EmailJS Configuration ──
+  // To activate EmailJS:
+  // 1. Create an account at https://www.emailjs.com
+  // 2. Create an email service and template
+  // 3. Replace the values below with your own:
+  const EMAILJS_PUBLIC_KEY = 'YOUR_PUBLIC_KEY';
+  const EMAILJS_SERVICE_ID = 'YOUR_SERVICE_ID';
+  const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
+
+  // Initialize EmailJS if configured
+  const emailjsReady = EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY'
+    && typeof emailjs !== 'undefined';
+  if (emailjsReady) {
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+  }
+
   const form = document.getElementById('contactForm');
   const submitBtn = document.getElementById('submitBtn');
   const btnText = document.getElementById('btnText');
@@ -270,7 +380,6 @@
   }
 
   if (form) {
-    // Live validation on blur
     const nameInput = document.getElementById('name');
     const emailInput = document.getElementById('email');
     const serviceInput = document.getElementById('service');
@@ -288,7 +397,6 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      // Validate all required fields
       const v1 = validateField(nameInput, 'nameError', v => v.length >= 2);
       const v2 = validateField(emailInput, 'emailError', isValidEmail);
       const v3 = validateField(serviceInput, 'serviceError', v => v !== '');
@@ -307,20 +415,49 @@
 
       if (!v1 || !v2 || !v3 || !v4) return;
 
-      // Simulate sending
+      // Show loading state
       submitBtn.disabled = true;
       btnText.textContent = 'Küldés...';
       btnArrow.style.display = 'none';
       btnLoader.style.display = 'inline-block';
 
-      await new Promise(r => setTimeout(r, 1800));
+      try {
+        if (emailjsReady) {
+          // Send via EmailJS
+          await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+            from_name: nameInput.value.trim(),
+            from_email: emailInput.value.trim(),
+            company: document.getElementById('company').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            service: serviceInput.value,
+            message: messageInput.value.trim()
+          });
+        } else {
+          // Fallback: simulate sending (EmailJS not configured)
+          await new Promise(r => setTimeout(r, 1800));
+        }
 
-      submitBtn.style.display = 'none';
-      formSuccess.style.display = 'flex';
-      form.querySelectorAll('input, select, textarea').forEach(el => {
-        el.disabled = true;
-        el.style.opacity = '0.5';
-      });
+        // Show success
+        submitBtn.style.display = 'none';
+        formSuccess.style.display = 'flex';
+        form.querySelectorAll('input, select, textarea').forEach(el => {
+          el.disabled = true;
+          el.style.opacity = '0.5';
+        });
+      } catch (err) {
+        // Show error state
+        btnText.textContent = 'Hiba történt – próbálja újra';
+        btnArrow.style.display = 'inline';
+        btnLoader.style.display = 'none';
+        submitBtn.disabled = false;
+        submitBtn.style.background = '#ff6b6b';
+        submitBtn.style.color = '#fff';
+        setTimeout(() => {
+          btnText.textContent = 'Küldöm az ajánlatkérést';
+          submitBtn.style.background = '';
+          submitBtn.style.color = '';
+        }, 3000);
+      }
     });
   }
 
@@ -334,6 +471,43 @@
       card.style.setProperty('--mouse-y', y + '%');
     });
   });
+
+  /* ── COOKIE CONSENT BANNER ─────────────────── */
+  const cookieBanner = document.getElementById('cookieBanner');
+  const cookieAccept = document.getElementById('cookieAccept');
+  const cookieDecline = document.getElementById('cookieDecline');
+
+  function getCookieConsent() {
+    return localStorage.getItem('loricatus_cookie_consent');
+  }
+
+  function setCookieConsent(value) {
+    localStorage.setItem('loricatus_cookie_consent', value);
+  }
+
+  if (cookieBanner && !getCookieConsent()) {
+    // Show banner after a short delay for better UX
+    setTimeout(() => {
+      cookieBanner.classList.add('visible');
+      cookieBanner.setAttribute('aria-hidden', 'false');
+    }, 1500);
+  }
+
+  if (cookieAccept) {
+    cookieAccept.addEventListener('click', () => {
+      setCookieConsent('accepted');
+      cookieBanner.classList.remove('visible');
+      cookieBanner.setAttribute('aria-hidden', 'true');
+    });
+  }
+
+  if (cookieDecline) {
+    cookieDecline.addEventListener('click', () => {
+      setCookieConsent('declined');
+      cookieBanner.classList.remove('visible');
+      cookieBanner.setAttribute('aria-hidden', 'true');
+    });
+  }
 
   /* ── FOOTER YEAR ───────────────────────────── */
   const yearSpan = document.querySelector('.footer-bottom-inner span');

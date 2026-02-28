@@ -1,7 +1,56 @@
 /* ===================================================
    LORICATUS – Premium Drone Company CSS
-   Brand: Graphite + Neon Yellow-Green / Space Grotesk
+   Brand: Graphite + Neon Yellow-Green / Aktiv Grotesk Corp
    =================================================== */
+
+/* ── BRAND FONTS ─────────────────────────────────── */
+@font-face {
+  font-family: 'Aktiv Grotesk Corp';
+  src: url('assets/fonts/AktivGroteskCorp-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk Corp';
+  src: url('assets/fonts/AktivGroteskCorp-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk Corp';
+  src: url('assets/fonts/AktivGroteskCorp-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk Corp';
+  src: url('assets/fonts/AktivGroteskCorp-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('assets/fonts/IBMPlexMono-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('assets/fonts/IBMPlexMono-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* ── DESIGN TOKENS ─────────────────────────────── */
 :root {
@@ -27,8 +76,9 @@
   --easing-out: cubic-bezier(0.0, 0.0, 0.2, 1.0);
   --easing-in: cubic-bezier(0.4, 0.0, 1.0, 1.0);
 
-  --font-head: 'Space Grotesk', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-head: 'Aktiv Grotesk Corp', 'Space Grotesk', sans-serif;
+  --font-body: 'Aktiv Grotesk Corp', 'Inter', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
 
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.35);
   --shadow-glow: 0 0 32px rgba(197, 255, 43, 0.18);
@@ -103,9 +153,9 @@ textarea {
   position: absolute;
   top: 40px;
   right: 40px;
-  font-family: var(--font-head);
+  font-family: var(--font-mono);
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.25em;
   color: rgba(255, 255, 255, 0.1);
   user-select: none;
@@ -148,8 +198,9 @@ textarea {
 }
 
 .section-tag {
+  font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--accent);
@@ -430,8 +481,9 @@ textarea {
   border-radius: 50px;
   background: rgba(197, 255, 43, 0.08);
   border: 1px solid rgba(197, 255, 43, 0.2);
+  font-family: var(--font-mono);
   font-size: 0.82rem;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: 0.04em;
   color: var(--accent);
   margin-bottom: 28px;
@@ -907,8 +959,9 @@ textarea {
 
 .eq-tag {
   display: inline-block;
+  font-family: var(--font-mono);
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--accent);
@@ -993,8 +1046,9 @@ textarea {
 
 .portfolio-cat {
   display: inline-block;
+  font-family: var(--font-mono);
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--accent);
@@ -1452,6 +1506,246 @@ textarea {
   flex-wrap: wrap;
 }
 
+/* ── LIGHTBOX ──────────────────────────────────── */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s var(--easing), visibility 0.4s;
+}
+
+.lightbox.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 10;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  transition: all 0.3s;
+}
+
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--accent);
+  transform: rotate(90deg);
+}
+
+.lightbox-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  transition: all 0.3s;
+}
+
+.lightbox-arrow:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--black);
+  box-shadow: 0 0 24px var(--accent-glow);
+}
+
+.lightbox-prev { left: 24px; }
+.lightbox-next { right: 24px; }
+
+.lightbox-content {
+  position: relative;
+  z-index: 5;
+  max-width: 85vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: lightboxIn 0.4s var(--easing-out);
+}
+
+@keyframes lightboxIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.lightbox-img {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6);
+  width: auto;
+  height: auto;
+}
+
+.lightbox-info {
+  text-align: center;
+  margin-top: 20px;
+  max-width: 500px;
+}
+
+.lightbox-info .lightbox-cat {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(197, 255, 43, 0.1);
+  border: 1px solid rgba(197, 255, 43, 0.2);
+  padding: 4px 12px;
+  border-radius: 50px;
+  margin-bottom: 12px;
+}
+
+.lightbox-info h3 {
+  font-family: var(--font-head);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.lightbox-info p {
+  font-size: 0.88rem;
+  color: var(--silver);
+}
+
+.lightbox-counter {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--smoke);
+  letter-spacing: 0.1em;
+}
+
+/* ── COOKIE BANNER ────────────────────────────── */
+.cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 8888;
+  background: rgba(13, 15, 16, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 20px 0;
+  transform: translateY(100%);
+  transition: transform 0.5s var(--easing);
+}
+
+.cookie-banner.visible {
+  transform: translateY(0);
+}
+
+.cookie-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.cookie-text {
+  flex: 1;
+  min-width: 280px;
+}
+
+.cookie-text p {
+  font-size: 0.88rem;
+  color: var(--silver);
+  line-height: 1.6;
+}
+
+.cookie-text a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.cookie-actions {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.cookie-btn {
+  padding: 10px 24px;
+  border-radius: 50px;
+  font-family: var(--font-head);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.3s var(--easing);
+  white-space: nowrap;
+}
+
+.cookie-btn-accept {
+  background: var(--accent);
+  color: var(--black);
+  box-shadow: 0 2px 12px var(--accent-glow);
+}
+
+.cookie-btn-accept:hover {
+  box-shadow: 0 4px 24px rgba(197, 255, 43, 0.5);
+  transform: translateY(-1px);
+}
+
+.cookie-btn-decline {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--silver);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cookie-btn-decline:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--white);
+}
+
 /* ── RESPONSIVE ─────────────────────────────────── */
 
 /* ── Tablet wide (≤1100px) ── */
@@ -1553,6 +1847,43 @@ textarea {
 @media (max-width: 768px) {
   :root {
     --nav-h: 60px;
+  }
+
+  /* ── Lightbox mobile ── */
+  .lightbox-arrow {
+    width: 40px;
+    height: 40px;
+  }
+
+  .lightbox-prev { left: 10px; }
+  .lightbox-next { right: 10px; }
+
+  .lightbox-close {
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .lightbox-content {
+    max-width: 95vw;
+  }
+
+  .lightbox-img {
+    max-height: 60vh;
+  }
+
+  /* ── Cookie mobile ── */
+  .cookie-inner {
+    padding: 0 20px;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .cookie-actions {
+    justify-content: center;
   }
 
   /* ── Nav ── */
