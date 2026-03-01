@@ -105,15 +105,9 @@
     setTimeout(animateCounters, 800);
   }
 
-  /* ── HERO PARALLAX ─────────────────────────── */
+  /* ── HERO PARALLAX (handled in unified 3D scroll handler below) ── */
   const heroParallax = document.getElementById('heroParallax');
-
-  window.addEventListener('scroll', () => {
-    if (!heroParallax) return;
-    const scrolled = window.scrollY;
-    const rate = scrolled * 0.35;
-    heroParallax.style.transform = `scale(1.05) translateY(${rate}px)`;
-  }, { passive: true });
+  const heroContent = document.querySelector('.hero-content');
 
   /* ── HERO CANVAS – Floating Grid / Particles ─ */
   const canvas = document.getElementById('heroCanvas');
@@ -461,16 +455,149 @@
     });
   }
 
-  /* ── SMOOTH HOVER GLOW FOLLOW (cards) ──────── */
-  document.querySelectorAll('.service-card, .equipment-card, .testi-card').forEach(card => {
-    card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      card.style.setProperty('--mouse-x', x + '%');
-      card.style.setProperty('--mouse-y', y + '%');
+  /* ── 3D TILT + GLOW FOLLOW (cards) ──────────── */
+  const isTouchDevice = window.matchMedia('(hover: none)').matches;
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+  if (!isTouchDevice) {
+    document.querySelectorAll('.service-card, .equipment-card, .testi-card').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;   // 0 to 1
+        const y = (e.clientY - rect.top) / rect.height;    // 0 to 1
+
+        // Glow follow
+        card.style.setProperty('--mouse-x', (x * 100) + '%');
+        card.style.setProperty('--mouse-y', (y * 100) + '%');
+
+        // 3D tilt: map 0..1 to degrees (inverted Y for natural feel)
+        const maxTilt = card.classList.contains('service-card') ? 10 : 6;
+        const tiltX = (y - 0.5) * -maxTilt;
+        const tiltY = (x - 0.5) * maxTilt;
+        card.style.transform = `perspective(800px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateY(-6px)`;
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = '';
+      });
     });
+  }
+
+  /* ── 3D REVEAL VARIANT ASSIGNMENT ────────────── */
+  // About section: directional 3D reveals
+  const aboutVisual = document.querySelector('.about-visual');
+  const aboutContentEl = document.querySelector('.about-content');
+  if (aboutVisual) {
+    aboutVisual.classList.remove('reveal');
+    aboutVisual.classList.add('reveal-3d-left');
+  }
+  if (aboutContentEl) {
+    aboutContentEl.classList.remove('reveal');
+    aboutContentEl.classList.add('reveal-3d-right');
+  }
+
+  // Contact section: directional 3D reveals
+  const contactInfo = document.querySelector('.contact-info');
+  const contactFormWrap = document.querySelector('.contact-form-wrap');
+  if (contactInfo) {
+    contactInfo.classList.remove('reveal');
+    contactInfo.classList.add('reveal-3d-left');
+  }
+  if (contactFormWrap) {
+    contactFormWrap.classList.remove('reveal');
+    contactFormWrap.classList.add('reveal-3d-right');
+  }
+
+  // Observe new 3D reveal variants
+  document.querySelectorAll('.reveal-3d-left, .reveal-3d-right, .reveal-3d-depth').forEach(el => {
+    revealObserver.observe(el);
   });
+
+  /* ── UNIFIED 3D SCROLL HANDLER ─────────────── */
+  const aboutImgWrap = document.querySelector('.about-img-wrap');
+  const portfolioCardsParallax = document.querySelectorAll('.portfolio-card');
+  const sections3D = document.querySelectorAll('.section');
+
+  function updateHero3DParallax() {
+    const scrolled = window.scrollY;
+    const heroH = heroSection ? heroSection.offsetHeight : window.innerHeight;
+    if (scrolled > heroH) return;
+
+    const progress = scrolled / heroH;
+
+    // Background: deeper parallax + subtle 3D rotation
+    if (heroParallax) {
+      heroParallax.style.transform =
+        `scale(1.05) translateY(${scrolled * 0.35}px) rotateX(${progress * 2}deg)`;
+    }
+
+    // Content: moves up faster + 3D tilt
+    if (heroContent) {
+      heroContent.style.transform =
+        `translateY(${scrolled * -0.15}px) rotateX(${progress * -3}deg)`;
+      heroContent.style.opacity = Math.max(0, 1 - progress * 1.5);
+    }
+  }
+
+  function updateAboutTilt() {
+    if (!aboutImgWrap) return;
+    const rect = aboutImgWrap.getBoundingClientRect();
+    const viewH = window.innerHeight;
+    if (rect.top > viewH || rect.bottom < 0) return;
+
+    const progress = (rect.top + rect.height / 2) / viewH;
+    const normalized = (progress - 0.5) * 2;
+
+    const rotateX = normalized * 6;
+    const rotateY = normalized * -3;
+    const translateZ = Math.abs(normalized) * -20;
+
+    aboutImgWrap.style.transform =
+      `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px)`;
+  }
+
+  function updatePortfolioParallax() {
+    portfolioCardsParallax.forEach((card, i) => {
+      const rect = card.getBoundingClientRect();
+      const viewH = window.innerHeight;
+      if (rect.top > viewH + 100 || rect.bottom < -100) return;
+
+      const centerOffset = (rect.top + rect.height / 2 - viewH / 2) / viewH;
+      const rate = [0.08, 0.04, 0.06, 0.1][i % 4];
+      const translateY = centerOffset * rate * 100;
+      const rotateX = centerOffset * 2;
+
+      card.style.transform = `translateY(${translateY}px) rotateX(${rotateX}deg)`;
+    });
+  }
+
+  function updateSections3D() {
+    sections3D.forEach(section => {
+      const rect = section.getBoundingClientRect();
+      const viewH = window.innerHeight;
+      if (rect.top > viewH + 200 || rect.bottom < -200) return;
+
+      const progress = (rect.top + rect.height / 2 - viewH / 2) / (viewH / 2);
+      const clamped = Math.max(-1, Math.min(1, progress));
+      const rotateX = clamped * 1.5;
+
+      section.style.transform = `perspective(2000px) rotateX(${rotateX}deg)`;
+    });
+  }
+
+  let scrollRAF;
+  window.addEventListener('scroll', () => {
+    if (scrollRAF) return;
+    scrollRAF = requestAnimationFrame(() => {
+      updateHero3DParallax();
+      if (!isMobile) {
+        updateAboutTilt();
+        updatePortfolioParallax();
+        updateSections3D();
+      }
+      scrollRAF = null;
+    });
+  }, { passive: true });
 
   /* ── COOKIE CONSENT BANNER ─────────────────── */
   const cookieBanner = document.getElementById('cookieBanner');
