@@ -146,7 +146,7 @@ textarea {
 .section {
   padding: 120px 0;
   position: relative;
-  overflow: hidden;
+  overflow-x: clip;
 }
 
 .section-bg-label {
@@ -161,29 +161,90 @@ textarea {
   user-select: none;
 }
 
-/* ── SCROLL REVEAL ANIMATIONS ───────────────────── */
+/* ── 3D PERSPECTIVE FOUNDATIONS ──────────────── */
+.services-grid,
+.equipment-grid,
+.portfolio-grid,
+.testimonials-grid,
+.about-container,
+.contact-container {
+  perspective: 1200px;
+}
+
+.hero {
+  perspective: 1400px;
+}
+
+/* ── 3D SCROLL REVEAL ANIMATIONS ──────────────────── */
 .reveal {
   opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.8s var(--easing), transform 0.8s var(--easing);
+  transform: translateY(40px) rotateX(8deg);
+  transform-origin: center bottom;
+  transition: opacity 0.9s var(--easing), transform 0.9s var(--easing);
   transition-delay: var(--delay, 0s);
+  will-change: transform, opacity;
 }
 
 .reveal.visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) rotateX(0deg);
+}
+
+/* Reveal from left (3D) */
+.reveal-3d-left {
+  opacity: 0;
+  transform: translateX(-60px) rotateY(12deg);
+  transform-origin: left center;
+  transition: opacity 0.9s var(--easing), transform 0.9s var(--easing);
+  transition-delay: var(--delay, 0s);
+  will-change: transform, opacity;
+}
+
+.reveal-3d-left.visible {
+  opacity: 1;
+  transform: translateX(0) rotateY(0deg);
+}
+
+/* Reveal from right (3D) */
+.reveal-3d-right {
+  opacity: 0;
+  transform: translateX(60px) rotateY(-12deg);
+  transform-origin: right center;
+  transition: opacity 0.9s var(--easing), transform 0.9s var(--easing);
+  transition-delay: var(--delay, 0s);
+  will-change: transform, opacity;
+}
+
+.reveal-3d-right.visible {
+  opacity: 1;
+  transform: translateX(0) rotateY(0deg);
+}
+
+/* Reveal from depth */
+.reveal-3d-depth {
+  opacity: 0;
+  transform: translateZ(-80px) scale(0.92);
+  transition: opacity 1s var(--easing), transform 1s var(--easing);
+  transition-delay: var(--delay, 0s);
+  will-change: transform, opacity;
+}
+
+.reveal-3d-depth.visible {
+  opacity: 1;
+  transform: translateZ(0) scale(1);
 }
 
 .fade-in-up {
   opacity: 0;
-  transform: translateY(60px);
+  transform: translateY(60px) rotateX(4deg);
+  transform-origin: center bottom;
   animation: fadeInUp 1.2s var(--easing-out) 0.3s forwards;
 }
 
 @keyframes fadeInUp {
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) rotateX(0deg);
   }
 }
 
@@ -471,6 +532,8 @@ textarea {
   padding: 0 40px;
   padding-top: calc(var(--nav-h) + 20px);
   width: 100%;
+  will-change: transform, opacity;
+  transform-style: preserve-3d;
 }
 
 .hero-badge {
@@ -671,8 +734,11 @@ textarea {
   padding: 36px 32px;
   position: relative;
   overflow: hidden;
-  transition: all 0.4s var(--easing);
+  transition: background 0.4s var(--easing), border-color 0.4s var(--easing),
+              box-shadow 0.4s var(--easing), transform 0.3s var(--easing);
+  transform-style: preserve-3d;
   cursor: default;
+  will-change: transform;
 }
 
 .service-card::before {
@@ -690,7 +756,6 @@ textarea {
 .service-card:hover {
   background: rgba(197, 255, 43, 0.04);
   border-color: rgba(197, 255, 43, 0.2);
-  transform: translateY(-6px);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), var(--shadow-glow);
 }
 
@@ -715,6 +780,11 @@ textarea {
 .service-card:hover .service-icon {
   background: rgba(197, 255, 43, 0.18);
   box-shadow: 0 0 20px rgba(197, 255, 43, 0.2);
+  transform: translateZ(30px);
+}
+
+.service-card:hover h3 {
+  transform: translateZ(20px);
 }
 
 .service-icon svg {
@@ -774,6 +844,8 @@ textarea {
   overflow: hidden;
   aspect-ratio: 4/3;
   box-shadow: var(--shadow-md);
+  transition: transform 0.15s linear;
+  will-change: transform;
 }
 
 .about-img {
@@ -915,12 +987,28 @@ textarea {
   border: 1px solid rgba(255, 255, 255, 0.07);
   display: flex;
   flex-direction: column;
-  transition: all 0.4s var(--easing);
+  transition: background 0.4s var(--easing), border-color 0.4s var(--easing),
+              box-shadow 0.4s var(--easing), transform 0.3s var(--easing);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* 3D reveal entrance for equipment cards */
+.equipment-card.reveal {
+  opacity: 0;
+  transform: rotateX(15deg) translateY(50px) scale(0.95);
+  transform-origin: center bottom;
+  transition: opacity 1s var(--easing), transform 1s var(--easing);
+  transition-delay: var(--delay, 0s);
+}
+
+.equipment-card.reveal.visible {
+  opacity: 1;
+  transform: rotateX(0deg) translateY(0) scale(1);
 }
 
 .equipment-card:hover {
   border-color: rgba(197, 255, 43, 0.18);
-  transform: translateY(-4px);
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
 }
 
@@ -1002,6 +1090,18 @@ textarea {
   overflow: hidden;
   position: relative;
   cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform 0.6s var(--easing), box-shadow 0.4s var(--easing);
+  will-change: transform;
+}
+
+.portfolio-card:hover {
+  transform: perspective(1000px) rotateY(-3deg) rotateX(2deg) scale(1.02);
+  box-shadow: 20px 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.portfolio-card:hover .portfolio-overlay {
+  transform: translateZ(30px);
 }
 
 .portfolio-card.large {
@@ -1094,13 +1194,35 @@ textarea {
   padding: 40px 36px;
   position: relative;
   overflow: hidden;
-  transition: all 0.4s var(--easing);
+  transition: background 0.4s var(--easing), border-color 0.4s var(--easing),
+              box-shadow 0.4s var(--easing), transform 0.3s var(--easing);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* 3D entrance from different angles per card */
+.testi-card.reveal:nth-child(1) {
+  transform: rotateY(15deg) translateX(-30px) translateY(40px);
+  transform-origin: left center;
+}
+
+.testi-card.reveal:nth-child(2) {
+  transform: rotateX(12deg) translateY(60px);
+  transform-origin: center bottom;
+}
+
+.testi-card.reveal:nth-child(3) {
+  transform: rotateY(-15deg) translateX(30px) translateY(40px);
+  transform-origin: right center;
+}
+
+.testi-card.reveal.visible {
+  transform: rotateY(0deg) rotateX(0deg) translateX(0) translateY(0);
 }
 
 .testi-card:hover {
   border-color: rgba(197, 255, 43, 0.15);
   background: rgba(197, 255, 43, 0.025);
-  transform: translateY(-4px);
 }
 
 .testi-quote {
@@ -1873,6 +1995,35 @@ textarea {
     max-height: 60vh;
   }
 
+  /* ── 3D mobile reductions ── */
+  .reveal {
+    transform: translateY(30px) rotateX(4deg);
+  }
+
+  .reveal-3d-left {
+    transform: translateX(-30px) rotateY(6deg);
+  }
+
+  .reveal-3d-right {
+    transform: translateX(30px) rotateY(-6deg);
+  }
+
+  .equipment-card.reveal {
+    transform: rotateX(8deg) translateY(30px) scale(0.97);
+  }
+
+  .testi-card.reveal:nth-child(1),
+  .testi-card.reveal:nth-child(3) {
+    transform: translateY(30px) rotateY(0deg);
+  }
+
+  .services-grid,
+  .equipment-grid,
+  .portfolio-grid,
+  .testimonials-grid {
+    perspective: 800px;
+  }
+
   /* ── Cookie mobile ── */
   .cookie-inner {
     padding: 0 20px;
@@ -2283,5 +2434,47 @@ textarea {
 
   .btn-secondary:hover {
     transform: none;
+  }
+
+  .service-card,
+  .equipment-card,
+  .testi-card {
+    transform-style: flat !important;
+  }
+}
+
+/* ── REDUCED MOTION ────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+
+  .reveal,
+  .reveal-3d-left,
+  .reveal-3d-right,
+  .reveal-3d-depth,
+  .equipment-card.reveal,
+  .testi-card.reveal {
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  .fade-in-up {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .service-card,
+  .equipment-card,
+  .testi-card,
+  .portfolio-card,
+  .about-img-wrap,
+  .hero-content {
+    will-change: auto !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .section {
+    transform: none !important;
   }
 }
