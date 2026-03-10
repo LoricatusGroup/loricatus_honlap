@@ -1,28 +1,26 @@
 /* ============================================================
-   SCROLL-VIDEO – Full-page background video scrubber
-   Videó: assets/bg-video.mp4
-   Scroll-vezérelt lejátszás: a scroll pozíció mozgatja az időt.
+   SCROLL-VIDEO – Frame-alapú, sima scroll-vezérelt háttér
+   80 képkocka @ 10fps (frames2/frame_0001.jpg … frame_0080.jpg)
+   Technika: Apple-stílusú képkocka-váltás scrolloláskor
    + Float-up section animations (IntersectionObserver)
    ============================================================ */
 (function () {
   'use strict';
 
-  // ── VIDEO ELEM LÉTREHOZÁSA ──────────────────────────────────
+  // ── CONFIG ─────────────────────────────────────────────────
+  const FRAME_COUNT = 80;
+  const FRAME_PATH = 'frames2/frame_';
+  const FRAME_EXT = '.jpg';
+  const FIRST_BATCH = 15;   // első batch gyors betöltés
+
+  // ── CANVAS ─────────────────────────────────────────────────
   const canvas = document.getElementById('scroll-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
 
-  const video = document.createElement('video');
-  video.src = 'assets/bg-video.mp4';
-  video.muted = true;
-  video.playsInline = true;
-  video.preload = 'auto';
-  video.loop = false;
-  video.style.display = 'none';
-  document.body.appendChild(video);
-
+  const frames = new Array(FRAME_COUNT).fill(null);
+  let currentFrame = 0;
   let rafId = null;
-  let isReady = false;
 
   // ── RESIZE ─────────────────────────────────────────────────
   function resize() {
@@ -32,72 +30,73 @@
     canvas.style.width = window.innerWidth + 'px';
     canvas.style.height = window.innerHeight + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    if (isReady) drawFrame();
+    render(currentFrame);
   }
 
-  // ── DRAW: middle-crop cover ─────────────────────────────────
-  function drawFrame() {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const vRatio = video.videoWidth / video.videoHeight;
-    const cRatio = vw / vh;
-
-    let sw, sh, sx, sy;
-    if (vRatio > cRatio) {
-      // videó szélesebb – oldalakat vágjuk
-      sh = video.videoHeight;
-      sw = Math.round(sh * cRatio);
-      sx = Math.round((video.videoWidth - sw) / 2);
-      sy = 0;
-    } else {
-      // videó magasabb – tetejét/alját vágjuk
-      sw = video.videoWidth;
-      sh = Math.round(sw / cRatio);
-      sx = 0;
-      sy = Math.round((video.videoHeight - sh) / 2);
+  // ── DRAW: cover-crop, nincs szürke csík ───────────────────
+  function render(index) {
+    let img = frames[index];
+    if (!img) {
+      // Visszafelé keresés: legutolsó betöltött frame
+      for (let i = index; i >= 0; i--) {
+        if (frames[i]) { img = frames[i]; break; }
+      }
     }
+    if (!img) return;
 
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const scale = Math.max(vw / img.naturalWidth, vh / img.naturalHeight);
+    const dw = img.naturalWidth * scale, dh = img.naturalHeight * scale;
     ctx.clearRect(0, 0, vw, vh);
-    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, vw, vh);
+    ctx.drawImage(img, (vw - dw) / 2, (vh - dh) / 2, dw, dh);
   }
 
-  // ── SCROLL → VIDEÓIDŐ ──────────────────────────────────────
+  // ── SCROLL → FRAME ─────────────────────────────────────────
   function scrub() {
-    if (!isReady || !video.duration) return;
     const docH = document.documentElement.scrollHeight - window.innerHeight;
     if (docH <= 0) return;
     const progress = Math.min(window.scrollY / docH, 1);
-    const targetTime = progress * video.duration;
-
-    // Beállítjuk az időt (ez pausolt videónál is működik)
-    if (Math.abs(video.currentTime - targetTime) > 0.05) {
-      video.currentTime = targetTime;
+    const index = Math.min(Math.floor(progress * FRAME_COUNT), FRAME_COUNT - 1);
+    if (index !== currentFrame) {
+      currentFrame = index;
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => render(currentFrame));
     }
   }
 
-  // Minden frame-en kirajzoljuk a videót (akkor is, ha az időpont frissül)
-  function renderLoop() {
-    if (isReady) drawFrame();
-    rafId = requestAnimationFrame(renderLoop);
+  // ── BETÖLTÉS ───────────────────────────────────────────────
+  function loadAt(i, cb) {
+    const img = new Image();
+    img.onload = () => { frames[i] = img; cb && cb(img); };
+    img.onerror = () => { cb && cb(null); };
+    img.src = `${FRAME_PATH}${String(i + 1).padStart(4, '0')}${FRAME_EXT}`;
   }
 
-  // ── INIT ───────────────────────────────────────────────────
-  video.addEventListener('loadedmetadata', () => {
-    isReady = true;
-    video.currentTime = 0;
-    resize();
-    renderLoop();
-  });
-
-  // Ha a böngésző azonnal betölti (cache)
-  if (video.readyState >= 1) {
-    isReady = true;
-    resize();
-    renderLoop();
+  function startLoading() {
+    let done = 0;
+    for (let i = 0; i < FIRST_BATCH; i++) {
+      const idx = i;
+      loadAt(idx, () => {
+        if (idx === 0) render(0);         // első frame azonnal
+        if (++done === FIRST_BATCH) lazyRest();
+      });
+    }
   }
 
-  window.addEventListener('scroll', scrub, { passive: true });
-  window.addEventListener('resize', resize, { passive: true });
+  function lazyRest() {
+    const idle = window.requestIdleCallback || (fn => setTimeout(fn, 30));
+    let i = FIRST_BATCH;
+    function next(dl) {
+      while (i < FRAME_COUNT) {
+        const idx = i++;
+        loadAt(idx, () => {
+          if (idx === currentFrame) render(currentFrame);
+        });
+        if (dl && dl.timeRemaining && dl.timeRemaining() < 4) { idle(next); return; }
+      }
+    }
+    idle(next);
+  }
 
   // ── FLOAT-UP SECTION ANIMATIONS ────────────────────────────
   function initFloatAnimations() {
@@ -107,9 +106,7 @@
       '.testimonials-section .container, #contact .container, ' +
       '.footer .container'
     );
-
     targets.forEach(el => el.classList.add('sv-float'));
-
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -118,14 +115,19 @@
         }
       });
     }, { threshold: 0.08 });
-
     targets.forEach(el => observer.observe(el));
   }
 
-  document.addEventListener('DOMContentLoaded', initFloatAnimations);
-  // Ha DOMContentLoaded már lefutott
-  if (document.readyState !== 'loading') initFloatAnimations();
-
+  // ── INIT ───────────────────────────────────────────────────
   resize();
+  startLoading();
+  window.addEventListener('scroll', scrub, { passive: true });
+  window.addEventListener('resize', resize, { passive: true });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFloatAnimations);
+  } else {
+    initFloatAnimations();
+  }
 
 })();
