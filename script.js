@@ -331,22 +331,12 @@
     }, { passive: true });
   }
 
-  /* ── CONTACT FORM (EmailJS) ────────────────── */
-  // ── EmailJS Configuration ──
-  // To activate EmailJS:
-  // 1. Create an account at https://www.emailjs.com
-  // 2. Create an email service and template
-  // 3. Replace the values below with your own:
-  const EMAILJS_PUBLIC_KEY = 'YOUR_PUBLIC_KEY';
-  const EMAILJS_SERVICE_ID = 'YOUR_SERVICE_ID';
-  const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
-
-  // Initialize EmailJS if configured
-  const emailjsReady = EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY'
-    && typeof emailjs !== 'undefined';
-  if (emailjsReady) {
-    emailjs.init(EMAILJS_PUBLIC_KEY);
-  }
+  /* ── CONTACT FORM (Web3Forms – teljesen ingyenes) ─────────────── */
+  // ── Web3Forms konfiguráció ──
+  // 1. Látogasson el a https://web3forms.com oldalra
+  // 2. Adja meg az email-címét és kattintson a "Get Access Key" gombra
+  // 3. A kapott kulcsot illessze be ide:
+  const WEB3FORMS_ACCESS_KEY = 'f2a2064b-f35f-4864-a1a3-a56dcf4644b4';
 
   const form = document.getElementById('contactForm');
   const submitBtn = document.getElementById('submitBtn');
@@ -416,19 +406,28 @@
       btnLoader.style.display = 'inline-block';
 
       try {
-        if (emailjsReady) {
-          // Send via EmailJS
-          await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-            from_name: nameInput.value.trim(),
-            from_email: emailInput.value.trim(),
-            company: document.getElementById('company').value.trim(),
-            phone: document.getElementById('phone').value.trim(),
-            service: serviceInput.value,
-            message: messageInput.value.trim()
-          });
-        } else {
-          // Fallback: simulate sending (EmailJS not configured)
-          await new Promise(r => setTimeout(r, 1800));
+        const payload = {
+          access_key: WEB3FORMS_ACCESS_KEY,
+          subject: 'Új árajánlatkérés – Loricatus honlap',
+          from_name: nameInput.value.trim(),
+          name: nameInput.value.trim(),
+          email: emailInput.value.trim(),
+          company: document.getElementById('company').value.trim(),
+          phone: document.getElementById('phone').value.trim(),
+          service: serviceInput.value,
+          message: messageInput.value.trim()
+        };
+
+        const response = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.message || 'Hiba a küldés során');
         }
 
         // Show success
