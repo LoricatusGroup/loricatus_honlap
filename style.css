@@ -64,13 +64,13 @@
   --white: #ffffff;
 
   --accent: #c7d540;
-  --accent-dim: rgba(199, 213, 64, 0.08);
-  --accent-glow: rgba(199, 213, 64, 0.12);
+  --accent-dim: rgba(199, 213, 64, 0.07);
+  --accent-glow: rgba(199, 213, 64, 0.10);
 
   --nav-h: 72px;
-  --radius: 12px;
-  --radius-lg: 20px;
-  --radius-card: 16px;
+  --radius: 6px;
+  --radius-lg: 10px;
+  --radius-card: 8px;
 
   --easing: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --easing-out: cubic-bezier(0.0, 0.0, 0.2, 1.0);
@@ -154,10 +154,10 @@ textarea {
   top: 40px;
   right: 40px;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.25em;
-  color: rgba(255, 255, 255, 0.1);
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.12);
   user-select: none;
 }
 
@@ -262,9 +262,9 @@ textarea {
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--smoke);
 }
 
 .section-desc {
@@ -279,7 +279,8 @@ textarea {
 }
 
 .accent-text {
-  color: var(--accent);
+  color: var(--white);
+  font-style: italic;
 }
 
 /* ── BUTTONS ────────────────────────────────────── */
@@ -288,15 +289,16 @@ textarea {
   align-items: center;
   gap: 10px;
   padding: 15px 32px;
-  border-radius: 50px;
+  border-radius: 8px;
   font-family: var(--font-head);
   font-size: 0.95rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
   transition: all 0.3s var(--easing);
   position: relative;
   overflow: hidden;
   white-space: nowrap;
+  text-transform: uppercase;
 }
 
 .btn::before {
@@ -314,14 +316,14 @@ textarea {
 }
 
 .btn-primary {
-  background: var(--accent);
+  background: var(--white);
   color: var(--black);
-  box-shadow: 0 4px 24px var(--accent-glow);
+  box-shadow: none;
 }
 
 .btn-primary:hover {
+  background: var(--parchment);
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(199, 213, 64, 0.20);
 }
 
 .btn-primary:active {
@@ -329,15 +331,14 @@ textarea {
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.08);
+  background: transparent;
   color: var(--white);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.6);
   transform: translateY(-2px);
 }
 
@@ -347,6 +348,7 @@ textarea {
 }
 
 .btn-sm {
+  border-radius: 6px;
   padding: 10px 22px;
   font-size: 0.88rem;
   margin-top: 20px;
@@ -437,18 +439,19 @@ textarea {
 .nav-cta {
   flex-shrink: 0;
   padding: 10px 24px;
-  border-radius: 50px;
-  background: var(--accent);
+  border-radius: 6px;
+  background: var(--white);
   color: var(--black);
   font-family: var(--font-head);
   font-size: 0.88rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   transition: all 0.3s var(--easing);
 }
 
 .nav-cta:hover {
-  box-shadow: 0 0 20px rgba(199, 213, 64, 0.15);
+  background: var(--parchment);
   transform: translateY(-1px);
 }
 
@@ -517,10 +520,7 @@ textarea {
 }
 
 .hero-canvas {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
+  display: none;
 }
 
 .hero-content {
@@ -539,24 +539,23 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 18px;
-  border-radius: 50px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  border-left: 2px solid var(--smoke);
+  padding-left: 14px;
   font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 400;
-  letter-spacing: 0.04em;
-  color: var(--silver);
-  margin-bottom: 28px;
+  letter-spacing: 0.12em;
+  color: var(--smoke);
+  text-transform: uppercase;
+  margin-bottom: 32px;
 }
 
 .badge-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
-  animation: pulse 2s ease-in-out infinite;
+  display: none;
 }
 
 @keyframes pulse {
@@ -702,7 +701,7 @@ textarea {
   font-family: var(--font-head);
   font-size: clamp(1.2rem, 2vw, 1.8rem);
   font-weight: 700;
-  color: var(--accent);
+  color: var(--silver);
   display: inline;
 }
 
@@ -727,29 +726,21 @@ textarea {
 }
 
 .service-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: var(--radius-card);
   padding: 36px 32px;
   position: relative;
   overflow: hidden;
   transition: background 0.4s var(--easing), border-color 0.4s var(--easing),
-              box-shadow 0.4s var(--easing), transform 0.3s var(--easing);
+              transform 0.3s var(--easing);
   transform-style: preserve-3d;
   cursor: default;
   will-change: transform;
 }
 
 .service-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0;
-  transition: opacity 0.4s;
+  display: none;
 }
 
 .service-card:hover {
@@ -810,11 +801,16 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  color: var(--accent);
-  letter-spacing: 0.03em;
-  transition: gap 0.3s;
+  color: var(--silver);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: gap 0.3s, color 0.3s;
+}
+
+.service-link:hover {
+  color: var(--white);
 }
 
 .service-link:hover {
@@ -862,14 +858,15 @@ textarea {
   position: absolute;
   bottom: 24px;
   left: 24px;
-  background: var(--accent);
-  color: var(--black);
+  background: rgba(8, 11, 16, 0.88);
+  color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius);
   padding: 16px 20px;
   display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: 0 8px 32px var(--accent-glow);
+  backdrop-filter: blur(12px);
 }
 
 .badge-num {
@@ -1342,7 +1339,7 @@ textarea {
 }
 
 .contact-detail-item a:hover {
-  color: var(--accent);
+  color: var(--white);
 }
 
 /* ── FORM ───────────────────────────────────────── */
@@ -1560,8 +1557,8 @@ textarea {
 }
 
 .social-btn:hover {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--white);
+  border-color: var(--white);
   color: var(--black);
   transform: translateY(-2px);
 }
@@ -1590,7 +1587,7 @@ textarea {
 }
 
 .footer-col ul li a:hover {
-  color: var(--accent);
+  color: var(--white);
 }
 
 .footer-contact-list li {
@@ -1604,7 +1601,7 @@ textarea {
 }
 
 .footer-contact-list li a:hover {
-  color: var(--accent);
+  color: var(--white);
 }
 
 .footer-hours {
@@ -1694,10 +1691,9 @@ textarea {
 }
 
 .lightbox-arrow:hover {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--white);
+  border-color: var(--white);
   color: var(--black);
-  box-shadow: 0 0 24px var(--accent-glow);
 }
 
 .lightbox-prev { left: 24px; }
@@ -1846,13 +1842,12 @@ textarea {
 }
 
 .cookie-btn-accept {
-  background: var(--accent);
+  background: var(--white);
   color: var(--black);
-  box-shadow: 0 2px 12px var(--accent-glow);
 }
 
 .cookie-btn-accept:hover {
-  box-shadow: 0 4px 20px rgba(199, 213, 64, 0.18);
+  background: var(--parchment);
   transform: translateY(-1px);
 }
 
@@ -2076,11 +2071,13 @@ textarea {
     display: block;
     margin-top: 8px;
     text-align: center;
-    background: var(--accent);
+    background: var(--white);
     color: var(--black);
     font-weight: 700;
-    border-radius: 50px;
+    border-radius: 6px;
     padding: 14px 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .nav-cta {
