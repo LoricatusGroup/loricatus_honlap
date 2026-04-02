@@ -74,6 +74,8 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 select, input, textarea { font-family: inherit; }
 
 /* ── LAYOUT ─────────────────────────────────────── */
+.section-bg-label { display: none; }
+.hero-canvas { display: none; }
 .container {
   max-width: var(--w);
   margin: 0 auto;
@@ -287,7 +289,7 @@ select, input, textarea { font-family: inherit; }
   margin-bottom: 28px;
   max-width: 800px;
 }
-.accent-text { font-style: italic; font-weight: 300; color: #fff; }
+.accent-text { font-style: italic; font-weight: 300; color: inherit; }
 .hero-subtitle {
   font-size: clamp(0.95rem, 1.4vw, 1.1rem);
   color: rgba(255,255,255,0.6);
@@ -429,7 +431,7 @@ select, input, textarea { font-family: inherit; }
   font-size: 1.8rem;
   font-weight: 700;
   line-height: 1;
-  color: var(--text);
+  color: #fff;
 }
 .about-img-badge span:last-child {
   font-size: 0.78rem;
@@ -762,7 +764,7 @@ select, input, textarea { font-family: inherit; }
   padding-right: 40px;
   cursor: pointer;
 }
-.form-group select option { background: #111316; color: var(--text); }
+.form-group select option { background: #111316; color: #F8F6F2; }
 .form-group textarea { resize: vertical; min-height: 120px; }
 .form-error { font-size: 0.74rem; color: #ff6b6b; display: none; margin-top: -4px; font-family: var(--font-mono); }
 .form-group.error input,
