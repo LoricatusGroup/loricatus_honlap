@@ -63,9 +63,9 @@
   --parchment: #e8ecee;
   --white: #ffffff;
 
-  --accent: #C5FF2B;
-  --accent-dim: rgba(197, 255, 43, 0.12);
-  --accent-glow: rgba(197, 255, 43, 0.35);
+  --accent: #c7d540;
+  --accent-dim: rgba(199, 213, 64, 0.08);
+  --accent-glow: rgba(199, 213, 64, 0.12);
 
   --nav-h: 72px;
   --radius: 12px;
@@ -81,7 +81,7 @@
   --font-mono: 'IBM Plex Mono', monospace;
 
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.35);
-  --shadow-glow: 0 0 32px rgba(197, 255, 43, 0.18);
+  --shadow-glow: 0 0 20px rgba(199, 213, 64, 0.07);
   --shadow-md: 0 8px 40px rgba(0, 0, 0, 0.4);
 }
 
@@ -321,7 +321,7 @@ textarea {
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 40px rgba(197, 255, 43, 0.55);
+  box-shadow: 0 8px 32px rgba(199, 213, 64, 0.20);
 }
 
 .btn-primary:active {
@@ -445,11 +445,10 @@ textarea {
   font-weight: 700;
   letter-spacing: 0.03em;
   transition: all 0.3s var(--easing);
-  box-shadow: 0 0 20px rgba(197, 255, 43, 0.3);
 }
 
 .nav-cta:hover {
-  box-shadow: 0 0 36px rgba(197, 255, 43, 0.55);
+  box-shadow: 0 0 20px rgba(199, 213, 64, 0.15);
   transform: translateY(-1px);
 }
 
@@ -542,13 +541,13 @@ textarea {
   gap: 10px;
   padding: 8px 18px;
   border-radius: 50px;
-  background: rgba(197, 255, 43, 0.08);
-  border: 1px solid rgba(197, 255, 43, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   font-family: var(--font-mono);
   font-size: 0.82rem;
   font-weight: 400;
   letter-spacing: 0.04em;
-  color: var(--accent);
+  color: var(--silver);
   margin-bottom: 28px;
 }
 
@@ -564,11 +563,11 @@ textarea {
 
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(197, 255, 43, 0.6);
+    box-shadow: 0 0 0 0 rgba(199, 213, 64, 0.30);
   }
 
   50% {
-    box-shadow: 0 0 0 6px rgba(197, 255, 43, 0);
+    box-shadow: 0 0 0 5px rgba(199, 213, 64, 0);
   }
 }
 
@@ -754,9 +753,9 @@ textarea {
 }
 
 .service-card:hover {
-  background: rgba(197, 255, 43, 0.04);
-  border-color: rgba(197, 255, 43, 0.2);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), var(--shadow-glow);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
 }
 
 .service-card:hover::before {
@@ -767,19 +766,19 @@ textarea {
   width: 52px;
   height: 52px;
   border-radius: 12px;
-  background: var(--accent-dim);
-  border: 1px solid rgba(197, 255, 43, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 24px;
-  color: var(--accent);
+  color: var(--silver);
   transition: all 0.3s;
 }
 
 .service-card:hover .service-icon {
-  background: rgba(197, 255, 43, 0.18);
-  box-shadow: 0 0 20px rgba(197, 255, 43, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--white);
   transform: translateZ(30px);
 }
 
@@ -940,12 +939,12 @@ textarea {
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: var(--accent-dim);
-  border: 1px solid rgba(197, 255, 43, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent);
+  color: var(--silver);
   margin-top: 2px;
 }
 
@@ -1008,7 +1007,7 @@ textarea {
 }
 
 .equipment-card:hover {
-  border-color: rgba(197, 255, 43, 0.18);
+  border-color: rgba(255, 255, 255, 0.14);
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
 }
 
@@ -1151,9 +1150,9 @@ textarea {
   font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--accent);
-  background: rgba(197, 255, 43, 0.1);
-  border: 1px solid rgba(197, 255, 43, 0.2);
+  color: var(--parchment);
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 4px 12px;
   border-radius: 50px;
   margin-bottom: 12px;
@@ -1221,8 +1220,8 @@ textarea {
 }
 
 .testi-card:hover {
-  border-color: rgba(197, 255, 43, 0.15);
-  background: rgba(197, 255, 43, 0.025);
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .testi-quote {
@@ -1311,12 +1310,12 @@ textarea {
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: var(--accent-dim);
-  border: 1px solid rgba(197, 255, 43, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent);
+  color: var(--silver);
 }
 
 .contact-icon svg {
@@ -1413,9 +1412,9 @@ textarea {
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-  border-color: rgba(197, 255, 43, 0.4);
-  background: rgba(197, 255, 43, 0.04);
-  box-shadow: 0 0 0 3px rgba(197, 255, 43, 0.08);
+  border-color: rgba(199, 213, 64, 0.35);
+  background: rgba(199, 213, 64, 0.03);
+  box-shadow: 0 0 0 3px rgba(199, 213, 64, 0.06);
 }
 
 .form-group input::placeholder,
@@ -1477,10 +1476,10 @@ textarea {
   align-items: center;
   gap: 12px;
   padding: 18px 24px;
-  background: rgba(197, 255, 43, 0.08);
-  border: 1px solid rgba(197, 255, 43, 0.25);
+  background: rgba(199, 213, 64, 0.07);
+  border: 1px solid rgba(199, 213, 64, 0.20);
   border-radius: var(--radius);
-  color: var(--accent);
+  color: var(--parchment);
   font-weight: 600;
   animation: successIn 0.5s var(--easing-out);
 }
@@ -1502,7 +1501,7 @@ textarea {
 }
 
 .form-success strong {
-  color: var(--accent);
+  color: var(--white);
 }
 
 /* ── FOOTER ─────────────────────────────────────── */
@@ -1749,9 +1748,9 @@ textarea {
   font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--accent);
-  background: rgba(197, 255, 43, 0.1);
-  border: 1px solid rgba(197, 255, 43, 0.2);
+  color: var(--parchment);
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 4px 12px;
   border-radius: 50px;
   margin-bottom: 12px;
@@ -1853,7 +1852,7 @@ textarea {
 }
 
 .cookie-btn-accept:hover {
-  box-shadow: 0 4px 24px rgba(197, 255, 43, 0.5);
+  box-shadow: 0 4px 20px rgba(199, 213, 64, 0.18);
   transform: translateY(-1px);
 }
 

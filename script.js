@@ -129,7 +129,7 @@
       this.vx = (Math.random() - 0.5) * 0.2;
       this.size = 1 + Math.random() * 1.5;
       this.alpha = 0;
-      this.alphaMax = 0.15 + Math.random() * 0.35;
+      this.alphaMax = 0.10 + Math.random() * 0.20;
       this.fade = 'in';
       this.life = 0;
       this.maxLife = 200 + Math.random() * 300;
@@ -151,7 +151,7 @@
     draw() {
       ctx.save();
       ctx.globalAlpha = Math.max(0, this.alpha);
-      ctx.fillStyle = '#C5FF2B';
+      ctx.fillStyle = '#c7d540';
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
       ctx.fill();
@@ -162,7 +162,7 @@
   function drawGrid() {
     const spacing = 80;
     ctx.save();
-    ctx.strokeStyle = 'rgba(197, 255, 43, 0.04)';
+    ctx.strokeStyle = 'rgba(199, 213, 64, 0.025)';
     ctx.lineWidth = 0.5;
     for (let x = 0; x < W; x += spacing) {
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
@@ -184,7 +184,7 @@
           const alpha = (1 - dist / maxDist) * 0.08;
           ctx.save();
           ctx.globalAlpha = alpha;
-          ctx.strokeStyle = '#C5FF2B';
+          ctx.strokeStyle = '#c7d540';
           ctx.lineWidth = 0.5;
           ctx.beginPath();
           ctx.moveTo(particles[i].x, particles[i].y);
