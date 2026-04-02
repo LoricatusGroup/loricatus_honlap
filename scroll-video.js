@@ -11,11 +11,15 @@
   const FRAME_COUNT = 80;
   const FRAME_PATH = 'frames2/frame_';
   const FRAME_EXT = '.jpg';
-  const FIRST_BATCH = 15;   // első batch gyors betöltés
+  const FIRST_BATCH = 5;   // első batch gyors betöltés
 
-  // ── CANVAS ─────────────────────────────────────────────────
+  // ── MOBIL LETILTÁS (768px alatt nem töltjük a frame-eket) ──
   const canvas = document.getElementById('scroll-canvas');
   if (!canvas) return;
+  if (window.innerWidth <= 768) {
+    canvas.style.display = 'none';
+    return;
+  }
   const ctx = canvas.getContext('2d');
 
   const frames = new Array(FRAME_COUNT).fill(null);

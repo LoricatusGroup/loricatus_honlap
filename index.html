@@ -58,22 +58,22 @@
   <!-- =================== HERO =================== -->
   <section id="hero" class="hero">
     <div class="hero-bg">
-      <img src="assets/hero-bg.png" alt="Loricatus légi felvétel" class="hero-img" id="heroParallax" />
+      <img src="assets/hero-bg.png" alt="Loricatus légi felvétel" class="hero-img" id="heroParallax" fetchpriority="high" />
       <div class="hero-overlay"></div>
     </div>
     <canvas id="heroCanvas" class="hero-canvas"></canvas>
     <div class="hero-content fade-in-up">
       <div class="hero-badge">
         <span class="badge-dot"></span>
-        Engedélyezett drónoperátor · A2 &amp; STS minősítés
+        Térinformatika az építőiparban · A2 &amp; STS minősítés
       </div>
       <h1 class="hero-title">
         Látja azt,<br />
         <span class="accent-text">amit Ön nem.</span>
       </h1>
       <p class="hero-subtitle">
-        Professzionális drónszolgáltatások ipari, építészeti és mérnöki feladatokra.<br />
-        Precizitás a levegőből – ott, ahol a részletek számítanak.
+        Drón, LiDAR, BIM-koordináció. Amit nem lehet megmérni, azt nem lehet megépíteni.<br />
+        Precizitás a levegőből – ott, ahol az adat számít.
       </p>
       <div class="hero-actions">
         <button class="btn btn-primary"
@@ -124,7 +124,7 @@
       <div class="section-header reveal">
         <div class="section-tag">Mit nyújtunk</div>
         <h2 class="section-title">Teljes körű drón<br /><span class="accent-text">megoldások</span></h2>
-        <p class="section-desc">Ipari precizitás, professzionális technológia – minden projekthez a legjobb eszköz.</p>
+        <p class="section-desc">Repülünk, rögzítünk, koordinálunk. Minden projekthez az a technológia, ami tényleg számít.</p>
       </div>
       <div class="services-grid">
 
@@ -152,8 +152,7 @@
             </svg>
           </div>
           <h3>Felmérés & Térképezés</h3>
-          <p>Centiméteres pontosságú GIS-alapú térképek és digitális terepmodellek. RTK-GNSS technológiával, valós idejű
-            korrekciókkal.</p>
+          <p>Pontfelhő-alapú digitális terepmodellek és GIS-adatbázisok, amelyekre tervezni, építeni és bizonyítani lehet. RTK-GNSS technológiával, valós idejű korrekciókkal.</p>
           <a href="#contact" class="service-link">Ajánlatkérés <span>→</span></a>
         </div>
 
@@ -165,8 +164,7 @@
             </svg>
           </div>
           <h3>Épületinspekció</h3>
-          <p>Hidak, toronyházak, ipari létesítmények biztonságos és alapos vizsgálata emberi belépés nélkül. Részletes
-            hibatérkép és riport.</p>
+          <p>Hidak, kémények, toronyházak, ipari létesítmények biztonságos vizsgálata. Az eredmény nem csak látvány, hanem dokumentált bizonyíték.</p>
           <a href="#contact" class="service-link">Ajánlatkérés <span>→</span></a>
         </div>
 
@@ -178,8 +176,7 @@
             </svg>
           </div>
           <h3>LiDAR Szkennelés</h3>
-          <p>Milliméteres pontosságú 3D pontfelhő modellek épületekről, terepről, infrastruktúráról. Ideális BIM és
-            mérnöki tervezéshez.</p>
+          <p>Milliméteres pontosságú 3D pontfelhő-modellek – a BIM-alapú tervezés és mérnöki dokumentáció kiindulópontja. Épületekről, terepről, infrastruktúráról.</p>
           <a href="#contact" class="service-link">Ajánlatkérés <span>→</span></a>
         </div>
 
@@ -211,6 +208,20 @@
           <a href="#contact" class="service-link">Ajánlatkérés <span>→</span></a>
         </div>
 
+        <div class="service-card reveal" style="--delay: 0.35s">
+          <div class="service-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="8" y="8" width="32" height="32" rx="3" stroke="currentColor" stroke-width="2" />
+              <path d="M16 20h16M16 28h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              <circle cx="34" cy="28" r="4" stroke="currentColor" stroke-width="2" />
+              <path d="M32 28l4 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </div>
+          <h3>BIM Koordináció</h3>
+          <p>Digitális modell, mint aktív munkatárs. Összehangoljuk a terveket, verziókat és adatokat – hogy ne legyen kérdés, mi az érvényes.</p>
+          <a href="#contact" class="service-link">Ajánlatkérés <span>→</span></a>
+        </div>
+
       </div>
     </div>
   </section>
@@ -221,7 +232,7 @@
     <div class="container about-container">
       <div class="about-visual reveal">
         <div class="about-img-wrap">
-          <img src="assets/services-bg.png" alt="Loricatus drónos szakértelem" class="about-img" />
+          <img src="assets/services-bg.png" alt="Loricatus drónos szakértelem" class="about-img" loading="lazy" />
           <div class="about-img-badge">
             <span class="badge-num">8+</span>
             <span>év<br />tapasztalat</span>
@@ -250,17 +261,13 @@
       </div>
       <div class="about-content reveal">
         <div class="section-tag">A Loricatus különbsége</div>
-        <h2 class="section-title">Ahol a technológia<br /><span class="accent-text">találkozik a precizitással</span>
+        <h2 class="section-title">Ahol az adat<br /><span class="accent-text">valóság lesz</span>
         </h2>
         <p class="about-lead">
-          A Loricatus nem csupán drónokat reptet – <strong>megoldásokat épít</strong>. Csapatunk mérnökökből,
-          geodétákból és légtér-szakértőkből áll, akik együtt gondolkodnak az Ön feladatán, és az iparág legfejlettebb
-          technológiájával hajtják végre.
+          Loricatusként az a munkánk, hogy a világ pontosabb és érthetőbb legyen. Néha sikerül. Néha nem. De minden alkalommal tanulunk belőle.
         </p>
         <p class="about-body">
-          Minden felszállás mögött alapos tervezés, engedélyek és biztonsági protokollok állnak. Legyen szó egy 200
-          hektáros mezőgazdasági területről, egy bonyolult ipari épület vizsgálatáról vagy egy nagyszabású rendezvény
-          légi dokumentálásáról – a Loricatus ott van, ahol a részletek számítanak.
+          Nem csupán drónokat röptetünk – digitális valóságot teremtünk. Csapatunk mérnökökből, geodétákból és BIM-koordinátorokból áll, akik a projekt elejétől az utolsó átadásig ott vannak. Legyen szó pontfelhős felmérésről, épületinspekciόról vagy BIM-dokumentáció összehangolásáról – az adat nálunk nem díszlet, hanem munkaalap.
         </p>
         <div class="about-values">
           <div class="value-item">
@@ -294,7 +301,7 @@
             </div>
             <div>
               <strong>Mért, dokumentált eredmény</strong>
-              <span>Minden projekthez részletes riport, CAD-export és GIS-adatok</span>
+              <span>Minden projekthez részletes riport, pontfelhő, CAD-export és GIS-adatok – amiből lehet dolgozni, nem csak nézegetni</span>
             </div>
           </div>
         </div>
@@ -315,7 +322,7 @@
       <div class="equipment-grid">
         <div class="equipment-card reveal" style="--delay: 0.05s">
           <div class="eq-img-wrap">
-            <img src="assets/equipment-bg.png" alt="DJI Matrice 350 RTK" class="eq-img" />
+            <img src="assets/equipment-bg.png" alt="DJI Matrice 350 RTK" class="eq-img" loading="lazy" />
           </div>
           <div class="eq-info">
             <span class="eq-tag">Fő platform</span>
@@ -325,7 +332,7 @@
         </div>
         <div class="equipment-card reveal" style="--delay: 0.12s">
           <div class="eq-img-wrap">
-            <img src="assets/equipment-bg.png" alt="DJI Mavic 3 Enterprise" class="eq-img eq-img-2" />
+            <img src="assets/equipment-bg.png" alt="DJI Mavic 3 Enterprise" class="eq-img eq-img-2" loading="lazy" />
           </div>
           <div class="eq-info">
             <span class="eq-tag">Kompakt platform</span>
@@ -335,7 +342,7 @@
         </div>
         <div class="equipment-card reveal" style="--delay: 0.19s">
           <div class="eq-img-wrap">
-            <img src="assets/equipment-bg.png" alt="Zenmuse L1 LiDAR" class="eq-img eq-img-3" />
+            <img src="assets/equipment-bg.png" alt="Zenmuse L1 LiDAR" class="eq-img eq-img-3" loading="lazy" />
           </div>
           <div class="eq-info">
             <span class="eq-tag">Szkennelés</span>
@@ -346,7 +353,7 @@
         </div>
         <div class="equipment-card reveal" style="--delay: 0.25s">
           <div class="eq-img-wrap">
-            <img src="assets/equipment-bg.png" alt="Termokamera" class="eq-img eq-img-4" />
+            <img src="assets/equipment-bg.png" alt="Termokamera" class="eq-img eq-img-4" loading="lazy" />
           </div>
           <div class="eq-info">
             <span class="eq-tag">Termográfia</span>
@@ -365,45 +372,46 @@
       <div class="section-header reveal">
         <div class="section-tag">Referenciák</div>
         <h2 class="section-title">Elvégzett<br /><span class="accent-text">projektek</span></h2>
+        <p class="section-desc">Valós projektek. Valós eredmények. Nem prezentációban – építkezésen.</p>
       </div>
       <div class="portfolio-grid">
         <div class="portfolio-card large reveal" style="--delay:0.05s">
           <div class="portfolio-img-wrap">
-            <img src="assets/hero-bg.png" alt="Városi felmérés" class="portfolio-img" />
+            <img src="assets/hero-bg.png" alt="NMHH EMC Labor BIM dokumentáció" class="portfolio-img" loading="lazy" />
             <div class="portfolio-overlay">
-              <span class="portfolio-cat">Felmérés & Térképezés</span>
-              <h3>Városközpont ortofotó<br />és terepmodell</h3>
-              <p>12 km² • RTK · GSD 2 cm</p>
+              <span class="portfolio-cat">BIM Koordináció</span>
+              <h3>NMHH EMC Labor –<br />BIM dokumentáció</h3>
+              <p>Esztergomi út · IFC-export · CDE integráció</p>
             </div>
           </div>
         </div>
         <div class="portfolio-card reveal" style="--delay:0.12s">
           <div class="portfolio-img-wrap">
-            <img src="assets/services-bg.png" alt="Épületinspekció" class="portfolio-img" />
+            <img src="assets/services-bg.png" alt="Ipari kémény termográfiás inspekció" class="portfolio-img" loading="lazy" />
             <div class="portfolio-overlay">
-              <span class="portfolio-cat">Inspekció</span>
-              <h3>Ipari kémény<br />vizsgálat</h3>
-              <p>LiDAR + hőkamera</p>
+              <span class="portfolio-cat">Épületinspekció</span>
+              <h3>Ipari kémény<br />termográfiás inspekció</h3>
+              <p>LiDAR + hőkamera · hibatérkép</p>
             </div>
           </div>
         </div>
         <div class="portfolio-card reveal" style="--delay:0.19s">
           <div class="portfolio-img-wrap">
-            <img src="assets/equipment-bg.png" alt="Mezőgazdaság" class="portfolio-img" />
+            <img src="assets/equipment-bg.png" alt="Mezőgazdasági NDVI térkép" class="portfolio-img" loading="lazy" />
             <div class="portfolio-overlay">
               <span class="portfolio-cat">Precíziós mezőgazdaság</span>
-              <h3>NDVI térkép<br />400 ha</h3>
-              <p>Multispektrális · GIS export</p>
+              <h3>Mezőgazdasági NDVI<br />térkép – 400 ha</h3>
+              <p>Multispektrális · GIS export · 18% szerhasználat-csökkentés</p>
             </div>
           </div>
         </div>
         <div class="portfolio-card reveal" style="--delay:0.25s">
           <div class="portfolio-img-wrap">
-            <img src="assets/hero-bg.png" alt="3D modell" class="portfolio-img" />
+            <img src="assets/hero-bg.png" alt="Kastély 3D pontfelhő régészeti dokumentáció" class="portfolio-img" loading="lazy" />
             <div class="portfolio-overlay">
-              <span class="portfolio-cat">3D Modellezés</span>
-              <h3>Kastély<br />3D pontfelhő</h3>
-              <p>LiDAR · BIM-export</p>
+              <span class="portfolio-cat">3D Felmérés</span>
+              <h3>Kastély 3D pontfelhő<br />és régészeti dokumentáció</h3>
+              <p>LiDAR · BIM-export · kulturális örökség</p>
             </div>
           </div>
         </div>
@@ -422,8 +430,7 @@
       <div class="testimonials-grid">
         <div class="testi-card reveal" style="--delay:0.05s">
           <div class="testi-quote">"</div>
-          <p>A Loricatus csapata 24 óra alatt elvégezte a teljes épületfelmérést és másnap megkaptuk a teljeskörű
-            riportot. Páratlan szakmaiság és pontosság.</p>
+          <p>Egyszer csak azt kérdeztem: hol az érvényes verzió? Ők tudták. Csak megnyitottuk a modellt – és minden ott volt, névvel, réteggel, koordinátával.</p>
           <div class="testi-author">
             <div class="testi-avatar" style="background: var(--accent);">K</div>
             <div>
@@ -434,8 +441,7 @@
         </div>
         <div class="testi-card reveal" style="--delay:0.12s">
           <div class="testi-quote">"</div>
-          <p>Az NDVI-térképek alapján 18%-kal csökkentettük a növényvédőszer felhasználást. A Loricatus nem
-            ajánlóterméket adott – megoldást adott a farmunk számára.</p>
+          <p>Az NDVI-térképek alapján 18%-kal csökkentettük a növényvédőszer-felhasználást. A Loricatus nem ajánlóterméket adott – számot adott a farmunkról.</p>
           <div class="testi-author">
             <div class="testi-avatar" style="background: #2B3B46;">S</div>
             <div>
@@ -652,6 +658,7 @@
             <li><a href="#services">LiDAR szkennelés</a></li>
             <li><a href="#services">Hőkamera &amp; termográfia</a></li>
             <li><a href="#services">Precíziós mezőgazdaság</a></li>
+            <li><a href="#services">BIM koordináció</a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -702,11 +709,11 @@
   </div>
 
   <!-- Scroll-video dependencies -->
-  <script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
-  <script src="scroll-video.js"></script>
-  <script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js" defer></script>
+  <script src="scroll-video.js" defer></script>
+  <script src="script.js" defer></script>
 </body>
 
 </html>
