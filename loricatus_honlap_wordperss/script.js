@@ -14,14 +14,17 @@
   const hamburger = document.getElementById('hamburger');
   const allNavLinks = document.querySelectorAll('.nav-links a:not(.nav-cta-link)');
 
+  function updateNavbarState() {
+    if (!navbar) return;
+    navbar.classList.toggle('scrolled', window.scrollY > 30);
+  }
+
   window.addEventListener('scroll', () => {
-    if (window.scrollY > 30) {
-      navbar.classList.add('scrolled');
-    } else {
-      navbar.classList.remove('scrolled');
-    }
+    updateNavbarState();
     updateActiveNavLink();
   }, { passive: true });
+
+  updateNavbarState();
 
   hamburger.addEventListener('click', () => {
     hamburger.classList.toggle('open');

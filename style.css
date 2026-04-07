@@ -184,8 +184,8 @@ select, input, textarea { font-family: inherit; }
 }
 .navbar.scrolled {
   background: rgba(248, 246, 242, 0.96);
-  backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   border-color: var(--border);
 }
 .nav-container {
@@ -198,7 +198,8 @@ select, input, textarea { font-family: inherit; }
   gap: 32px;
 }
 .nav-logo { flex-shrink: 0; display: flex; align-items: center; }
-.logo-svg { height: 20px; width: auto; object-fit: contain; }
+.logo-svg { height: 20px; width: auto; object-fit: contain; transition: filter 0.3s; }
+.navbar.scrolled .logo-svg { filter: brightness(0) saturate(100%); }
 .nav-links {
   display: flex;
   align-items: center;

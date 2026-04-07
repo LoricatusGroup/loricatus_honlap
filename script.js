@@ -11,9 +11,13 @@
   const hamburger = document.getElementById('hamburger');
   const navLinks = document.getElementById('navLinks');
 
-  window.addEventListener('scroll', () => {
+  const updateNavbarState = () => {
+    if (!navbar) return;
     navbar.classList.toggle('scrolled', window.scrollY > 40);
-  }, { passive: true });
+  };
+
+  window.addEventListener('scroll', updateNavbarState, { passive: true });
+  updateNavbarState();
 
   if (hamburger) {
     hamburger.addEventListener('click', () => {
