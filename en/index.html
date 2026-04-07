@@ -1,119 +1,115 @@
 <!DOCTYPE html>
-<html lang="hu">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Loricatus – Professzionális Drónszolgáltatások</title>
+  <title>Loricatus - Professional Drone Services</title>
   <meta name="description"
-    content="Loricatus – Magyarország megbízható professzionális drónszolgáltatója. Légi felvételek, épületinspekció, térképezés, LiDAR szkennelés. Kérjen ajánlatot még ma!" />
-  <link rel="canonical" href="https://loricatus.hu/" />
+    content="Loricatus is Hungary's trusted professional drone service provider. Aerial surveying, building inspection, mapping, and LiDAR scanning for projects where accurate data matters." />
+  <link rel="canonical" href="https://loricatus.hu/en/" />
   <link rel="alternate" hreflang="hu" href="https://loricatus.hu/" />
   <link rel="alternate" hreflang="en" href="https://loricatus.hu/en/" />
   <link rel="alternate" hreflang="it" href="https://loricatus.hu/it/" />
   <link rel="alternate" hreflang="x-default" href="https://loricatus.hu/" />
-  <link rel="stylesheet" href="style.css?v=9" />
+  <link rel="stylesheet" href="/style.css?v=9" />
 </head>
 
 <body>
 
-  <!-- =================== NAVIGATION =================== -->
   <nav id="navbar" class="navbar">
     <div class="nav-container">
-      <a href="#hero" class="nav-logo" aria-label="Loricatus főoldal">
-        <img src="assets/logo.svg" alt="Loricatus" class="logo-svg" />
+      <a href="#hero" class="nav-logo" aria-label="Loricatus home page">
+        <img src="/assets/logo.svg" alt="Loricatus" class="logo-svg" />
       </a>
       <ul class="nav-links" id="navLinks">
-        <li><a href="#services">Szolgáltatások</a></li>
-        <li><a href="#about">Rólunk</a></li>
-        <li><a href="#equipment">Eszközpark</a></li>
-        <li><a href="#portfolio">Projektek</a></li>
-        <li><a href="#contact" class="nav-cta-link">Ajánlatkérés</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#equipment">Fleet</a></li>
+        <li><a href="#portfolio">Projects</a></li>
+        <li><a href="#contact" class="nav-cta-link">Request a Quote</a></li>
       </ul>
-      <div class="lang-switcher" aria-label="Nyelvválasztó">
-        <a href="/" class="lang-link is-active" aria-current="page">HU</a>
-        <a href="/en/" class="lang-link">EN</a>
+      <div class="lang-switcher" aria-label="Language switcher">
+        <a href="/" class="lang-link">HU</a>
+        <a href="/en/" class="lang-link is-active" aria-current="page">EN</a>
         <a href="/it/" class="lang-link">IT</a>
       </div>
       <button class="nav-cta" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
-        Ajánlatkérés
+        Request a Quote
       </button>
-      <button class="hamburger" id="hamburger" aria-label="Menü">
+      <button class="hamburger" id="hamburger" aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
     </div>
   </nav>
 
-  <!-- =================== HERO =================== -->
   <section id="hero" class="hero">
     <div class="hero-bg">
-      <img src="assets/drone4.webp" alt="Loricatus drónos felmérés" class="hero-img" id="heroParallax" fetchpriority="high" />
+      <img src="/assets/drone4.webp" alt="Loricatus drone survey" class="hero-img" id="heroParallax" fetchpriority="high" />
       <div class="hero-overlay"></div>
     </div>
     <canvas id="heroCanvas" class="hero-canvas"></canvas>
     <div class="hero-content fade-in-up">
       <div class="hero-badge">
         <span class="badge-dot"></span>
-          Térinformatika az építőiparban · A2 CofC engedély
+          Geospatial intelligence for construction · A2 CofC certified
       </div>
       <h1 class="hero-title">
-          Lásd át<br />
-          <span class="accent-text">a világot!</span>
+          See the world<br />
+          <span class="accent-text">with clarity</span>
       </h1>
       <p class="hero-subtitle">
-        Drón, LiDAR, BIM-koordináció. Amit nem lehet megmérni, azt nem lehet megépíteni.<br />
-        Precizitás a levegőből – ott, ahol az adat számít.
+        Drone operations, LiDAR, BIM coordination. What cannot be measured cannot be built.<br />
+        Precision from the air for projects where data has to hold up in practice.
       </p>
       <div class="hero-actions">
         <button class="btn btn-primary"
           onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
-          Kérjen ajánlatot
+          Request a Quote
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </button>
         <button class="btn btn-secondary"
           onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})">
-          Szolgáltatásaink
+          Explore Services
         </button>
       </div>
     </div>
     <div class="hero-scroll-indicator">
       <div class="scroll-line"></div>
-      <span>Görgessen le</span>
+      <span>Scroll down</span>
     </div>
-    <!-- Stats strip at bottom of hero -->
     <div class="hero-stats">
       <div class="hero-stat">
         <span class="stat-num" data-target="500">0</span><span class="stat-suffix">+</span>
-        <span class="stat-label">Elvégzett projekt</span>
+        <span class="stat-label">Completed projects</span>
       </div>
       <div class="hero-stat-divider"></div>
       <div class="hero-stat">
         <span class="stat-num" data-target="1200">0</span><span class="stat-suffix">+</span>
-        <span class="stat-label">Repülési óra</span>
+        <span class="stat-label">Flight hours</span>
       </div>
       <div class="hero-stat-divider"></div>
       <div class="hero-stat">
         <span class="stat-num" data-target="98">0</span><span class="stat-suffix">%</span>
-        <span class="stat-label">Ügyfél-elégedettség</span>
+        <span class="stat-label">Client satisfaction</span>
       </div>
       <div class="hero-stat-divider"></div>
       <div class="hero-stat">
         <span class="stat-num" data-target="8">0</span><span class="stat-suffix">+</span>
-        <span class="stat-label">Év tapasztalat</span>
+        <span class="stat-label">Years of experience</span>
       </div>
     </div>
   </section>
 
-  <!-- =================== SERVICES =================== -->
   <section id="services" class="services section">
-    <div class="section-bg-label">02 / SZOLGÁLTATÁSOK</div>
+    <div class="section-bg-label">02 / SERVICES</div>
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-tag">Mit nyújtunk</div>
-        <h2 class="section-title">Teljes körű drón<br /><span class="accent-text">megoldások</span></h2>
-        <p class="section-desc">Repülünk, rögzítünk, koordinálunk. Minden projekthez az a technológia, ami tényleg számít.</p>
+        <div class="section-tag">What we deliver</div>
+        <h2 class="section-title">End-to-end drone<br /><span class="accent-text">capabilities</span></h2>
+        <p class="section-desc">We fly, capture, process, and coordinate. Each project gets the technology that actually supports the decision.</p>
       </div>
       <div class="services-grid">
 
@@ -127,10 +123,9 @@
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" />
             </svg>
           </div>
-          <h3>Légi Fotó & Videó</h3>
-          <p>Cinema-minőségű légi felvételek ingatlanokról, rendezvényekről, természeti tájakról. 4K–8K felbontásban,
-            stabilizált gimbalrendszerrel.</p>
-          <a href="#contact" class="service-link">Ajánlatkérés <span>→</span></a>
+          <h3>Aerial Photo and Video</h3>
+          <p>Cinematic-grade aerial footage for real estate, events, industrial sites, and landscapes. Delivered in 4K to 8K with stabilized gimbal systems.</p>
+          <a href="#contact" class="service-link">Request a Quote <span>→</span></a>
         </div>
 
         <div class="service-card reveal" style="--delay: 0.1s">
@@ -142,9 +137,9 @@
               <circle cx="30" cy="30" r="4" stroke="currentColor" stroke-width="2" />
             </svg>
           </div>
-          <h3>Felmérés & Térképezés</h3>
-          <p>Pontfelhő-alapú digitális terepmodellek és GIS-adatbázisok, amelyekre tervezni, építeni és bizonyítani lehet. RTK-GNSS technológiával, valós idejű korrekciókkal.</p>
-          <a href="#contact" class="service-link">Ajánlatkérés <span>→</span></a>
+          <h3>Surveying and Mapping</h3>
+          <p>Point-cloud-based terrain models and GIS datasets you can design, build, and verify against. Powered by RTK GNSS and real-time corrections.</p>
+          <a href="#contact" class="service-link">Request a Quote <span>→</span></a>
         </div>
 
         <div class="service-card reveal" style="--delay: 0.15s">
@@ -155,9 +150,9 @@
               <rect x="6" y="38" width="36" height="3" rx="1.5" fill="currentColor" opacity="0.3" />
             </svg>
           </div>
-          <h3>Épületinspekció</h3>
-          <p>Hidak, kémények, toronyházak, ipari létesítmények biztonságos vizsgálata. Az eredmény nem csak látvány, hanem dokumentált bizonyíték.</p>
-          <a href="#contact" class="service-link">Ajánlatkérés <span>→</span></a>
+          <h3>Building Inspection</h3>
+          <p>Safe inspection workflows for bridges, chimneys, high-rise buildings, and industrial assets. The outcome is documented evidence, not just attractive visuals.</p>
+          <a href="#contact" class="service-link">Request a Quote <span>→</span></a>
         </div>
 
         <div class="service-card reveal" style="--delay: 0.2s">
@@ -168,9 +163,9 @@
               <path d="M16 32h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
             </svg>
           </div>
-          <h3>LiDAR Szkennelés</h3>
-          <p>Milliméteres pontosságú 3D pontfelhő-modellek – a BIM-alapú tervezés és mérnöki dokumentáció kiindulópontja. Épületekről, terepről, infrastruktúráról.</p>
-          <a href="#contact" class="service-link">Ajánlatkérés <span>→</span></a>
+          <h3>LiDAR Scanning</h3>
+          <p>Millimetre-accurate 3D point clouds for BIM-driven design and engineering documentation, across buildings, terrain, and infrastructure.</p>
+          <a href="#contact" class="service-link">Request a Quote <span>→</span></a>
         </div>
 
         <div class="service-card reveal" style="--delay: 0.25s">
@@ -182,10 +177,9 @@
               <circle cx="24" cy="24" r="6" fill="currentColor" opacity="0.15" stroke="currentColor" stroke-width="2" />
             </svg>
           </div>
-          <h3>Hőkamera & Termográfia</h3>
-          <p>Hőveszteség-detektálás épületeken, fotovoltaikus panelek vizsgálata, ipari hőtérkép. Gyors, megbízható
-            diagnózis.</p>
-          <a href="#contact" class="service-link">Ajánlatkérés <span>→</span></a>
+          <h3>Thermal Imaging</h3>
+          <p>Thermal-loss detection for buildings, photovoltaic panel inspection, and industrial heat mapping. Fast diagnostics with decision-ready outputs.</p>
+          <a href="#contact" class="service-link">Request a Quote <span>→</span></a>
         </div>
 
         <div class="service-card reveal" style="--delay: 0.3s">
@@ -197,10 +191,9 @@
               <circle cx="24" cy="22" r="4" stroke="currentColor" stroke-width="2" />
             </svg>
           </div>
-          <h3>Precíziós Mezőgazdaság</h3>
-          <p>Multispektrális indexek (NDVI, NDRE), terméshozam-előrejelzés, növényvédelmi permetező drónok. Okos
-            gazdálkodás levegőből.</p>
-          <a href="#contact" class="service-link">Ajánlatkérés <span>→</span></a>
+          <h3>Precision Agriculture</h3>
+          <p>NDVI and NDRE analysis, yield forecasting, and intelligent aerial crop monitoring for data-led agricultural operations.</p>
+          <a href="#contact" class="service-link">Request a Quote <span>→</span></a>
         </div>
 
         <div class="service-card reveal" style="--delay: 0.35s">
@@ -213,25 +206,24 @@
               <path d="M32 28l4 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
             </svg>
           </div>
-          <h3>BIM Koordináció</h3>
-          <p>Digitális modell, mint aktív munkatárs. Összehangoljuk a terveket, verziókat és adatokat – hogy ne legyen kérdés, mi az érvényes.</p>
-          <a href="#contact" class="service-link">Ajánlatkérés <span>→</span></a>
+          <h3>BIM Coordination</h3>
+          <p>Your digital model as an active project tool. We align drawings, versions, and data flows so the approved source is always clear.</p>
+          <a href="#contact" class="service-link">Request a Quote <span>→</span></a>
         </div>
 
       </div>
     </div>
   </section>
 
-  <!-- =================== ABOUT =================== -->
   <section id="about" class="about section">
-    <div class="section-bg-label">03 / RÓLUNK</div>
+    <div class="section-bg-label">03 / ABOUT</div>
     <div class="container about-container">
       <div class="about-visual reveal">
         <div class="about-img-wrap">
-          <img src="assets/mernok.webp" alt="Loricatus mérnöki tervezés és kivitelezés" class="about-img" loading="lazy" />
+          <img src="/assets/mernok.webp" alt="Loricatus engineering design and delivery" class="about-img" loading="lazy" />
           <div class="about-img-badge">
             <span class="badge-num">8+</span>
-            <span>év<br />tapasztalat</span>
+            <span>years of<br />experience</span>
           </div>
         </div>
         <div class="about-cert-row">
@@ -239,25 +231,25 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="20 6 9 17 4 12" />
             </svg>
-            A2 CofC engedély
+            A2 CofC certified
           </div>
           <div class="cert-pill">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="20 6 9 17 4 12" />
             </svg>
-            Légiügyi engedélyek
+            Aviation permits in place
           </div>
         </div>
       </div>
       <div class="about-content reveal">
-        <div class="section-tag">A Loricatus különbsége</div>
-        <h2 class="section-title">Ahol az adat<br /><span class="accent-text">valóság lesz</span>
+        <div class="section-tag">The Loricatus difference</div>
+        <h2 class="section-title">Where data becomes<br /><span class="accent-text">usable reality</span>
         </h2>
         <p class="about-lead">
-          Loricatusként az a munkánk, hogy a világ pontosabb és érthetőbb legyen. Néha sikerül. Néha nem. De minden alkalommal tanulunk belőle.
+          At Loricatus, our job is to make the built world more accurate and more understandable. Sometimes it is straightforward. Sometimes it is not. Every project improves the next one.
         </p>
         <p class="about-body">
-          Nem csupán drónokat röptetünk – digitális valóságot teremtünk. Csapatunk mérnökökből, geodétákból és BIM-koordinátorokból áll, akik a projekt elejétől az utolsó átadásig ott vannak. Legyen szó pontfelhős felmérésről, épületinspekciόról vagy BIM-dokumentáció összehangolásáról – az adat nálunk nem díszlet, hanem munkaalap.
+          We do more than fly drones. We build reliable digital context for design, construction, inspection, and handover. Our team combines engineering, surveying, and BIM coordination expertise, from the first site capture to the final deliverable. Whether the task is point-cloud surveying, asset inspection, or model coordination, data is not decoration here. It is the working basis.
         </p>
         <div class="about-values">
           <div class="value-item">
@@ -267,8 +259,8 @@
               </svg>
             </div>
             <div>
-              <strong>Teljes jogszabályi megfelelés</strong>
-              <span>Magyar és EU drónszabályok, légiügyi engedélyek, biztosítás</span>
+              <strong>Full regulatory compliance</strong>
+              <span>Hungarian and EU drone rules, aviation permits, and insurance aligned to project requirements</span>
             </div>
           </div>
           <div class="value-item">
@@ -279,8 +271,8 @@
               </svg>
             </div>
             <div>
-              <strong>Projektre szabott feldolgozás</strong>
-              <span>Az adatfeldolgozás és az átadás ütemezése minden esetben a feladat összetettségéhez igazodik</span>
+              <strong>Project-specific processing</strong>
+              <span>Data processing and delivery schedules are matched to the real complexity and decisions behind each assignment</span>
             </div>
           </div>
           <div class="value-item">
@@ -290,8 +282,8 @@
               </svg>
             </div>
             <div>
-              <strong>Mért, dokumentált eredmény</strong>
-              <span>Minden projekthez részletes riport, pontfelhő, CAD-export és GIS-adatok – amiből lehet dolgozni, nem csak nézegetni</span>
+              <strong>Measured, documented outputs</strong>
+              <span>Detailed reports, point clouds, CAD exports, and GIS datasets that can be acted on immediately</span>
             </div>
           </div>
         </div>
@@ -299,98 +291,95 @@
     </div>
   </section>
 
-  <!-- =================== EQUIPMENT =================== -->
   <section id="equipment" class="equipment section">
-    <div class="section-bg-label">04 / ESZKÖZPARK</div>
+    <div class="section-bg-label">04 / FLEET</div>
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-tag">Technológia</div>
-        <h2 class="section-title">Ipari szintű<br /><span class="accent-text">eszközpark</span></h2>
-        <p class="section-desc">Kizárólag professzionális, minősített hardvereket alkalmazunk – mert az eredmény
-          minősége az eszközön múlik.</p>
+        <div class="section-tag">Technology</div>
+        <h2 class="section-title">Industrial-grade<br /><span class="accent-text">equipment</span></h2>
+        <p class="section-desc">We work exclusively with certified professional hardware because output quality starts with the platform in the field.</p>
       </div>
       <div class="equipment-grid">
         <div class="equipment-card reveal" style="--delay: 0.05s">
           <div class="eq-img-wrap">
-            <img src="assets/eq1.webp" alt="DJI Matrice 400 SP Plus" class="eq-img" loading="lazy" />
+            <img src="/assets/eq1.webp" alt="DJI Matrice 400 SP Plus" class="eq-img" loading="lazy" />
           </div>
           <div class="eq-info">
-            <span class="eq-tag">Fő platform</span>
+            <span class="eq-tag">Primary platform</span>
             <h3>DJI MATRICE 400 SP PLUS</h3>
-            <p>Nagy teherbírású ipari drónplatform összetett felmérési, inspekciós és adatgyűjtési feladatokhoz</p>
+            <p>Heavy-duty industrial drone platform for complex surveying, inspection, and data-capture missions</p>
           </div>
         </div>
         <div class="equipment-card reveal" style="--delay: 0.12s">
           <div class="eq-img-wrap">
-            <img src="assets/eq2.webp" alt="DJI Matrice 4 E SP Plus" class="eq-img eq-img-2" loading="lazy" />
+            <img src="/assets/eq2.webp" alt="DJI Matrice 4 E SP Plus" class="eq-img eq-img-2" loading="lazy" />
           </div>
           <div class="eq-info">
-            <span class="eq-tag">Kompakt platform</span>
+            <span class="eq-tag">Compact platform</span>
             <h3>DJI MATRICE 4 E SP PLUS</h3>
-            <p>Gyorsan bevethető, kompakt drónplatform helyszíni dokumentáláshoz, felméréshez és vizuális ellenőrzéshez</p>
+            <p>Rapid-deployment compact drone platform for site documentation, surveying, and visual inspection</p>
           </div>
         </div>
         <div class="equipment-card reveal" style="--delay: 0.19s">
           <div class="eq-img-wrap">
-            <img src="DJI-Zenmuse-L1-scaled.webp" alt="DJI Zenmuse L3 (EU) SP Plus LiDAR szenzor" class="eq-img" loading="lazy" decoding="async" />
+            <img src="/DJI-Zenmuse-L1-scaled.webp" alt="DJI Zenmuse L3 (EU) SP Plus LiDAR sensor" class="eq-img" loading="lazy" decoding="async" />
           </div>
           <div class="eq-info">
-            <span class="eq-tag">LiDAR szenzor</span>
+            <span class="eq-tag">LiDAR sensor</span>
             <h3>DJI Zenmuse L3 (EU) SP Plus</h3>
-            <p>LiDAR alapú szenzor nagy pontosságú pontfelhős felméréshez és részletes téradatgyűjtéshez</p>
+            <p>LiDAR-based sensor for high-accuracy point-cloud capture and detailed spatial data acquisition</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- =================== PORTFOLIO =================== -->
   <section id="portfolio" class="portfolio section">
-    <div class="section-bg-label">05 / PROJEKTEK</div>
+    <div class="section-bg-label">05 / PROJECTS</div>
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-tag">Referenciák</div>
-        <h2 class="section-title">Elvégzett<br /><span class="accent-text">projektek</span></h2>
-        <p class="section-desc">Valós projektek. Valós eredmények. Nem prezentációban – építkezésen.</p>
+        <div class="section-tag">Selected references</div>
+        <h2 class="section-title">Completed<br /><span class="accent-text">projects</span></h2>
+        <p class="section-desc">Real projects, real constraints, real outputs delivered where construction teams actually work.</p>
       </div>
       <div class="portfolio-grid">
         <div class="portfolio-card large reveal" style="--delay:0.05s">
           <div class="portfolio-img-wrap">
-            <img src="assets/proj1.webp" alt="NMHH EMC Labor BIM dokumentáció" class="portfolio-img" loading="lazy" />
+            <img src="/assets/proj1.webp" alt="NMHH EMC Laboratory BIM documentation" class="portfolio-img" loading="lazy" />
             <div class="portfolio-overlay">
-              <span class="portfolio-cat">BIM Koordináció</span>
-              <h3>NMHH EMC Labor –<br />BIM dokumentáció</h3>
-              <p>Esztergomi út · IFC-export · CDE integráció</p>
+              <span class="portfolio-cat">BIM Coordination</span>
+              <h3>NMHH EMC Laboratory -<br />BIM documentation</h3>
+              <p>Esztergomi Road · IFC export · CDE integration</p>
             </div>
           </div>
         </div>
         <div class="portfolio-card reveal" style="--delay:0.12s">
           <div class="portfolio-img-wrap">
-            <img src="assets/proj2.webp" alt="Ipari kémény termográfiás inspekció" class="portfolio-img" loading="lazy" />
+            <img src="/assets/proj2.webp" alt="Industrial chimney thermographic inspection" class="portfolio-img" loading="lazy" />
             <div class="portfolio-overlay">
-              <span class="portfolio-cat">Épületinspekció</span>
-              <h3>Ipari kémény<br />termográfiás inspekció</h3>
-              <p>LiDAR + hőkamera · hibatérkép</p>
+              <span class="portfolio-cat">Building Inspection</span>
+              <h3>Industrial chimney<br />thermographic inspection</h3>
+              <p>LiDAR + thermal imaging · defect mapping</p>
             </div>
           </div>
         </div>
         <div class="portfolio-card reveal" style="--delay:0.19s">
           <div class="portfolio-img-wrap">
-            <img src="assets/proj-matyas-church.jpg" alt="Mátyás-templom drónos felmérése" class="portfolio-img" loading="lazy" />
+            <img src="/assets/proj-matyas-church.jpg" alt="Drone survey of Matthias Church" class="portfolio-img" loading="lazy" />
             <div class="portfolio-overlay">
-              <span class="portfolio-cat">3D Drónfelmérés</span>
-              <h3>Mátyás-templom –<br />Budavári Hauszmann Program</h3>
-              <p>Drónos fotogrammetria · 3D pontfelhő · műemlékvédelem</p>
+              <span class="portfolio-cat">3D Drone Survey</span>
+              <h3>Matthias Church -<br />Buda Castle redevelopment</h3>
+              <p>Drone photogrammetry · 3D point cloud · heritage protection</p>
             </div>
           </div>
         </div>
         <div class="portfolio-card reveal" style="--delay:0.25s">
           <div class="portfolio-img-wrap">
-            <img src="assets/proj-budapest-aerial.jpg" alt="Budapest légi felmérés – Gellért-szobor" class="portfolio-img" loading="lazy" />
+            <img src="/assets/proj-budapest-aerial.jpg" alt="Budapest aerial survey - Gellert Statue" class="portfolio-img" loading="lazy" />
             <div class="portfolio-overlay">
-              <span class="portfolio-cat">Légi Felmérés</span>
-              <h3>Budapest – Gellért-szobor<br />légi felmérés és dokumentáció</h3>
-              <p>Drón ortofotó · GIS adatbázis · városi topográfia</p>
+              <span class="portfolio-cat">Aerial Survey</span>
+              <h3>Budapest - Gellert Statue<br />aerial survey and documentation</h3>
+              <p>Drone orthophoto · GIS database · urban topography</p>
             </div>
           </div>
         </div>
@@ -398,73 +387,70 @@
     </div>
   </section>
 
-  <!-- =================== PARTNERS =================== -->
   <section class="partners section">
-    <div class="section-bg-label">07 / PARTNEREINK</div>
+    <div class="section-bg-label">07 / PARTNERS</div>
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-tag">Akikkel dolgoztunk</div>
-        <h2 class="section-title">Megbízóink és<br /><span class="accent-text">partnereink</span></h2>
-        <p class="section-desc">Ipari szereplők, építőipari vállalatok és közintézmények bíztak meg projektjeik precíz elvégzésével.</p>
+        <div class="section-tag">Who we work with</div>
+        <h2 class="section-title">Clients and<br /><span class="accent-text">partners</span></h2>
+        <p class="section-desc">Industrial operators, construction companies, and public-sector clients trust us with projects where precision is not optional.</p>
       </div>
       <div class="partners-grid reveal">
         <div class="partner-item">
-          <img src="assets/partner-adriaport.webp" alt="Adria Port" loading="lazy" />
+          <img src="/assets/partner-adriaport.webp" alt="Adria Port" loading="lazy" />
         </div>
         <div class="partner-item">
-          <img src="assets/partner-confector.webp" alt="Confector" loading="lazy" />
+          <img src="/assets/partner-confector.webp" alt="Confector" loading="lazy" />
         </div>
         <div class="partner-item">
-          <img src="assets/partner-crec.webp" alt="CREG" loading="lazy" />
+          <img src="/assets/partner-crec.webp" alt="CREG" loading="lazy" />
         </div>
         <div class="partner-item">
-          <img src="assets/partner-indupro.webp" alt="Indupro" loading="lazy" />
+          <img src="/assets/partner-indupro.webp" alt="Indupro" loading="lazy" />
         </div>
       </div>
-      <p class="partners-more reveal">És még sok más megbízó…</p>
+      <p class="partners-more reveal">And many more clients besides.</p>
     </div>
   </section>
 
-  <!-- =================== TESTIMONIALS =================== -->
   <section class="testimonials section">
-    <div class="section-bg-label">08 / VÉLEMÉNYEK</div>
+    <div class="section-bg-label">08 / FEEDBACK</div>
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-tag">Ügyfeleink mondják</div>
-        <h2 class="section-title">Amit <span class="accent-text">partnereink</span><br />tapasztaltak</h2>
+        <div class="section-tag">What clients say</div>
+        <h2 class="section-title">What our <span class="accent-text">partners</span><br />experienced</h2>
       </div>
       <div class="testimonials-grid">
         <div class="testi-card reveal" style="--delay:0.05s">
           <div class="testi-quote">"</div>
-          <p>Egyszer csak azt kérdeztem: hol az érvényes verzió? Ők tudták. Csak megnyitottuk a modellt – és minden ott volt, névvel, réteggel, koordinátával.</p>
+          <p>At one point I asked a simple question: which version is actually current? They knew immediately. We opened the model and everything was there, named, layered, and coordinated.</p>
           <div class="testi-author">
             <div class="testi-avatar" style="background: var(--accent);">K</div>
             <div>
-              <strong>Kovács Attila</strong>
-              <span>Projektmenedzser, Magyar Építő Zrt.</span>
+              <strong>Attila Kovacs</strong>
+              <span>Project Manager, Magyar Epito Zrt.</span>
             </div>
           </div>
         </div>
         <div class="testi-card reveal" style="--delay:0.12s">
           <div class="testi-quote">"</div>
-          <p>Az NDVI-térképek alapján 18%-kal csökkentettük a növényvédőszer-felhasználást. A Loricatus nem ajánlóterméket adott – számot adott a farmunkról.</p>
+          <p>Based on the NDVI maps, we reduced crop-protection chemical use by 18%. Loricatus did not give us a brochure. They gave us numbers we could act on.</p>
           <div class="testi-author">
             <div class="testi-avatar" style="background: #2B3B46;">S</div>
             <div>
-              <strong>Szabó Péter</strong>
-              <span>Gazdálkodó, 650 ha</span>
+              <strong>Peter Szabo</strong>
+              <span>Farmer, 650 ha</span>
             </div>
           </div>
         </div>
         <div class="testi-card reveal" style="--delay:0.19s">
           <div class="testi-quote">"</div>
-          <p>A hőkamerás vizsgálatuk felfedte azt a szigetelési problémát, amit 3 éve nem találtunk meg.
-            Megtakarítottunk egy komoly felújítási összeget. Köszönjük!</p>
+          <p>Their thermal inspection exposed the insulation issue we had failed to identify for three years. That saved us from a major refurbishment cost.</p>
           <div class="testi-author">
             <div class="testi-avatar" style="background: #3d5a70;">N</div>
             <div>
-              <strong>Nagy Éva</strong>
-              <span>Ingatlankezelő, BPM Group</span>
+              <strong>Eva Nagy</strong>
+              <span>Property Manager, BPM Group</span>
             </div>
           </div>
         </div>
@@ -472,15 +458,13 @@
     </div>
   </section>
 
-  <!-- =================== CONTACT / LEAD FORM =================== -->
   <section id="contact" class="contact section">
-    <div class="section-bg-label">09 / KAPCSOLAT</div>
+    <div class="section-bg-label">09 / CONTACT</div>
     <div class="container contact-container">
       <div class="contact-info reveal">
-        <div class="section-tag">Lépjünk kapcsolatba</div>
-        <h2 class="section-title">Kérjen<br /><span class="accent-text">ingyenes ajánlatot</span></h2>
-        <p class="contact-desc">Töltse ki az űrlapot és visszajelzünk. Minden projekt egyedi – az ajánlat
-          is az.</p>
+        <div class="section-tag">Let's talk</div>
+        <h2 class="section-title">Request a<br /><span class="accent-text">free quote</span></h2>
+        <p class="contact-desc">Fill in the form and we will get back to you. Every project is different, so every proposal is built to fit the task.</p>
         <div class="contact-details">
           <div class="contact-detail-item">
             <div class="contact-icon">
@@ -490,7 +474,7 @@
               </svg>
             </div>
             <div>
-              <strong>Telefon</strong>
+              <strong>Phone</strong>
               <a href="tel:+36204931222">+36 20 493 1222</a>
             </div>
           </div>
@@ -514,8 +498,8 @@
               </svg>
             </div>
             <div>
-              <strong>Iroda</strong>
-              <span>Budapest, Toldy Ferenc u. 19.<br />3. emelet 18. ajtó, 1015</span>
+              <strong>Office</strong>
+              <span>Budapest, Toldy Ferenc u. 19.<br />3rd floor, door 18, 1015</span>
             </div>
           </div>
         </div>
@@ -524,53 +508,52 @@
         <form id="contactForm" class="contact-form" novalidate>
           <div class="form-row">
             <div class="form-group">
-              <label for="name">Teljes neve *</label>
-              <input type="text" id="name" name="name" placeholder="Pl. Kovács Attila" required />
-              <span class="form-error" id="nameError">Kérem adja meg nevét</span>
+              <label for="name">Full name *</label>
+              <input type="text" id="name" name="name" placeholder="For example: Attila Kovacs" required />
+              <span class="form-error" id="nameError">Please enter your name</span>
             </div>
             <div class="form-group">
-              <label for="company">Cég neve</label>
-              <input type="text" id="company" name="company" placeholder="Pl. Magyar Építő Zrt." />
+              <label for="company">Company</label>
+              <input type="text" id="company" name="company" placeholder="For example: Magyar Epito Zrt." />
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="email">E-mail cím *</label>
-              <input type="email" id="email" name="email" placeholder="pelda@ceg.hu" required />
-              <span class="form-error" id="emailError">Érvényes e-mail szükséges</span>
+              <label for="email">Email *</label>
+              <input type="email" id="email" name="email" placeholder="example@company.com" required />
+              <span class="form-error" id="emailError">A valid email is required</span>
             </div>
             <div class="form-group">
-              <label for="phone">Telefonszám</label>
+              <label for="phone">Phone</label>
               <input type="tel" id="phone" name="phone" placeholder="+36 30 ..." />
             </div>
           </div>
           <div class="form-group">
-            <label for="service">Melyik szolgáltatás érdekli? *</label>
+            <label for="service">Which service do you need? *</label>
             <select id="service" name="service" required>
-              <option value="" disabled selected>Válasszon szolgáltatást</option>
-              <option>Légi fotó &amp; videó</option>
-              <option>Felmérés &amp; térképezés</option>
-              <option>Épületinspekció</option>
-              <option>LiDAR szkennelés</option>
-              <option>Hőkamera &amp; termográfia</option>
-              <option>Precíziós mezőgazdaság</option>
-              <option>Egyéb / Több szolgáltatás</option>
+              <option value="" disabled selected>Select a service</option>
+              <option>Aerial photo and video</option>
+              <option>Surveying and mapping</option>
+              <option>Building inspection</option>
+              <option>LiDAR scanning</option>
+              <option>Thermal imaging</option>
+              <option>Precision agriculture</option>
+              <option>Other / Multiple services</option>
             </select>
-            <span class="form-error" id="serviceError">Kérem válasszon egy szolgáltatást</span>
+            <span class="form-error" id="serviceError">Please choose a service</span>
           </div>
           <div class="form-group">
-            <label for="message">Projekt leírása *</label>
+            <label for="message">Project brief *</label>
             <textarea id="message" name="message" rows="4"
-              placeholder="Kérjük írja le röviden a projektet, a helyszínt és a várt eredményt..." required></textarea>
-            <span class="form-error" id="messageError">Kérem írja le a projektet</span>
+              placeholder="Please describe the project, location, and expected deliverable in a few lines..." required></textarea>
+            <span class="form-error" id="messageError">Please describe the project</span>
           </div>
           <div class="form-check">
             <input type="checkbox" id="gdpr" name="gdpr" required />
-            <label for="gdpr">Elfogadom az <a href="#">adatkezelési tájékoztatót</a> és hozzájárulok adataim
-              kezeléséhez. *</label>
+            <label for="gdpr">I accept the <a href="#">privacy notice</a> and consent to the processing of my data. *</label>
           </div>
           <button type="submit" class="btn btn-primary btn-full" id="submitBtn">
-            <span id="btnText">Küldöm az ajánlatkérést</span>
+            <span id="btnText">Send my quote request</span>
             <svg id="btnArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2">
               <path d="M5 12h14M12 5l7 7-7 7" />
@@ -581,28 +564,27 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="20 6 9 17 4 12" />
             </svg>
-            <strong>Köszönjük!</strong> Ajánlatkérését megkaptuk. Hamarosan jelentkezünk.
+            <strong>Thank you!</strong> We received your request and will get back to you soon.
           </div>
         </form>
       </div>
     </div>
   </section>
 
-  <!-- =================== LIGHTBOX =================== -->
   <div id="lightbox" class="lightbox" aria-hidden="true">
     <div class="lightbox-backdrop"></div>
-    <button class="lightbox-close" aria-label="Bezárás">
+    <button class="lightbox-close" aria-label="Close">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <line x1="18" y1="6" x2="6" y2="18" />
         <line x1="6" y1="6" x2="18" y2="18" />
       </svg>
     </button>
-    <button class="lightbox-arrow lightbox-prev" aria-label="Előző">
+    <button class="lightbox-arrow lightbox-prev" aria-label="Previous">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polyline points="15 18 9 12 15 6" />
       </svg>
     </button>
-    <button class="lightbox-arrow lightbox-next" aria-label="Következő">
+    <button class="lightbox-arrow lightbox-next" aria-label="Next">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polyline points="9 6 15 12 9 18" />
       </svg>
@@ -618,14 +600,12 @@
     <div class="lightbox-counter" id="lightboxCounter"></div>
   </div>
 
-  <!-- =================== FOOTER =================== -->
   <footer class="footer">
     <div class="footer-top">
       <div class="container footer-grid">
         <div class="footer-brand">
-          <img src="assets/logo.svg" alt="Loricatus" class="footer-logo" />
-          <p>Professzionális drónszolgáltatások ipari és kereskedelmi ügyfelek számára. EU-konform, engedéllyel
-            rendelkező operátor.</p>
+          <img src="/assets/logo.svg" alt="Loricatus" class="footer-logo" />
+          <p>Professional drone services for industrial and commercial clients. EU-compliant operations with licensed pilots and project-focused deliverables.</p>
           <div class="footer-social">
             <a href="#" aria-label="Facebook" class="social-btn">
               <svg viewBox="0 0 24 24" fill="currentColor">
@@ -656,65 +636,63 @@
           </div>
         </div>
         <div class="footer-col">
-          <h4>Szolgáltatások</h4>
+          <h4>Services</h4>
           <ul>
-            <li><a href="#services">Légi fotó &amp; videó</a></li>
-            <li><a href="#services">Felmérés &amp; térképezés</a></li>
-            <li><a href="#services">Épületinspekció</a></li>
-            <li><a href="#services">LiDAR szkennelés</a></li>
-            <li><a href="#services">Hőkamera &amp; termográfia</a></li>
-            <li><a href="#services">Precíziós mezőgazdaság</a></li>
-            <li><a href="#services">BIM koordináció</a></li>
+            <li><a href="#services">Aerial photo and video</a></li>
+            <li><a href="#services">Surveying and mapping</a></li>
+            <li><a href="#services">Building inspection</a></li>
+            <li><a href="#services">LiDAR scanning</a></li>
+            <li><a href="#services">Thermal imaging</a></li>
+            <li><a href="#services">Precision agriculture</a></li>
+            <li><a href="#services">BIM coordination</a></li>
           </ul>
         </div>
         <div class="footer-col">
-          <h4>Vállalat</h4>
+          <h4>Company</h4>
           <ul>
-            <li><a href="#about">Rólunk</a></li>
-            <li><a href="#equipment">Eszközpark</a></li>
-            <li><a href="#portfolio">Referenciák</a></li>
-            <li><a href="#contact">Kapcsolat</a></li>
-            <li><a href="#">Adatkezelés</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#equipment">Fleet</a></li>
+            <li><a href="#portfolio">References</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="#">Privacy</a></li>
           </ul>
         </div>
         <div class="footer-col">
-          <h4>Elérhetőség</h4>
+          <h4>Contact</h4>
           <ul class="footer-contact-list">
             <li><a href="tel:+36204931222">+36 20 493 1222</a></li>
             <li><a href="mailto:info@loricatus.hu">info@loricatus.hu</a></li>
-            <li>Budapest, Toldy Ferenc u. 19.<br />3. emelet 18. ajtó, 1015</li>
-            <li class="footer-hours">H–CS: 8:00–14:30 · P: 8:00–14:00</li>
+            <li>Budapest, Toldy Ferenc u. 19.<br />3rd floor, door 18, 1015</li>
+            <li class="footer-hours">Mon-Thu: 8:00-14:30 · Fri: 8:00-14:00</li>
           </ul>
           <button class="btn btn-primary btn-sm"
             onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
-            Ajánlatkérés
+            Request a Quote
           </button>
         </div>
       </div>
     </div>
     <div class="footer-bottom">
       <div class="container footer-bottom-inner">
-        <span>© 2025 Loricatus. Minden jog fenntartva.</span>
-        <span>Engedélyezett EU drónoperátor · A2 CofC</span>
+        <span>© 2025 Loricatus. All rights reserved.</span>
+        <span>Authorized EU drone operator · A2 CofC</span>
       </div>
     </div>
   </footer>
 
-  <!-- =================== COOKIE BANNER =================== -->
   <div id="cookieBanner" class="cookie-banner" aria-hidden="true">
     <div class="cookie-inner">
       <div class="cookie-text">
-        <p>Ez a weboldal sütiket használ a legjobb felhasználói élmény biztosítása érdekében. A böngészés
-          folytatásával Ön elfogadja a <a href="#">sütikezelési szabályzatunkat</a>.</p>
+        <p>This website uses cookies to provide the best possible user experience. By continuing to browse, you accept our <a href="#">cookie policy</a>.</p>
       </div>
       <div class="cookie-actions">
-        <button class="cookie-btn cookie-btn-accept" id="cookieAccept">Elfogadom</button>
-        <button class="cookie-btn cookie-btn-decline" id="cookieDecline">Elutasítom</button>
+        <button class="cookie-btn cookie-btn-accept" id="cookieAccept">Accept</button>
+        <button class="cookie-btn cookie-btn-decline" id="cookieDecline">Decline</button>
       </div>
     </div>
   </div>
 
-  <script src="script.js?v=5" defer></script>
+  <script src="/script.js?v=5" defer></script>
 </body>
 
 </html>

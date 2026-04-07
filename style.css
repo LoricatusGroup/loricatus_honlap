@@ -228,6 +228,35 @@ select, input, textarea { font-family: inherit; }
   transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 .nav-cta:hover { background: var(--text); color: var(--bg); }
+.lang-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 12px;
+}
+.lang-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  padding: 7px 10px;
+  border: 1px solid rgba(0,0,0,0.16);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.lang-link:hover {
+  color: var(--text);
+  border-color: rgba(0,0,0,0.35);
+}
+.lang-link.is-active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
 .hamburger {
   display: none;
   flex-direction: column;
@@ -249,6 +278,19 @@ select, input, textarea { font-family: inherit; }
 .navbar:not(.scrolled) .nav-links a.active { color: #fff; }
 .navbar:not(.scrolled) .nav-cta { color: #fff; border-color: rgba(255,255,255,0.35); }
 .navbar:not(.scrolled) .nav-cta:hover { background: #fff; color: #111316; border-color: #fff; }
+.navbar:not(.scrolled) .lang-link {
+  color: rgba(255,255,255,0.78);
+  border-color: rgba(255,255,255,0.25);
+}
+.navbar:not(.scrolled) .lang-link:hover {
+  color: #fff;
+  border-color: rgba(255,255,255,0.45);
+}
+.navbar:not(.scrolled) .lang-link.is-active {
+  background: #fff;
+  color: #111316;
+  border-color: #fff;
+}
 .navbar:not(.scrolled) .hamburger span { background: #fff; }
 
 /* ── HERO ───────────────────────────────────────── */
@@ -1079,6 +1121,17 @@ select, input, textarea { font-family: inherit; }
 @media (max-width: 768px) {
   :root { --nav-h: 60px; }
 
+  .lang-switcher {
+    margin-left: auto;
+    margin-right: 12px;
+    gap: 4px;
+  }
+  .lang-link {
+    min-width: 34px;
+    padding: 6px 8px;
+    font-size: 0.62rem;
+  }
+
   .nav-links {
     display: none;
     position: fixed;
@@ -1105,7 +1158,7 @@ select, input, textarea { font-family: inherit; }
     letter-spacing: 0.06em;
   }
   .nav-cta { display: none; }
-  .hamburger { display: flex; margin-left: auto; }
+  .hamburger { display: flex; margin-left: 0; }
 
   .hero { min-height: 100svh; }
   .hero-content { padding: 0 var(--pad) 0; padding-top: calc(var(--nav-h) + 40px); }

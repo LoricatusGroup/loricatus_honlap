@@ -84,12 +84,31 @@
 
   /* ── CONTACT FORM ────────────────────────────── */
   const WEB3FORMS_ACCESS_KEY = 'f2a2064b-f35f-4864-a1a3-a56dcf4644b4';
+  const pageLang = (document.documentElement.lang || 'hu').toLowerCase();
+  const formMessages = pageLang.startsWith('en')
+    ? {
+        subject: 'New quote request - Loricatus website',
+        sending: 'Sending...',
+        errorRetry: 'Error - please try again'
+      }
+    : pageLang.startsWith('it')
+      ? {
+          subject: 'Nuova richiesta di preventivo - sito Loricatus',
+          sending: 'Invio in corso...',
+          errorRetry: 'Errore - riprova'
+        }
+      : {
+          subject: 'Új árajánlatkérés - Loricatus honlap',
+          sending: 'Küldés...',
+          errorRetry: 'Hiba - próbálja újra'
+        };
   const form = document.getElementById('contactForm');
   const submitBtn = document.getElementById('submitBtn');
   const btnText = document.getElementById('btnText');
   const btnArrow = document.getElementById('btnArrow');
   const btnLoader = document.getElementById('btnLoader');
   const formSuccess = document.getElementById('formSuccess');
+  const defaultSubmitLabel = btnText ? btnText.textContent : '';
 
   function validateField(input, errorId, validator) {
     const group = input.closest('.form-group');
@@ -122,7 +141,7 @@
       if (!gdpr.checked || !v1 || !v2 || !v3 || !v4) return;
 
       submitBtn.disabled = true;
-      btnText.textContent = 'Küldés...';
+      btnText.textContent = formMessages.sending;
       if (btnArrow) btnArrow.style.display = 'none';
       if (btnLoader) btnLoader.style.display = 'inline-block';
 
@@ -132,7 +151,7 @@
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify({
             access_key: WEB3FORMS_ACCESS_KEY,
-            subject: 'Új árajánlatkérés – Loricatus honlap',
+            subject: formMessages.subject,
             from_name: nameInput.value.trim(),
             name: nameInput.value.trim(),
             email: emailInput.value.trim(),
@@ -151,14 +170,14 @@
           el.style.opacity = '0.5';
         });
       } catch {
-        btnText.textContent = 'Hiba – próbálja újra';
+        btnText.textContent = formMessages.errorRetry;
         if (btnArrow) btnArrow.style.display = 'inline';
         if (btnLoader) btnLoader.style.display = 'none';
         submitBtn.disabled = false;
         submitBtn.style.background = '#ff6b6b';
         submitBtn.style.color = '#fff';
         setTimeout(() => {
-          btnText.textContent = 'Küldöm az ajánlatkérést';
+          btnText.textContent = defaultSubmitLabel;
           submitBtn.style.background = '';
           submitBtn.style.color = '';
         }, 3000);
