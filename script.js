@@ -195,38 +195,40 @@
   const cards    = Array.from(document.querySelectorAll('.portfolio-card'));
   let current    = 0;
 
-  function openLightbox(i) {
-    current = i;
-    const card = cards[i];
-    const img = card.querySelector('.portfolio-img');
-    lbImg.src = img.src;
-    lbImg.alt = img.alt;
-    lbCat.textContent   = card.querySelector('.portfolio-cat')?.textContent || '';
-    lbTitle.textContent = card.querySelector('h3')?.textContent || '';
-    lbDesc.textContent  = card.querySelector('p')?.textContent || '';
-    lbCount.textContent = `${i + 1} / ${cards.length}`;
-    lightbox.classList.add('active');
-    lightbox.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-  }
+  if (lightbox && lbImg && lbCat && lbTitle && lbDesc && lbCount && cards.length > 0) {
+    function openLightbox(i) {
+      current = i;
+      const card = cards[i];
+      const img = card.querySelector('.portfolio-img');
+      lbImg.src = img.src;
+      lbImg.alt = img.alt;
+      lbCat.textContent   = card.querySelector('.portfolio-cat')?.textContent || '';
+      lbTitle.textContent = card.querySelector('h3')?.textContent || '';
+      lbDesc.textContent  = card.querySelector('p')?.textContent || '';
+      lbCount.textContent = `${i + 1} / ${cards.length}`;
+      lightbox.classList.add('active');
+      lightbox.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
 
-  function closeLightbox() {
-    lightbox.classList.remove('active');
-    lightbox.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-  }
+    function closeLightbox() {
+      lightbox.classList.remove('active');
+      lightbox.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
 
-  cards.forEach((card, i) => card.addEventListener('click', () => openLightbox(i)));
-  document.querySelector('.lightbox-close')?.addEventListener('click', closeLightbox);
-  document.querySelector('.lightbox-backdrop')?.addEventListener('click', closeLightbox);
-  document.querySelector('.lightbox-prev')?.addEventListener('click', () => openLightbox((current - 1 + cards.length) % cards.length));
-  document.querySelector('.lightbox-next')?.addEventListener('click', () => openLightbox((current + 1) % cards.length));
-  document.addEventListener('keydown', e => {
-    if (!lightbox.classList.contains('active')) return;
-    if (e.key === 'Escape') closeLightbox();
-    if (e.key === 'ArrowLeft') openLightbox((current - 1 + cards.length) % cards.length);
-    if (e.key === 'ArrowRight') openLightbox((current + 1) % cards.length);
-  });
+    cards.forEach((card, i) => card.addEventListener('click', () => openLightbox(i)));
+    document.querySelector('.lightbox-close')?.addEventListener('click', closeLightbox);
+    document.querySelector('.lightbox-backdrop')?.addEventListener('click', closeLightbox);
+    document.querySelector('.lightbox-prev')?.addEventListener('click', () => openLightbox((current - 1 + cards.length) % cards.length));
+    document.querySelector('.lightbox-next')?.addEventListener('click', () => openLightbox((current + 1) % cards.length));
+    document.addEventListener('keydown', e => {
+      if (!lightbox.classList.contains('active')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') openLightbox((current - 1 + cards.length) % cards.length);
+      if (e.key === 'ArrowRight') openLightbox((current + 1) % cards.length);
+    });
+  }
 
   /* ── COOKIE ──────────────────────────────────── */
   const cookieBanner = document.getElementById('cookieBanner');
