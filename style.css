@@ -1299,57 +1299,37 @@ html[lang="it"] .nav-cta {
   html[lang="it"] .nav-cta { padding: 9px 16px; }
 }
 
-@media (max-width: 900px) {
-  .section { padding: 72px 0; }
-  .about-container { grid-template-columns: 1fr; gap: 40px; }
-  .contact-container { grid-template-columns: 1fr; gap: 40px; }
-  .testimonials-grid { grid-template-columns: 1fr 1fr; }
-  .testi-card:nth-child(2) { border-right: none; }
-  .testi-card:last-child { grid-column: 1 / -1; border-right: none; border-top: 1px solid var(--border); }
-  .partners-grid { grid-template-columns: 1fr 1fr; }
-  .partner-item:nth-child(2) { border-right: none; }
-  .partner-item:nth-child(3) { border-top: 1px solid var(--border); }
-  .partner-item:nth-child(4) { border-right: none; border-top: 1px solid var(--border); }
-  .equipment-grid { grid-template-columns: 1fr 1fr; }
-  .portfolio-grid { grid-template-columns: 1fr 1fr; }
-  .portfolio-card.large { grid-column: 1 / 3; grid-row: auto; }
-  .hero-stats { grid-template-columns: repeat(2, 1fr); }
-  .hero-stat:nth-child(2) { border-right: none; }
-  .hero-stat:nth-child(3) { border-top: 1px solid var(--border); }
-  .hero-stat:nth-child(4) { border-right: none; border-top: 1px solid var(--border); }
-  .section-header { flex-wrap: wrap; }
-  .subpage-grid { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 768px) {
+@media (max-width: 980px) {
   :root { --nav-h: 60px; }
 
   .nav-container {
-    gap: 8px;
-    padding: 0 14px;
+    gap: 10px;
+    padding: 0 16px;
   }
   .nav-logo {
     min-width: 0;
     flex: 1 1 auto;
     overflow: hidden;
+    max-width: calc(100% - 128px);
   }
   .logo-svg {
-    height: 16px;
-    width: auto;
-    max-width: 100%;
+    height: 17px;
+    width: 100%;
+    max-width: 220px;
+    object-fit: contain;
   }
 
   .lang-switcher {
     margin-left: 0;
     margin-right: 6px;
-    gap: 3px;
+    gap: 4px;
     flex: 0 0 auto;
   }
   .lang-link {
-    min-width: 30px;
-    padding: 6px 7px;
-    font-size: 0.58rem;
-    letter-spacing: 0.06em;
+    min-width: 32px;
+    padding: 6px 8px;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
   }
 
   .nav-links {
@@ -1380,6 +1360,60 @@ html[lang="it"] .nav-cta {
   }
   .nav-cta { display: none; }
   .hamburger { display: flex; margin-left: 0; flex-shrink: 0; }
+}
+
+@media (max-width: 900px) {
+  .section { padding: 72px 0; }
+  .about-container { grid-template-columns: 1fr; gap: 40px; }
+  .contact-container { grid-template-columns: 1fr; gap: 40px; }
+  .testimonials-grid { grid-template-columns: 1fr 1fr; }
+  .testi-card:nth-child(2) { border-right: none; }
+  .testi-card:last-child { grid-column: 1 / -1; border-right: none; border-top: 1px solid var(--border); }
+  .partners-grid { grid-template-columns: 1fr 1fr; }
+  .partner-item:nth-child(2) { border-right: none; }
+  .partner-item:nth-child(3) { border-top: 1px solid var(--border); }
+  .partner-item:nth-child(4) { border-right: none; border-top: 1px solid var(--border); }
+  .equipment-grid { grid-template-columns: 1fr 1fr; }
+  .portfolio-grid { grid-template-columns: 1fr 1fr; }
+  .portfolio-card.large { grid-column: 1 / 3; grid-row: auto; }
+  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+  .hero-stat:nth-child(2) { border-right: none; }
+  .hero-stat:nth-child(3) { border-top: 1px solid var(--border); }
+  .hero-stat:nth-child(4) { border-right: none; border-top: 1px solid var(--border); }
+  .section-header { flex-wrap: wrap; }
+  .subpage-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .nav-container {
+    gap: 6px;
+    padding: 0 12px;
+  }
+  .nav-logo {
+    max-width: calc(100% - 108px);
+  }
+  .logo-svg {
+    height: 15px;
+    max-width: 200px;
+  }
+
+  .lang-switcher {
+    margin-right: 4px;
+    gap: 3px;
+  }
+  .lang-link {
+    min-width: 28px;
+    padding: 6px 6px;
+    font-size: 0.54rem;
+    letter-spacing: 0.04em;
+  }
+
+  .hamburger {
+    padding: 6px;
+  }
+  .hamburger span {
+    width: 20px;
+  }
 
   .hero { min-height: 100svh; }
   .hero-content { padding: 0 var(--pad) 0; padding-top: calc(var(--nav-h) + 40px); }
