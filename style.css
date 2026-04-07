@@ -1303,33 +1303,35 @@ html[lang="it"] .nav-cta {
   :root { --nav-h: 60px; }
 
   .nav-container {
-    gap: 10px;
-    padding: 0 16px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 8px;
+    padding: 0 12px;
   }
   .nav-logo {
     min-width: 0;
-    flex: 1 1 auto;
     overflow: hidden;
-    max-width: calc(100% - 128px);
+    max-width: none;
   }
   .logo-svg {
-    height: 17px;
+    height: 15px;
     width: 100%;
-    max-width: 220px;
+    max-width: 176px;
     object-fit: contain;
   }
 
   .lang-switcher {
     margin-left: 0;
-    margin-right: 6px;
-    gap: 4px;
+    margin-right: 0;
+    gap: 2px;
     flex: 0 0 auto;
+    justify-self: end;
   }
   .lang-link {
-    min-width: 32px;
-    padding: 6px 8px;
-    font-size: 0.6rem;
-    letter-spacing: 0.08em;
+    min-width: 24px;
+    padding: 5px 6px;
+    font-size: 0.54rem;
+    letter-spacing: 0.04em;
   }
 
   .nav-links {
@@ -1359,7 +1361,13 @@ html[lang="it"] .nav-cta {
     letter-spacing: 0.06em;
   }
   .nav-cta { display: none; }
-  .hamburger { display: flex; margin-left: 0; flex-shrink: 0; }
+  .hamburger {
+    display: flex;
+    margin-left: 0;
+    flex-shrink: 0;
+    justify-self: end;
+    padding: 6px;
+  }
 }
 
 @media (max-width: 900px) {
@@ -1387,32 +1395,31 @@ html[lang="it"] .nav-cta {
 @media (max-width: 768px) {
   .nav-container {
     gap: 6px;
-    padding: 0 12px;
+    padding: 0 10px;
   }
   .nav-logo {
-    max-width: calc(100% - 108px);
+    max-width: none;
   }
   .logo-svg {
-    height: 15px;
-    max-width: 200px;
+    height: 14px;
+    max-width: 144px;
   }
 
   .lang-switcher {
-    margin-right: 4px;
-    gap: 3px;
+    gap: 2px;
   }
   .lang-link {
-    min-width: 28px;
-    padding: 6px 6px;
-    font-size: 0.54rem;
-    letter-spacing: 0.04em;
+    min-width: 20px;
+    padding: 4px 4px;
+    font-size: 0.48rem;
+    letter-spacing: 0.02em;
   }
 
   .hamburger {
-    padding: 6px;
+    padding: 5px;
   }
   .hamburger span {
-    width: 20px;
+    width: 18px;
   }
 
   .hero { min-height: 100svh; }
@@ -1458,6 +1465,29 @@ html[lang="it"] .nav-cta {
   .subpage-actions,
   .subpage-links,
   .subpage-pill-row { flex-direction: column; align-items: stretch; }
+}
+
+@media (max-width: 420px) {
+  .nav-container {
+    gap: 4px;
+    padding: 0 8px;
+  }
+  .logo-svg {
+    height: 13px;
+    max-width: 128px;
+  }
+  .lang-link {
+    min-width: 18px;
+    padding: 4px 3px;
+    font-size: 0.44rem;
+    letter-spacing: 0.01em;
+  }
+  .hamburger {
+    padding: 4px;
+  }
+  .hamburger span {
+    width: 16px;
+  }
 }
 
 @media (max-width: 480px) {
