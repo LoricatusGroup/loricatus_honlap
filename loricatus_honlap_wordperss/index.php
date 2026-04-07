@@ -18,11 +18,11 @@ get_header(); ?>
     <div class="hero-content fade-in-up">
         <div class="hero-badge">
             <span class="badge-dot"></span>
-            Engedélyezett drónoperátor &middot; A2 &amp; STS minősítés
+            Engedélyezett drónoperátor &middot; A2 CofC engedély
         </div>
         <h1 class="hero-title">
-            Látja azt,<br />
-            <span class="accent-text">amit Ön nem.</span>
+            Lásd át<br />
+            <span class="accent-text">a világot!</span>
         </h1>
         <p class="hero-subtitle">
             Professzionális drónszolgáltatások ipari, építészeti és mérnöki feladatokra.<br />
@@ -197,12 +197,6 @@ get_header(); ?>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="20 6 9 17 4 12" />
                     </svg>
-                    STS-01 minősítés
-                </div>
-                <div class="cert-pill">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="20 6 9 17 4 12" />
-                    </svg>
                     Légiügyi engedélyek
                 </div>
             </div>
@@ -244,8 +238,8 @@ get_header(); ?>
                         </svg>
                     </div>
                     <div>
-                        <strong>Gyors átfutási idő</strong>
-                        <span>Az adatok feldolgozása és átadása 24&ndash;72 órán belül</span>
+                        <strong>Projektre szabott feldolgozás</strong>
+                        <span>Az adatfeldolgozás és az átadás ütemezése minden esetben a feladat összetettségéhez igazodik</span>
                     </div>
                 </div>
                 <div class="value-item">
@@ -278,49 +272,34 @@ get_header(); ?>
             <div class="equipment-card reveal" style="--delay: 0.05s">
                 <div class="eq-img-wrap">
                     <img src="<?php echo esc_url(get_template_directory_uri()); ?>/assets/equipment-bg.png"
-                        alt="DJI Matrice 350 RTK" class="eq-img" />
+                        alt="DJI Matrice 400 SP Plus" class="eq-img" />
                 </div>
                 <div class="eq-info">
                     <span class="eq-tag">Fő platform</span>
-                    <h3>DJI Matrice 350 RTK</h3>
-                    <p>55 perces repülési idő &middot; RTK centiméteres pontosság &middot; IP54 védelemmel &middot;
-                        Hőkamerával kombinálható</p>
+                    <h3>DJI MATRICE 400 SP PLUS</h3>
+                    <p>Nagy teherbírású ipari drónplatform összetett felmérési, inspekciós és adatgyűjtési feladatokhoz</p>
                 </div>
             </div>
             <div class="equipment-card reveal" style="--delay: 0.12s">
                 <div class="eq-img-wrap">
                     <img src="<?php echo esc_url(get_template_directory_uri()); ?>/assets/equipment-bg.png"
-                        alt="DJI Mavic 3 Enterprise" class="eq-img eq-img-2" />
+                        alt="DJI Matrice 4 E SP Plus" class="eq-img eq-img-2" />
                 </div>
                 <div class="eq-info">
                     <span class="eq-tag">Kompakt platform</span>
-                    <h3>DJI Mavic 3 Enterprise</h3>
-                    <p>Gyors bevethetőség &middot; 4/3" CMOS szenzor &middot; 56&times; zoom &middot; Ideális
-                        inspekciókhoz és dokumentáláshoz</p>
+                    <h3>DJI MATRICE 4 E SP PLUS</h3>
+                    <p>Gyorsan bevethető, kompakt drónplatform helyszíni dokumentáláshoz, felméréshez és vizuális ellenőrzéshez</p>
                 </div>
             </div>
             <div class="equipment-card reveal" style="--delay: 0.19s">
                 <div class="eq-img-wrap">
                     <img src="<?php echo esc_url(get_template_directory_uri()); ?>/assets/equipment-bg.png"
-                        alt="Zenmuse L1 LiDAR" class="eq-img eq-img-3" />
+                        alt="DJI Zenmuse L3 (EU) SP Plus LiDAR szenzor" class="eq-img eq-img-3" />
                 </div>
                 <div class="eq-info">
-                    <span class="eq-tag">Szkennelés</span>
-                    <h3>Zenmuse L1 LiDAR + RGB</h3>
-                    <p>240.000 pont/mp &middot; &plusmn;3 cm pontosság &middot; Valós idejű 3D pontfelhő &middot; Szemek
-                        biztonságával megegyező lézer osztály</p>
-                </div>
-            </div>
-            <div class="equipment-card reveal" style="--delay: 0.25s">
-                <div class="eq-img-wrap">
-                    <img src="<?php echo esc_url(get_template_directory_uri()); ?>/assets/equipment-bg.png"
-                        alt="Termokamera" class="eq-img eq-img-4" />
-                </div>
-                <div class="eq-info">
-                    <span class="eq-tag">Termográfia</span>
-                    <h3>Zenmuse H20T Hőkamera</h3>
-                    <p>Radiometriás IR &middot; 640&times;512 felbontás &middot; &ndash;40&deg;C&ndash;550&deg;C
-                        &middot; Azonnali hőtérkép generálás</p>
+                    <span class="eq-tag">LiDAR szenzor</span>
+                    <h3>DJI Zenmuse L3 (EU) SP Plus</h3>
+                    <p>LiDAR alapú szenzor nagy pontosságú pontfelhős felméréshez és részletes téradatgyűjtéshez</p>
                 </div>
             </div>
         </div>

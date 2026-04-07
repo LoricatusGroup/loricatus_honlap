@@ -78,7 +78,7 @@
                 <?php echo date('Y'); ?>
                 <?php bloginfo('name'); ?>. Minden jog fenntartva.
             </span>
-            <span>Engedélyezett EU drónoperátor &middot; A2 CofC &middot; STS-01</span>
+            <span>Engedélyezett EU drónoperátor &middot; A2 CofC</span>
         </div>
     </div>
 </footer>
