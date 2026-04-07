@@ -688,6 +688,44 @@ select, input, textarea { font-family: inherit; }
 }
 .portfolio-overlay p { font-size: 0.78rem; color: rgba(255,255,255,0.6); }
 
+/* ── PARTNERS ───────────────────────────────────── */
+.partners { background: var(--bg); }
+.partners-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border: 1px solid var(--border);
+  margin-bottom: 32px;
+}
+.partner-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 32px;
+  border-right: 1px solid var(--border);
+  transition: background 0.25s;
+}
+.partner-item:last-child { border-right: none; }
+.partner-item:hover { background: var(--bg2); }
+.partner-item img {
+  max-width: 140px;
+  max-height: 60px;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: grayscale(1) opacity(0.6);
+  transition: filter 0.3s;
+}
+.partner-item:hover img { filter: grayscale(0) opacity(1); }
+.partners-more {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 /* ── TESTIMONIALS ───────────────────────────────── */
 .testimonials {
   background: var(--bg2);
@@ -1023,6 +1061,10 @@ select, input, textarea { font-family: inherit; }
   .testimonials-grid { grid-template-columns: 1fr 1fr; }
   .testi-card:nth-child(2) { border-right: none; }
   .testi-card:last-child { grid-column: 1 / -1; border-right: none; border-top: 1px solid var(--border); }
+  .partners-grid { grid-template-columns: 1fr 1fr; }
+  .partner-item:nth-child(2) { border-right: none; }
+  .partner-item:nth-child(3) { border-top: 1px solid var(--border); }
+  .partner-item:nth-child(4) { border-right: none; border-top: 1px solid var(--border); }
   .equipment-grid { grid-template-columns: 1fr 1fr; }
   .portfolio-grid { grid-template-columns: 1fr 1fr; }
   .portfolio-card.large { grid-column: 1 / 3; grid-row: auto; }
@@ -1082,6 +1124,10 @@ select, input, textarea { font-family: inherit; }
   .testimonials-grid { grid-template-columns: 1fr; }
   .testi-card { border-right: none; border-bottom: 1px solid var(--border); }
   .testi-card:last-child { border-bottom: none; }
+  .partners-grid { grid-template-columns: 1fr 1fr; }
+  .partner-item:nth-child(2) { border-right: none; }
+  .partner-item:nth-child(3) { border-top: 1px solid var(--border); }
+  .partner-item:nth-child(4) { border-right: none; border-top: 1px solid var(--border); }
   .contact-form-wrap { padding: 24px 20px; }
   .form-row { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr; gap: 32px; }
