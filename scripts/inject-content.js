@@ -30,6 +30,12 @@ async function fetchPageContent() {
   return rows[0]
 }
 
+// Escape characters that could break an [attr="value"] selector.
+// CMS keys are constrained to [a-z0-9-], but be defensive anyway.
+function escapeAttr(s) {
+  return String(s).replace(/["\\]/g, '\\$&')
+}
+
 function applyContent(doc, content) {
   let applied = 0
   const missing = []
@@ -45,7 +51,7 @@ function applyContent(doc, content) {
 
     let hit = false
     for (const [attr, set] of candidates) {
-      const el = doc.querySelector(`[${attr}="${CSS.escape(key)}"]`)
+      const el = doc.querySelector(`[${attr}="${escapeAttr(key)}"]`)
       if (el) {
         set(el)
         applied++
