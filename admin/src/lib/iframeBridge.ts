@@ -140,23 +140,33 @@ export function setEditingClass(el: Element, on: boolean): void {
 // Layout (reorder + hide) — mirrors scripts/inject-content.js
 // ──────────────────────────────────────────────────────────────────────────────
 
+// Reorder matching children in-place WITHOUT disturbing non-matching siblings.
+// Inserts each target before the next sibling of the original LAST match,
+// so e.g. <nav> stays first and <footer> stays last even though they have no
+// idAttr.
 function reorderChildren(parent: Element | null, idAttr: string, order: string[]): void {
   if (!parent || !order.length) return
   const byId = new Map<string, Element>()
+  let referenceNode: Element | null = null
   Array.from(parent.children).forEach((child) => {
     const id = child.getAttribute(idAttr)
-    if (id) byId.set(id, child)
+    if (id) {
+      byId.set(id, child)
+      referenceNode = child.nextElementSibling
+    }
   })
   const placed = new Set<string>()
   for (const id of order) {
     const el = byId.get(id)
     if (el) {
-      parent.appendChild(el)
+      parent.insertBefore(el, referenceNode)
       placed.add(id)
     }
   }
+  // Append leftover matches (not in order array) just before the reference,
+  // keeping them within the original "matches zone".
   for (const [id, el] of byId) {
-    if (!placed.has(id)) parent.appendChild(el)
+    if (!placed.has(id)) parent.insertBefore(el, referenceNode)
   }
 }
 

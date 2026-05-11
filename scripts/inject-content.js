@@ -66,27 +66,30 @@ function applyContent(doc, content) {
   return { applied, missing }
 }
 
-// Reorder children of a parent so they match `order` (an array of IDs).
-// Elements identified via `idAttr` on each child. Unknown IDs in `order` are
-// ignored. Children whose IDs are not in `order` are appended at the end.
+// Reorder matching children in-place WITHOUT disturbing non-matching siblings.
+// Inserts each target before the next sibling of the original LAST match, so
+// e.g. <nav> stays first and <footer> stays last.
 function reorderChildren(parent, idAttr, order) {
   if (!parent || !Array.isArray(order) || !order.length) return
   const byId = new Map()
+  let referenceNode = null
   for (const child of Array.from(parent.children)) {
     const id = child.getAttribute(idAttr)
-    if (id) byId.set(id, child)
+    if (id) {
+      byId.set(id, child)
+      referenceNode = child.nextElementSibling
+    }
   }
   const placed = new Set()
   for (const id of order) {
     const el = byId.get(id)
     if (el) {
-      parent.appendChild(el)
+      parent.insertBefore(el, referenceNode)
       placed.add(id)
     }
   }
-  // Any remaining (not mentioned in order) keep their relative order at the end
   for (const [id, el] of byId) {
-    if (!placed.has(id)) parent.appendChild(el)
+    if (!placed.has(id)) parent.insertBefore(el, referenceNode)
   }
 }
 
