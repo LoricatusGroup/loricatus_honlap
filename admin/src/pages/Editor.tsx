@@ -2,10 +2,21 @@ import { useEffect, useMemo, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { parseEditableFields } from '../lib/parseHtml'
-import type { EditableField, ViewMode } from '../lib/types'
+import {
+  parseLayoutStructure,
+  mergeLayoutState,
+  diffLayoutState,
+} from '../lib/parseLayout'
+import type {
+  EditableField,
+  LayoutState,
+  LayoutStructure,
+  ViewMode,
+} from '../lib/types'
 import FieldEditor from '../components/FieldEditor'
 import ThemeEditor from '../components/ThemeEditor'
 import LivePreview from '../components/LivePreview'
+import LayoutEditor from '../components/LayoutEditor'
 
 interface Props {
   user: User
@@ -16,6 +27,8 @@ type Status = { type: 'info' | 'error' | 'success'; text: string } | null
 export default function EditorPage({ user }: Props) {
   const [fields, setFields] = useState<EditableField[]>([])
   const [theme, setTheme] = useState<Record<string, string>>({})
+  const [structure, setStructure] = useState<LayoutStructure | null>(null)
+  const [layout, setLayout] = useState<LayoutState | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -28,7 +41,10 @@ export default function EditorPage({ user }: Props) {
 
     const load = async () => {
       try {
-        const htmlFields = await parseEditableFields()
+        const [htmlFields, layoutStructure] = await Promise.all([
+          parseEditableFields(),
+          parseLayoutStructure(),
+        ])
         const { data: pageData, error } = await supabase
           .from('page_content')
           .select('*')
@@ -46,6 +62,8 @@ export default function EditorPage({ user }: Props) {
 
         setFields(mergedFields)
         setTheme(pageData?.theme ?? {})
+        setStructure(layoutStructure)
+        setLayout(mergeLayoutState(layoutStructure, pageData?.layout))
         setLoading(false)
       } catch (err) {
         if (cancelled) return
@@ -75,6 +93,11 @@ export default function EditorPage({ user }: Props) {
     [fields],
   )
 
+  const layoutDirty = useMemo(() => {
+    if (!structure || !layout) return false
+    return Object.keys(diffLayoutState(structure, layout)).length > 0
+  }, [structure, layout])
+
   const handleFieldChange = (key: string, value: string) => {
     setFields((prev) => prev.map((f) => (f.key === key ? { ...f, value } : f)))
   }
@@ -88,14 +111,17 @@ export default function EditorPage({ user }: Props) {
   }
 
   const handleSave = async (): Promise<boolean> => {
+    if (!structure || !layout) return false
     setSaving(true)
     setStatus(null)
     const content = buildContent()
+    const layoutDiff = diffLayoutState(structure, layout)
     const { error } = await supabase
       .from('page_content')
       .update({
         content,
         theme,
+        layout: layoutDiff,
         updated_by: user.id,
         updated_at: new Date().toISOString(),
       })
@@ -155,6 +181,8 @@ export default function EditorPage({ user }: Props) {
     )
   }
 
+  if (!layout || !structure) return null
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-20">
@@ -164,8 +192,11 @@ export default function EditorPage({ user }: Props) {
               <h1 className="text-xl font-bold leading-tight">Loricatus Editor</h1>
               <p className="text-xs text-gray-400">
                 {user.email}
-                {changedCount > 0 && (
-                  <span className="ml-2 text-yellow-400">· {changedCount} módosított</span>
+                {(changedCount > 0 || layoutDirty) && (
+                  <span className="ml-2 text-yellow-400">
+                    {changedCount > 0 && <>· {changedCount} módosított mező</>}
+                    {layoutDirty && <> · elrendezés módosítva</>}
+                  </span>
                 )}
               </p>
             </div>
@@ -183,8 +214,19 @@ export default function EditorPage({ user }: Props) {
                 Élő szerkesztés
               </button>
               <button
+                onClick={() => setViewMode('layout')}
+                className={`px-3 py-1.5 border-l border-gray-600 ${
+                  viewMode === 'layout'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+                title="Szekciók és kártyák átrendezése, elrejtése"
+              >
+                Elrendezés
+              </button>
+              <button
                 onClick={() => setViewMode('form')}
-                className={`px-3 py-1.5 ${
+                className={`px-3 py-1.5 border-l border-gray-600 ${
                   viewMode === 'form'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -234,9 +276,15 @@ export default function EditorPage({ user }: Props) {
         </div>
       </header>
 
-      {viewMode === 'live' ? (
-        <LivePreview fields={fields} onFieldChange={handleFieldChange} />
-      ) : (
+      {viewMode === 'live' && (
+        <LivePreview fields={fields} layout={layout} onFieldChange={handleFieldChange} />
+      )}
+
+      {viewMode === 'layout' && (
+        <LayoutEditor structure={structure} state={layout} onChange={setLayout} />
+      )}
+
+      {viewMode === 'form' && (
         <main className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
           <section className="bg-gray-800 p-6 rounded-lg">
             <h2 className="text-xl font-bold mb-4">Téma színek</h2>

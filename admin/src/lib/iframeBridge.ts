@@ -1,7 +1,7 @@
 // Pure DOM helpers that operate on the live-preview iframe's contentDocument.
 // No React. Same-origin iframe — direct DOM access is allowed.
 
-import type { EditableField, FieldType } from './types'
+import type { EditableField, FieldType, LayoutState } from './types'
 
 const EDIT_ATTR_BY_TYPE: Record<FieldType, string> = {
   text: 'data-edit',
@@ -134,4 +134,54 @@ export function attachEditClickHandler(
 export function setEditingClass(el: Element, on: boolean): void {
   if (on) el.classList.add('cms-editing')
   else el.classList.remove('cms-editing')
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Layout (reorder + hide) — mirrors scripts/inject-content.js
+// ──────────────────────────────────────────────────────────────────────────────
+
+function reorderChildren(parent: Element | null, idAttr: string, order: string[]): void {
+  if (!parent || !order.length) return
+  const byId = new Map<string, Element>()
+  Array.from(parent.children).forEach((child) => {
+    const id = child.getAttribute(idAttr)
+    if (id) byId.set(id, child)
+  })
+  const placed = new Set<string>()
+  for (const id of order) {
+    const el = byId.get(id)
+    if (el) {
+      parent.appendChild(el)
+      placed.add(id)
+    }
+  }
+  for (const [id, el] of byId) {
+    if (!placed.has(id)) parent.appendChild(el)
+  }
+}
+
+export function applyLayout(doc: Document, layout: LayoutState): void {
+  // Sections
+  if (Array.isArray(layout.section_order) && layout.section_order.length) {
+    reorderChildren(doc.body, 'data-section', layout.section_order)
+  }
+  // List item orders
+  for (const [listName, order] of Object.entries(layout.list_order ?? {})) {
+    const listEl = doc.querySelector(`[data-list="${escapeAttr(listName)}"]`)
+    if (listEl) reorderChildren(listEl, 'data-list-item', order)
+  }
+  // Section visibility
+  for (const [name, hidden] of Object.entries(layout.section_hidden ?? {})) {
+    const el = doc.querySelector(`[data-section="${escapeAttr(name)}"]`)
+    if (!el) continue
+    if (hidden) el.setAttribute('hidden', '')
+    else el.removeAttribute('hidden')
+  }
+  // Item visibility
+  for (const [id, hidden] of Object.entries(layout.item_hidden ?? {})) {
+    const el = doc.querySelector(`[data-list-item="${escapeAttr(id)}"]`)
+    if (!el) continue
+    if (hidden) el.setAttribute('hidden', '')
+    else el.removeAttribute('hidden')
+  }
 }

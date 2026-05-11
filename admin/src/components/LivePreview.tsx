@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { EditableField } from '../lib/types'
+import type { EditableField, LayoutState } from '../lib/types'
 import {
   applyAllEdits,
+  applyLayout,
   attachEditClickHandler,
   injectEditorStyles,
   markChangedElements,
@@ -13,6 +14,7 @@ import HrefEditModal from './inline/HrefEditModal'
 
 interface Props {
   fields: EditableField[]
+  layout: LayoutState
   onFieldChange: (key: string, value: string) => void
 }
 
@@ -22,9 +24,10 @@ type ModalState =
   | { kind: 'href'; field: EditableField }
   | null
 
-export default function LivePreview({ fields, onFieldChange }: Props) {
+export default function LivePreview({ fields, layout, onFieldChange }: Props) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const fieldsRef = useRef(fields)
+  const layoutRef = useRef(layout)
   const onChangeRef = useRef(onFieldChange)
   const cleanupClickRef = useRef<(() => void) | null>(null)
   const inlineCleanupRef = useRef<(() => void) | null>(null)
@@ -35,8 +38,9 @@ export default function LivePreview({ fields, onFieldChange }: Props) {
   // Keep refs current so click handler always sees latest state
   useEffect(() => {
     fieldsRef.current = fields
+    layoutRef.current = layout
     onChangeRef.current = onFieldChange
-  }, [fields, onFieldChange])
+  }, [fields, layout, onFieldChange])
 
   const startInlineTextEdit = useCallback((element: Element, field: EditableField) => {
     // Tear down any previous inline edit
@@ -105,6 +109,7 @@ export default function LivePreview({ fields, onFieldChange }: Props) {
     if (!doc) return
 
     injectEditorStyles(doc)
+    applyLayout(doc, layoutRef.current)
     applyAllEdits(doc, fieldsRef.current)
     markChangedElements(doc, fieldsRef.current)
 
@@ -126,14 +131,15 @@ export default function LivePreview({ fields, onFieldChange }: Props) {
     setIframeReady(true)
   }, [startInlineTextEdit])
 
-  // Sync iframe DOM with field changes (from any source)
+  // Sync iframe DOM with field/layout changes (from any source)
   useEffect(() => {
     if (!iframeReady) return
     const doc = iframeRef.current?.contentDocument
     if (!doc) return
+    applyLayout(doc, layout)
     applyAllEdits(doc, fields)
     markChangedElements(doc, fields)
-  }, [fields, iframeReady])
+  }, [fields, layout, iframeReady])
 
   // Cleanup on unmount
   useEffect(() => {

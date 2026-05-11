@@ -15,7 +15,8 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 }
 
 async function fetchPageContent() {
-  const url = `${SUPABASE_URL}/rest/v1/page_content?page_slug=eq.index&select=content,theme`
+  // Use select=* so this still works before the `layout` column migration runs.
+  const url = `${SUPABASE_URL}/rest/v1/page_content?page_slug=eq.index&select=*`
   const res = await fetch(url, {
     headers: {
       apikey: SUPABASE_KEY,
@@ -65,6 +66,85 @@ function applyContent(doc, content) {
   return { applied, missing }
 }
 
+// Reorder children of a parent so they match `order` (an array of IDs).
+// Elements identified via `idAttr` on each child. Unknown IDs in `order` are
+// ignored. Children whose IDs are not in `order` are appended at the end.
+function reorderChildren(parent, idAttr, order) {
+  if (!parent || !Array.isArray(order) || !order.length) return
+  const byId = new Map()
+  for (const child of Array.from(parent.children)) {
+    const id = child.getAttribute(idAttr)
+    if (id) byId.set(id, child)
+  }
+  const placed = new Set()
+  for (const id of order) {
+    const el = byId.get(id)
+    if (el) {
+      parent.appendChild(el)
+      placed.add(id)
+    }
+  }
+  // Any remaining (not mentioned in order) keep their relative order at the end
+  for (const [id, el] of byId) {
+    if (!placed.has(id)) parent.appendChild(el)
+  }
+}
+
+function applyLayout(doc, layout) {
+  if (!layout || typeof layout !== 'object') return
+  const stats = { sectionsReordered: 0, listsReordered: 0, hidden: 0 }
+
+  // 1. Section order: reorder children of <body>, matching by data-section
+  if (Array.isArray(layout.section_order) && layout.section_order.length) {
+    reorderChildren(doc.body, 'data-section', layout.section_order)
+    stats.sectionsReordered = layout.section_order.length
+  }
+
+  // 2. List item order: per list (services, portfolio, ...) reorder cards
+  if (layout.list_order && typeof layout.list_order === 'object') {
+    for (const [listName, order] of Object.entries(layout.list_order)) {
+      if (!Array.isArray(order)) continue
+      const listEl = doc.querySelector(`[data-list="${escapeAttr(listName)}"]`)
+      if (!listEl) continue
+      reorderChildren(listEl, 'data-list-item', order)
+      stats.listsReordered++
+    }
+  }
+
+  // 3. Section visibility: hide via inline style
+  if (layout.section_hidden && typeof layout.section_hidden === 'object') {
+    for (const [sectionName, hidden] of Object.entries(layout.section_hidden)) {
+      const el = doc.querySelector(`[data-section="${escapeAttr(sectionName)}"]`)
+      if (!el) continue
+      if (hidden) {
+        el.setAttribute('hidden', '')
+        stats.hidden++
+      } else {
+        el.removeAttribute('hidden')
+      }
+    }
+  }
+
+  // 4. Item visibility
+  if (layout.item_hidden && typeof layout.item_hidden === 'object') {
+    for (const [itemId, hidden] of Object.entries(layout.item_hidden)) {
+      const el = doc.querySelector(`[data-list-item="${escapeAttr(itemId)}"]`)
+      if (!el) continue
+      if (hidden) {
+        el.setAttribute('hidden', '')
+        stats.hidden++
+      } else {
+        el.removeAttribute('hidden')
+      }
+    }
+  }
+
+  console.log(
+    `Applied layout: ${stats.sectionsReordered} section(s) reordered, ` +
+      `${stats.listsReordered} list(s) reordered, ${stats.hidden} element(s) hidden`,
+  )
+}
+
 function applyTheme(doc, theme) {
   const keys = Object.keys(theme)
   if (!keys.length) return false
@@ -87,6 +167,7 @@ async function main() {
   const pageData = await fetchPageContent()
   const content = pageData.content || {}
   const theme = pageData.theme || {}
+  const layout = pageData.layout || {}
 
   const htmlPath = path.join(__dirname, '..', 'index.html')
   const html = fs.readFileSync(htmlPath, 'utf-8')
@@ -99,6 +180,8 @@ async function main() {
     console.warn(`Skipped ${missing.length} keys (no matching data-edit target):`)
     missing.forEach((k) => console.warn(`  - ${k}`))
   }
+
+  applyLayout(doc, layout)
 
   if (applyTheme(doc, theme)) {
     console.log(`Applied theme: ${Object.keys(theme).join(', ')}`)

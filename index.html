@@ -51,7 +51,7 @@
   </nav>
 
   <!-- =================== HERO =================== -->
-  <section id="hero" class="hero">
+  <section id="hero" data-section="hero" class="hero">
     <div class="hero-bg">
       <img data-edit-src="hero-bg-image" src="assets/drone4.webp" alt="Loricatus drónos felmérés" class="hero-img" id="heroParallax" fetchpriority="high">
       <div class="hero-overlay"></div>
@@ -109,7 +109,7 @@
   </section>
 
   <!-- =================== SERVICES =================== -->
-  <section id="services" class="services section">
+  <section id="services" data-section="services" class="services section">
     <div class="section-bg-label">02 / SZOLGÁLTATÁSOK</div>
     <div class="container">
       <div class="section-header reveal">
@@ -117,9 +117,9 @@
         <h2 class="section-title"><span data-edit="services-title-line1">Teljes körű drón</span><br><span class="accent-text" data-edit="services-title-line2">megoldások</span></h2>
         <p class="section-desc" data-edit="services-desc">Repülünk, rögzítünk, koordinálunk. Minden projekthez az a technológia, ami tényleg számít.</p>
       </div>
-      <div class="services-grid">
+      <div class="services-grid" data-list="services">
 
-        <div class="service-card reveal" style="--delay: 0.05s">
+        <div class="service-card reveal" data-list-item="service-1" style="--delay: 0.05s">
           <div class="service-num">01</div>
           <div class="service-icon">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -132,7 +132,7 @@
           <a href="#contact" class="service-link"><span data-edit="service-1-link">Ajánlatkérés</span> <span>→</span></a>
         </div>
 
-        <div class="service-card reveal" style="--delay: 0.1s">
+        <div class="service-card reveal" data-list-item="service-2" style="--delay: 0.1s">
           <div class="service-num">02</div>
           <div class="service-icon">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -146,7 +146,7 @@
           <a href="#contact" class="service-link"><span data-edit="service-2-link">Ajánlatkérés</span> <span>→</span></a>
         </div>
 
-        <div class="service-card reveal" style="--delay: 0.15s">
+        <div class="service-card reveal" data-list-item="service-3" style="--delay: 0.15s">
           <div class="service-num">03</div>
           <div class="service-icon">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -159,7 +159,7 @@
           <a href="#contact" class="service-link"><span data-edit="service-3-link">Ajánlatkérés</span> <span>→</span></a>
         </div>
 
-        <div class="service-card reveal" style="--delay: 0.2s">
+        <div class="service-card reveal" data-list-item="service-4" style="--delay: 0.2s">
           <div class="service-num">04</div>
           <div class="service-icon">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -172,7 +172,7 @@
           <a href="#contact" class="service-link"><span data-edit="service-4-link">Ajánlatkérés</span> <span>→</span></a>
         </div>
 
-        <div class="service-card reveal" style="--delay: 0.25s">
+        <div class="service-card reveal" data-list-item="service-5" style="--delay: 0.25s">
           <div class="service-num">05</div>
           <div class="service-icon">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -186,7 +186,7 @@
           <a href="#contact" class="service-link"><span data-edit="service-5-link">Ajánlatkérés</span> <span>→</span></a>
         </div>
 
-        <div class="service-card reveal" style="--delay: 0.3s">
+        <div class="service-card reveal" data-list-item="service-6" style="--delay: 0.3s">
           <div class="service-num">06</div>
           <div class="service-icon">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -200,7 +200,7 @@
           <a href="#contact" class="service-link"><span data-edit="service-6-link">Ajánlatkérés</span> <span>→</span></a>
         </div>
 
-        <div class="service-card reveal" style="--delay: 0.35s">
+        <div class="service-card reveal" data-list-item="service-7" style="--delay: 0.35s">
           <div class="service-num">07</div>
           <div class="service-icon">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -220,7 +220,7 @@
   </section>
 
   <!-- =================== ABOUT =================== -->
-  <section id="about" class="about section">
+  <section id="about" data-section="about" class="about section">
     <div class="section-bg-label">03 / RÓLUNK</div>
     <div class="container about-container">
       <div class="about-visual reveal">
@@ -251,8 +251,8 @@
         <h2 class="section-title"><span data-edit="about-title-line1">Ahol az adat</span><br><span class="accent-text" data-edit="about-title-line2">valóság lesz</span></h2>
         <p class="about-lead" data-edit="about-lead">Loricatusként az a munkánk, hogy a világ pontosabb és érthetőbb legyen. Minden projektben azon dolgozunk, hogy a döntések biztosabb adatra, a kivitelezés pedig tisztább helyzetképre épülhessen.</p>
         <p class="about-body" data-edit="about-body">Nem csupán drónokat röptetünk – digitális valóságot teremtünk. Csapatunk mérnökökből, geodétákból és BIM-koordinátorokból áll, akik a projekt elejétől az utolsó átadásig ott vannak. Legyen szó pontfelhős felmérésről, épületinspekciόról vagy BIM-dokumentáció összehangolásáról – az adat nálunk nem díszlet, hanem munkaalap.</p>
-        <div class="about-values">
-          <div class="value-item">
+        <div class="about-values" data-list="about-values">
+          <div class="value-item" data-list-item="about-value-1">
             <div class="value-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
@@ -263,7 +263,7 @@
               <span data-edit="about-value-1-desc">Magyar és EU drónszabályok, légiügyi engedélyek, biztosítás</span>
             </div>
           </div>
-          <div class="value-item">
+          <div class="value-item" data-list-item="about-value-2">
             <div class="value-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -275,7 +275,7 @@
               <span data-edit="about-value-2-desc">Az adatfeldolgozás és az átadás ütemezése minden esetben a feladat összetettségéhez igazodik</span>
             </div>
           </div>
-          <div class="value-item">
+          <div class="value-item" data-list-item="about-value-3">
             <div class="value-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
@@ -292,7 +292,7 @@
   </section>
 
   <!-- =================== EQUIPMENT =================== -->
-  <section id="equipment" class="equipment section">
+  <section id="equipment" data-section="equipment" class="equipment section">
     <div class="section-bg-label">04 / ESZKÖZPARK</div>
     <div class="container">
       <div class="section-header reveal">
@@ -300,8 +300,8 @@
         <h2 class="section-title"><span data-edit="equipment-title-line1">Ipari szintű</span><br><span class="accent-text" data-edit="equipment-title-line2">eszközpark</span></h2>
         <p class="section-desc" data-edit="equipment-desc">Kizárólag professzionális, minősített hardvereket alkalmazunk – mert az eredmény minősége az eszközön múlik.</p>
       </div>
-      <div class="equipment-grid">
-        <div class="equipment-card reveal" style="--delay: 0.05s">
+      <div class="equipment-grid" data-list="equipment">
+        <div class="equipment-card reveal" data-list-item="equipment-1" style="--delay: 0.05s">
           <div class="eq-img-wrap">
             <img data-edit-src="equipment-1-image" src="assets/eq1.webp" alt="DJI Matrice 400 SP Plus" class="eq-img" loading="lazy">
           </div>
@@ -311,7 +311,7 @@
             <p data-edit="equipment-1-desc">Nagy teherbírású ipari drónplatform összetett felmérési, inspekciós és adatgyűjtési feladatokhoz</p>
           </div>
         </div>
-        <div class="equipment-card reveal" style="--delay: 0.12s">
+        <div class="equipment-card reveal" data-list-item="equipment-2" style="--delay: 0.12s">
           <div class="eq-img-wrap">
             <img data-edit-src="equipment-2-image" src="assets/eq2.webp" alt="DJI Matrice 4 E SP Plus" class="eq-img eq-img-2" loading="lazy">
           </div>
@@ -321,7 +321,7 @@
             <p data-edit="equipment-2-desc">Gyorsan bevethető, kompakt drónplatform helyszíni dokumentáláshoz, felméréshez és vizuális ellenőrzéshez</p>
           </div>
         </div>
-        <div class="equipment-card reveal" style="--delay: 0.19s">
+        <div class="equipment-card reveal" data-list-item="equipment-3" style="--delay: 0.19s">
           <div class="eq-img-wrap">
             <img data-edit-src="equipment-3-image" src="DJI-Zenmuse-L1-scaled.webp" alt="DJI Zenmuse L3 (EU) SP Plus LiDAR szenzor" class="eq-img" loading="lazy" decoding="async">
           </div>
@@ -336,7 +336,7 @@
   </section>
 
   <!-- =================== PORTFOLIO =================== -->
-  <section id="portfolio" class="portfolio section">
+  <section id="portfolio" data-section="portfolio" class="portfolio section">
     <div class="section-bg-label">05 / PROJEKTEK</div>
     <div class="container">
       <div class="section-header reveal">
@@ -344,8 +344,8 @@
         <h2 class="section-title"><span data-edit="portfolio-title-line1">Elvégzett</span><br><span class="accent-text" data-edit="portfolio-title-line2">projektek</span></h2>
         <p class="section-desc" data-edit="portfolio-desc">Valós projektek. Valós eredmények. Nem prezentációban – építkezésen.</p>
       </div>
-      <div class="portfolio-grid">
-        <div class="portfolio-card large reveal" style="--delay:0.05s">
+      <div class="portfolio-grid" data-list="portfolio">
+        <div class="portfolio-card large reveal" data-list-item="portfolio-1" style="--delay:0.05s">
           <div class="portfolio-img-wrap">
             <img data-edit-src="portfolio-1-image" src="assets/proj1.webp" alt="NMHH EMC Labor BIM dokumentáció" class="portfolio-img" loading="lazy">
             <div class="portfolio-overlay">
@@ -355,7 +355,7 @@
             </div>
           </div>
         </div>
-        <div class="portfolio-card reveal" style="--delay:0.12s">
+        <div class="portfolio-card reveal" data-list-item="portfolio-2" style="--delay:0.12s">
           <div class="portfolio-img-wrap">
             <img data-edit-src="portfolio-2-image" src="assets/proj2.webp" alt="Ipari kémény termográfiás inspekció" class="portfolio-img" loading="lazy">
             <div class="portfolio-overlay">
@@ -365,7 +365,7 @@
             </div>
           </div>
         </div>
-        <div class="portfolio-card reveal" style="--delay:0.19s">
+        <div class="portfolio-card reveal" data-list-item="portfolio-3" style="--delay:0.19s">
           <div class="portfolio-img-wrap">
             <img data-edit-src="portfolio-3-image" src="assets/proj-matyas-church.jpg" alt="Mátyás-templom drónos felmérése" class="portfolio-img" loading="lazy">
             <div class="portfolio-overlay">
@@ -375,7 +375,7 @@
             </div>
           </div>
         </div>
-        <div class="portfolio-card reveal" style="--delay:0.25s">
+        <div class="portfolio-card reveal" data-list-item="portfolio-4" style="--delay:0.25s">
           <div class="portfolio-img-wrap">
             <img data-edit-src="portfolio-4-image" src="assets/proj-budapest-aerial.jpg" alt="Budapest légi felmérés – Gellért-szobor" class="portfolio-img" loading="lazy">
             <div class="portfolio-overlay">
@@ -385,7 +385,7 @@
             </div>
           </div>
         </div>
-        <div class="portfolio-card reveal" style="--delay:0.32s">
+        <div class="portfolio-card reveal" data-list-item="portfolio-5" style="--delay:0.32s">
           <div class="portfolio-img-wrap">
             <img data-edit-src="portfolio-5-image" src="assets/proj4.webp" alt="Városi homlokzatfelmérés és 3D dokumentáció" class="portfolio-img" loading="lazy">
             <div class="portfolio-overlay">
@@ -400,7 +400,7 @@
   </section>
 
   <!-- =================== PARTNERS =================== -->
-  <section class="partners section">
+  <section id="partners" data-section="partners" class="partners section">
     <div class="section-bg-label">07 / PARTNEREINK</div>
     <div class="container">
       <div class="section-header reveal">
@@ -408,23 +408,23 @@
         <h2 class="section-title"><span data-edit="partners-title-line1">Megbízóink és</span><br><span class="accent-text" data-edit="partners-title-line2">partnereink</span></h2>
         <p class="section-desc" data-edit="partners-desc">Ipari szereplők, építőipari vállalatok és közintézmények bíztak meg projektjeik precíz elvégzésével.</p>
       </div>
-      <div class="partners-grid reveal">
-        <div class="partner-item">
+      <div class="partners-grid reveal" data-list="partners">
+        <div class="partner-item" data-list-item="partner-1">
           <a data-edit-href="partner-1-link" href="https://adriaport.hu/" target="_blank" rel="noopener noreferrer" aria-label="Adria Port weboldal">
             <img data-edit-src="partner-1-image" src="assets/partner-adriaport.webp" alt="Adria Port" loading="lazy">
           </a>
         </div>
-        <div class="partner-item">
+        <div class="partner-item" data-list-item="partner-2">
           <a data-edit-href="partner-2-link" href="https://confector.hu/" target="_blank" rel="noopener noreferrer" aria-label="Confector weboldal">
             <img data-edit-src="partner-2-image" src="assets/partner-confector.webp" alt="Confector" loading="lazy">
           </a>
         </div>
-        <div class="partner-item">
+        <div class="partner-item" data-list-item="partner-3">
           <a data-edit-href="partner-3-link" href="https://www.crecg.com/" target="_blank" rel="noopener noreferrer" aria-label="CREC weboldal">
             <img data-edit-src="partner-3-image" src="assets/partner-crec.webp" alt="CREC" loading="lazy">
           </a>
         </div>
-        <div class="partner-item">
+        <div class="partner-item" data-list-item="partner-4">
           <a data-edit-href="partner-4-link" href="https://indupro.hu/" target="_blank" rel="noopener noreferrer" aria-label="Indupro weboldal">
             <img data-edit-src="partner-4-image" src="assets/partner-indupro.webp" alt="Indupro" loading="lazy">
           </a>
@@ -435,15 +435,15 @@
   </section>
 
   <!-- =================== TESTIMONIALS =================== -->
-  <section class="testimonials section">
+  <section id="testimonials" data-section="testimonials" class="testimonials section">
     <div class="section-bg-label">08 / VÉLEMÉNYEK</div>
     <div class="container">
       <div class="section-header reveal">
         <div class="section-tag" data-edit="testimonials-tag">Ügyfeleink mondják</div>
         <h2 class="section-title"><span data-edit="testimonials-title-line1">Amit</span> <span class="accent-text" data-edit="testimonials-title-accent">partnereink</span><br><span data-edit="testimonials-title-line2">tapasztaltak</span></h2>
       </div>
-      <div class="testimonials-grid">
-        <div class="testi-card reveal" style="--delay:0.05s">
+      <div class="testimonials-grid" data-list="testimonials">
+        <div class="testi-card reveal" data-list-item="testi-1" style="--delay:0.05s">
           <div class="testi-quote">"</div>
           <p data-edit="testi-1-quote">Egyszer csak azt kérdeztem: hol az érvényes verzió? Ők tudták. Csak megnyitottuk a modellt – és minden ott volt, névvel, réteggel, koordinátával.</p>
           <div class="testi-author">
@@ -454,7 +454,7 @@
             </div>
           </div>
         </div>
-        <div class="testi-card reveal" style="--delay:0.12s">
+        <div class="testi-card reveal" data-list-item="testi-2" style="--delay:0.12s">
           <div class="testi-quote">"</div>
           <p data-edit="testi-2-quote">Az NDVI-térképek alapján 18%-kal csökkentettük a növényvédőszer-felhasználást. A Loricatus nem ajánlóterméket adott – számot adott a farmunkról.</p>
           <div class="testi-author">
@@ -465,7 +465,7 @@
             </div>
           </div>
         </div>
-        <div class="testi-card reveal" style="--delay:0.19s">
+        <div class="testi-card reveal" data-list-item="testi-3" style="--delay:0.19s">
           <div class="testi-quote">"</div>
           <p data-edit="testi-3-quote">A hőkamerás vizsgálatuk felfedte azt a szigetelési problémát, amit 3 éve nem találtunk meg. Megtakarítottunk egy komoly felújítási összeget. Köszönjük!</p>
           <div class="testi-author">
@@ -481,7 +481,7 @@
   </section>
 
   <!-- =================== CONTACT / LEAD FORM =================== -->
-  <section id="contact" class="contact section">
+  <section id="contact" data-section="contact" class="contact section">
     <div class="section-bg-label">09 / KAPCSOLAT</div>
     <div class="container contact-container">
       <div class="contact-info reveal">

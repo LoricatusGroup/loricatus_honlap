@@ -18,4 +18,28 @@ export type PageContent = {
   published_at: string | null
 }
 
-export type ViewMode = 'live' | 'form'
+export type ViewMode = 'live' | 'form' | 'layout'
+
+export type SectionInfo = {
+  name: string        // "hero", "services", ...
+  label: string       // "Hero", "Szolgáltatások", ...
+}
+
+export type ListInfo = {
+  name: string        // "services", "portfolio", ...
+  label: string       // "Szolgáltatások kártyák"
+  itemIds: string[]   // ["service-1", "service-2", ...] — original order from HTML
+  itemLabels: Record<string, string>  // { "service-1": "Légi Fotó & Videó", ... }
+}
+
+export type LayoutStructure = {
+  sections: SectionInfo[]      // original order from HTML
+  lists: ListInfo[]
+}
+
+export type LayoutState = {
+  section_order: string[]                 // current order (CMS may have reordered)
+  section_hidden: Record<string, boolean>
+  list_order: Record<string, string[]>    // per-list current order
+  item_hidden: Record<string, boolean>
+}
