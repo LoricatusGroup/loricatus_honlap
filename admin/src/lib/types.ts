@@ -17,3 +17,5 @@ export type PageContent = {
   updated_at: string
   published_at: string | null
 }
+
+export type ViewMode = 'live' | 'form'

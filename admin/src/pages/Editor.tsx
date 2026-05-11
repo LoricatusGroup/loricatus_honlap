@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { parseEditableFields } from '../lib/parseHtml'
-import type { EditableField } from '../lib/types'
+import type { EditableField, ViewMode } from '../lib/types'
 import FieldEditor from '../components/FieldEditor'
 import ThemeEditor from '../components/ThemeEditor'
+import LivePreview from '../components/LivePreview'
 
 interface Props {
   user: User
@@ -20,6 +21,7 @@ export default function EditorPage({ user }: Props) {
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [status, setStatus] = useState<Status>(null)
+  const [viewMode, setViewMode] = useState<ViewMode>('live')
 
   useEffect(() => {
     let cancelled = false
@@ -155,76 +157,108 @@ export default function EditorPage({ user }: Props) {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto p-4 flex flex-wrap gap-3 justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold">Loricatus Editor</h1>
-            <p className="text-xs text-gray-400">
-              Bejelentkezve: {user.email}
-              {changedCount > 0 && (
-                <span className="ml-2 text-yellow-400">· {changedCount} módosított mező</span>
-              )}
-            </p>
+      <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-20">
+        <div className="px-4 sm:px-6 py-3 flex flex-wrap gap-3 justify-between items-center">
+          <div className="flex items-center gap-4">
+            <div>
+              <h1 className="text-xl font-bold leading-tight">Loricatus Editor</h1>
+              <p className="text-xs text-gray-400">
+                {user.email}
+                {changedCount > 0 && (
+                  <span className="ml-2 text-yellow-400">· {changedCount} módosított</span>
+                )}
+              </p>
+            </div>
+
+            <div className="inline-flex rounded border border-gray-600 overflow-hidden text-xs">
+              <button
+                onClick={() => setViewMode('live')}
+                className={`px-3 py-1.5 ${
+                  viewMode === 'live'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+                title="Az élő oldalon kattintva szerkeszthetsz"
+              >
+                Élő szerkesztés
+              </button>
+              <button
+                onClick={() => setViewMode('form')}
+                className={`px-3 py-1.5 ${
+                  viewMode === 'form'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+                title="Klasszikus űrlap minden mezővel"
+              >
+                Lista
+              </button>
+            </div>
           </div>
-          <div className="flex gap-2 flex-wrap">
+
+          <div className="flex gap-2 flex-wrap items-center">
+            {status && (
+              <span
+                className={`text-xs ${
+                  status.type === 'error'
+                    ? 'text-red-300'
+                    : status.type === 'success'
+                    ? 'text-green-300'
+                    : 'text-blue-300'
+                }`}
+              >
+                {status.text}
+              </span>
+            )}
             <button
               onClick={() => supabase.auth.signOut()}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-xs"
             >
               Kijelentkezés
             </button>
             <button
               onClick={handleSave}
               disabled={saving || publishing}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-900 disabled:cursor-not-allowed rounded text-sm font-medium"
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-900 disabled:cursor-not-allowed rounded text-xs font-medium"
             >
               {saving ? 'Mentés…' : 'Mentés piszkozatba'}
             </button>
             <button
               onClick={handlePublish}
               disabled={saving || publishing}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-900 disabled:cursor-not-allowed rounded text-sm font-medium"
+              className="px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-900 disabled:cursor-not-allowed rounded text-xs font-medium"
             >
               {publishing ? 'Publikálás…' : 'Publikálás'}
             </button>
           </div>
         </div>
-        {status && (
-          <div
-            className={`max-w-4xl mx-auto px-4 pb-3 text-sm ${
-              status.type === 'error'
-                ? 'text-red-300'
-                : status.type === 'success'
-                ? 'text-green-300'
-                : 'text-blue-300'
-            }`}
-          >
-            {status.text}
-          </div>
-        )}
       </header>
 
-      <main className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
-        <section className="bg-gray-800 p-6 rounded-lg">
-          <h2 className="text-xl font-bold mb-4">Téma színek</h2>
-          <ThemeEditor theme={theme} onChange={setTheme} />
-        </section>
-
-        {grouped.map(([section, sectionFields]) => (
-          <section key={section} className="bg-gray-800 p-6 rounded-lg">
-            <h2 className="text-xl font-bold mb-4">{section}</h2>
-            <div className="space-y-4">
-              {sectionFields.map((field) => (
-                <FieldEditor
-                  key={field.key}
-                  field={field}
-                  onChange={(value) => handleFieldChange(field.key, value)}
-                />
-              ))}
-            </div>
+      {viewMode === 'live' ? (
+        <LivePreview fields={fields} onFieldChange={handleFieldChange} />
+      ) : (
+        <main className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
+          <section className="bg-gray-800 p-6 rounded-lg">
+            <h2 className="text-xl font-bold mb-4">Téma színek</h2>
+            <ThemeEditor theme={theme} onChange={setTheme} />
           </section>
-        ))}
-      </main>
+
+          {grouped.map(([section, sectionFields]) => (
+            <section key={section} className="bg-gray-800 p-6 rounded-lg">
+              <h2 className="text-xl font-bold mb-4">{section}</h2>
+              <div className="space-y-4">
+                {sectionFields.map((field) => (
+                  <FieldEditor
+                    key={field.key}
+                    field={field}
+                    onChange={(value) => handleFieldChange(field.key, value)}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </main>
+      )}
     </div>
   )
 }
