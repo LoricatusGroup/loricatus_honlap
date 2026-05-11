@@ -1,0 +1,9 @@
+{
+  "name": "loricatus-cms-scripts",
+  "private": true,
+  "version": "0.0.0",
+  "description": "CMS publish scripts run by GitHub Actions",
+  "dependencies": {
+    "jsdom": "^24.1.3"
+  }
+}
