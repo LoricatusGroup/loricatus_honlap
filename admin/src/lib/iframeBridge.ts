@@ -114,8 +114,10 @@ export function attachEditClickHandler(
   onClick: (info: IframeClickInfo) => void,
 ): () => void {
   const handler = (e: MouseEvent) => {
-    const target = e.target
-    if (!(target instanceof Element)) return
+    // Duck-type instead of `instanceof Element`: iframe elements belong to the
+    // iframe's realm, so they fail `instanceof window.Element` in the parent.
+    const target = e.target as { closest?: (sel: string) => Element | null } | null
+    if (!target || typeof target.closest !== 'function') return
     const editable = target.closest(ATTR_SELECTOR)
     if (!editable) return
     // Don't hijack clicks on elements that are currently being edited
