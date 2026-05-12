@@ -61,7 +61,14 @@ export default function LiveFreeformOverlay({ iframeRef, layout, onChange, enabl
     const compute = () => {
       if (rafId) cancelAnimationFrame(rafId)
       rafId = requestAnimationFrame(() => {
-        const iframeRect = iframe.getBoundingClientRect()
+        // Position handles in the WRAPPER's coordinate space (the iframe's
+        // offsetParent, which is the LivePreview's position:relative div) —
+        // NOT document/viewport space. iframe.offsetTop is the iframe's
+        // distance from the wrapper's content-box top; element.getBoundingClientRect
+        // is iframe-viewport-relative (i.e. 0 at iframe's content-box top,
+        // factoring in any internal iframe scroll).
+        const ifTop = iframe.offsetTop
+        const ifLeft = iframe.offsetLeft
         const items = collectPositionableElements(doc)
         const next: HandleData[] = []
         for (const { id, el } of items) {
@@ -71,8 +78,8 @@ export default function LiveFreeformOverlay({ iframeRef, layout, onChange, enabl
           next.push({
             id,
             el,
-            top: iframeRect.top + r.top + window.scrollY,
-            left: iframeRect.left + r.left + window.scrollX,
+            top: ifTop + r.top,
+            left: ifLeft + r.left,
             width: r.width,
             height: r.height,
           })
@@ -84,7 +91,6 @@ export default function LiveFreeformOverlay({ iframeRef, layout, onChange, enabl
     compute()
     doc.addEventListener('scroll', compute, { passive: true, capture: true })
     window.addEventListener('resize', compute)
-    window.addEventListener('scroll', compute, { passive: true })
 
     const observer = new MutationObserver(compute)
     observer.observe(doc.body, {
@@ -97,7 +103,6 @@ export default function LiveFreeformOverlay({ iframeRef, layout, onChange, enabl
     return () => {
       doc.removeEventListener('scroll', compute, { capture: true } as EventListenerOptions)
       window.removeEventListener('resize', compute)
-      window.removeEventListener('scroll', compute)
       observer.disconnect()
       if (rafId) cancelAnimationFrame(rafId)
     }

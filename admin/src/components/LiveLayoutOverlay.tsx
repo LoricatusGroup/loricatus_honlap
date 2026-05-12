@@ -54,7 +54,12 @@ export default function LiveLayoutOverlay({ iframeRef, layout, onChange, enabled
     const compute = () => {
       if (rafId) cancelAnimationFrame(rafId)
       rafId = requestAnimationFrame(() => {
-        const iframeRect = iframe.getBoundingClientRect()
+        // Wrapper-relative coordinates: iframe.offsetTop/Left is the iframe's
+        // position within its position:relative parent (the LivePreview wrapper).
+        // element.getBoundingClientRect is already iframe-viewport-relative
+        // (factors in internal iframe scroll).
+        const ifTop = iframe.offsetTop
+        const ifLeft = iframe.offsetLeft
         const next: HandleData[] = []
 
         doc.querySelectorAll('[data-section]').forEach((el) => {
@@ -66,8 +71,8 @@ export default function LiveLayoutOverlay({ iframeRef, layout, onChange, enabled
           next.push({
             kind: 'section',
             id,
-            top: iframeRect.top + r.top + window.scrollY,
-            left: iframeRect.left + r.left + window.scrollX,
+            top: ifTop + r.top,
+            left: ifLeft + r.left,
             width: r.width,
             height: r.height,
           })
@@ -86,8 +91,8 @@ export default function LiveLayoutOverlay({ iframeRef, layout, onChange, enabled
               kind: 'item',
               id,
               listName,
-              top: iframeRect.top + r.top + window.scrollY,
-              left: iframeRect.left + r.left + window.scrollX,
+              top: ifTop + r.top,
+              left: ifLeft + r.left,
               width: r.width,
               height: r.height,
             })
@@ -101,7 +106,6 @@ export default function LiveLayoutOverlay({ iframeRef, layout, onChange, enabled
     compute()
     doc.addEventListener('scroll', compute, { passive: true, capture: true })
     window.addEventListener('resize', compute)
-    window.addEventListener('scroll', compute, { passive: true })
 
     // Watch for DOM mutations in the iframe (e.g., layout state changes that
     // re-clone nodes) so handles re-align.
@@ -111,7 +115,6 @@ export default function LiveLayoutOverlay({ iframeRef, layout, onChange, enabled
     return () => {
       doc.removeEventListener('scroll', compute, { capture: true } as EventListenerOptions)
       window.removeEventListener('resize', compute)
-      window.removeEventListener('scroll', compute)
       observer.disconnect()
       if (rafId) cancelAnimationFrame(rafId)
     }
