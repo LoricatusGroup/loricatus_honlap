@@ -254,8 +254,10 @@ interface HandleOverlayProps {
 
 function HandleOverlay({ data, dragging, dropPosition, onMouseDown }: HandleOverlayProps) {
   const sectionStyle = data.kind === 'section'
-  const baseColor = sectionStyle ? 'bg-purple-600' : 'bg-blue-600'
+  const baseColor = sectionStyle ? 'bg-purple-600/85 hover:bg-purple-600' : 'bg-blue-600/85 hover:bg-blue-600'
 
+  // Outline is visual-only (pointer-events: none) so mouse-wheel scroll still
+  // reaches the iframe. Drag from the small ☰ corner icon.
   return (
     <div
       style={{
@@ -264,11 +266,13 @@ function HandleOverlay({ data, dragging, dropPosition, onMouseDown }: HandleOver
         left: data.left,
         width: data.width,
         height: data.height,
-        pointerEvents: 'none',
         zIndex: 1000,
-        outline: dragging ? '2px solid #3b82f6' : '1px dashed rgba(255,255,255,0.25)',
+        outline: dragging
+          ? '2px solid #3b82f6'
+          : '1px dashed rgba(255,255,255,0.2)',
         outlineOffset: -1,
         background: dragging ? 'rgba(59,130,246,0.1)' : 'transparent',
+        pointerEvents: 'none',
       }}
     >
       {/* Drop position indicator */}
@@ -298,22 +302,22 @@ function HandleOverlay({ data, dragging, dropPosition, onMouseDown }: HandleOver
           }}
         />
       )}
-      {/* Drag handle */}
+      {/* Small drag handle in top-left corner */}
       <button
         type="button"
         onMouseDown={onMouseDown}
-        className={`${baseColor} text-white text-xs px-2 py-1 rounded-br font-mono shadow-md hover:opacity-90 active:scale-95`}
+        className={`${baseColor} text-white text-[11px] leading-none px-1 py-0.5 rounded-br shadow-sm active:scale-95`}
         style={{
           position: 'absolute',
           top: 0,
           left: 0,
-          pointerEvents: 'auto',
           cursor: 'grab',
           userSelect: 'none',
+          pointerEvents: 'auto',
         }}
-        title={`${data.kind === 'section' ? 'Szekció' : 'Kártya'}: ${data.id}`}
+        title={`${data.kind === 'section' ? 'Szekció' : 'Kártya'}: ${data.id} — húzd új helyre`}
       >
-        ☰ {data.id}
+        ☰
       </button>
     </div>
   )

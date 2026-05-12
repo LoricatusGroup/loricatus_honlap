@@ -198,6 +198,8 @@ interface HandleBoxProps {
 function HandleBox({ data, dragging, modified, onMouseDown, onReset }: HandleBoxProps) {
   const idLabel = data.id.includes(':') ? data.id.split(':')[1] : data.id
 
+  // Outline is visual-only (pointer-events: none) so mouse-wheel scrolling
+  // still reaches the iframe underneath. Drag from the small ⊕ corner icon.
   return (
     <div
       style={{
@@ -206,15 +208,15 @@ function HandleBox({ data, dragging, modified, onMouseDown, onReset }: HandleBox
         left: data.left,
         width: data.width,
         height: data.height,
-        pointerEvents: 'none',
         zIndex: 1100,
         outline: dragging
           ? '2px solid #16a34a'
           : modified
           ? '1px solid rgba(245, 158, 11, 0.7)'
-          : '1px dashed rgba(34, 197, 94, 0.4)',
+          : '1px dashed rgba(34, 197, 94, 0.35)',
         outlineOffset: -1,
         background: dragging ? 'rgba(22,163,74,0.10)' : 'transparent',
+        pointerEvents: 'none',
       }}
     >
       <div
@@ -224,24 +226,32 @@ function HandleBox({ data, dragging, modified, onMouseDown, onReset }: HandleBox
           left: 0,
           display: 'flex',
           gap: 2,
-          pointerEvents: 'auto',
         }}
       >
         <button
           type="button"
           onMouseDown={onMouseDown}
-          className="bg-green-600 hover:bg-green-500 text-white text-xs px-2 py-1 rounded-br font-mono shadow-md active:scale-95"
-          style={{ cursor: 'grab', userSelect: 'none' }}
-          title={`Húzd új helyre — ${data.id}`}
+          className="bg-green-600/85 hover:bg-green-600 text-white text-[11px] leading-none px-1 py-0.5 rounded-br shadow-sm active:scale-95"
+          style={{
+            cursor: 'grab',
+            userSelect: 'none',
+            pointerEvents: 'auto',
+          }}
+          title={`⊕ ${idLabel} — húzd új helyre`}
         >
-          ⊕ {idLabel}
+          ⊕
         </button>
         {modified && (
           <button
             type="button"
-            onClick={onReset}
-            className="bg-amber-600 hover:bg-amber-500 text-white text-xs px-2 py-1 rounded-br font-mono shadow-md"
-            title="Visszaállít az eredeti helyre"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onReset()
+            }}
+            className="bg-amber-600/85 hover:bg-amber-600 text-white text-[11px] leading-none px-1 py-0.5 rounded-br shadow-sm"
+            style={{ pointerEvents: 'auto' }}
+            title={`Visszaállít — ${idLabel}`}
           >
             ↺
           </button>
