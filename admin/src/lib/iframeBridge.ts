@@ -144,8 +144,6 @@ export function attachEditClickHandler(
 
     e.preventDefault()
     e.stopPropagation()
-    // stopImmediatePropagation so any same-element listeners script.js may
-    // have attached in capture phase ALSO don't fire.
     e.stopImmediatePropagation?.()
 
     if (editable) {
@@ -154,23 +152,67 @@ export function attachEditClickHandler(
     }
   }
   doc.addEventListener('click', handler, { capture: true })
+
   // mousedown is also worth swallowing — some scripts use it instead of click
   // (and contenteditable focus must not race with a parallel mousedown).
   const mdHandler = (e: MouseEvent) => {
     const target = e.target as { closest?: (sel: string) => Element | null } | null
     if (!target || typeof target.closest !== 'function') return
     if (target.closest('a[href], button')) {
-      // Don't preventDefault on mousedown — that would block contenteditable
-      // focus on editable buttons. Just stop the iframe site's mousedown
-      // listeners from running their own logic.
       e.stopPropagation()
       e.stopImmediatePropagation?.()
     }
   }
   doc.addEventListener('mousedown', mdHandler, { capture: true })
+
+  // Defensive layer: physically neutralise inline onclick handlers and
+  // anchor hrefs that point to in-page anchors. Capture-phase stopPropagation
+  // SHOULD prevent the bubble-phase / target-phase listeners from firing, but
+  // browsers have proved finicky here, so we belt-and-braces by stripping the
+  // attribute outright. Originals are restored on cleanup.
+  type Restore = () => void
+  const restoreFns: Restore[] = []
+
+  doc.querySelectorAll('button').forEach((el) => {
+    const onclick = el.getAttribute('onclick')
+    if (onclick) {
+      el.removeAttribute('onclick')
+      // Also clear the onclick property in case it was set programmatically
+      ;(el as HTMLButtonElement).onclick = null
+      restoreFns.push(() => el.setAttribute('onclick', onclick))
+    }
+    // Buttons inside a <form> default to type=submit; reading el.type here
+    // captures that. If the user clicks a submit-button while in edit mode
+    // we don't want the form to submit either. Switch to type=button.
+    const origType = el.getAttribute('type')
+    if ((el as HTMLButtonElement).type === 'submit') {
+      el.setAttribute('type', 'button')
+      restoreFns.push(() => {
+        if (origType === null) el.removeAttribute('type')
+        else el.setAttribute('type', origType)
+      })
+    }
+  })
+
+  doc.querySelectorAll('a[href^="#"]').forEach((el) => {
+    // Anchor hash navigations also trigger smooth scroll. preventDefault is
+    // supposed to handle this, but we'll also temporarily blank the href so
+    // even a browser quirk can't navigate.
+    const orig = el.getAttribute('href')
+    if (orig) {
+      el.setAttribute('data-cms-orig-href', orig)
+      el.setAttribute('href', 'javascript:void(0)')
+      restoreFns.push(() => {
+        el.setAttribute('href', orig)
+        el.removeAttribute('data-cms-orig-href')
+      })
+    }
+  })
+
   return () => {
     doc.removeEventListener('click', handler, { capture: true })
     doc.removeEventListener('mousedown', mdHandler, { capture: true })
+    restoreFns.forEach((fn) => fn())
   }
 }
 
