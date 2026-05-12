@@ -29,9 +29,18 @@ interface Props {
 export default function LiveFreeformOverlay({ iframeRef, layout, onChange, enabled }: Props) {
   const [handles, setHandles] = useState<HandleData[]>([])
   const [draggingId, setDraggingId] = useState<string | null>(null)
+  const [dragTooltip, setDragTooltip] = useState<{
+    x: number
+    y: number
+    dx: number
+    dy: number
+    snap: boolean
+  } | null>(null)
   const positionsRef = useRef(layout.positions)
   const onChangeRef = useRef(onChange)
   const layoutRef = useRef(layout)
+
+  const SNAP_GRID = 10
 
   useEffect(() => {
     positionsRef.current = layout.positions
@@ -129,11 +138,24 @@ export default function LiveFreeformOverlay({ iframeRef, layout, onChange, enabl
     const onMove = (ev: globalThis.MouseEvent) => {
       const dx = ev.clientX - startX
       const dy = ev.clientY - startY
-      liveX = startPos.x + dx
-      liveY = startPos.y + dy
-      // Apply directly to DOM for smooth interaction; commit to state on mouseup
+      let nextX = startPos.x + dx
+      let nextY = startPos.y + dy
+      // Shift to snap to 10px grid
+      if (ev.shiftKey) {
+        nextX = Math.round(nextX / SNAP_GRID) * SNAP_GRID
+        nextY = Math.round(nextY / SNAP_GRID) * SNAP_GRID
+      }
+      liveX = nextX
+      liveY = nextY
       el.style.transform = `translate(${liveX}px, ${liveY}px)`
       el.setAttribute('data-cms-positioned', '')
+      setDragTooltip({
+        x: ev.clientX + 14,
+        y: ev.clientY + 14,
+        dx: Math.round(liveX),
+        dy: Math.round(liveY),
+        snap: ev.shiftKey,
+      })
     }
 
     const onUp = () => {
@@ -153,6 +175,7 @@ export default function LiveFreeformOverlay({ iframeRef, layout, onChange, enabl
       }
       onChangeRef.current({ ...current, positions: nextPositions })
       setDraggingId(null)
+      setDragTooltip(null)
     }
 
     window.addEventListener('mousemove', onMove)
@@ -183,6 +206,30 @@ export default function LiveFreeformOverlay({ iframeRef, layout, onChange, enabl
           />
         )
       })}
+      {dragTooltip && (
+        <div
+          style={{
+            position: 'fixed',
+            top: dragTooltip.y,
+            left: dragTooltip.x,
+            zIndex: 2000,
+            pointerEvents: 'none',
+            background: 'rgba(15, 23, 42, 0.92)',
+            color: 'white',
+            padding: '4px 8px',
+            borderRadius: 4,
+            fontFamily: 'ui-monospace, monospace',
+            fontSize: 12,
+            boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {dragTooltip.dx >= 0 ? '+' : ''}
+          {dragTooltip.dx}px, {dragTooltip.dy >= 0 ? '+' : ''}
+          {dragTooltip.dy}px
+          {dragTooltip.snap && <span className="ml-2 text-yellow-300">⊞ snap</span>}
+        </div>
+      )}
     </>
   )
 }

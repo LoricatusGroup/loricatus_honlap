@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { parseEditableFields } from '../lib/parseHtml'
@@ -31,6 +31,26 @@ type Status = { type: 'info' | 'error' | 'success'; text: string } | null
 
 const LOCALE_STORAGE_KEY = 'loricatus-cms-locale'
 
+function SavedAgo({ since }: { since: number }) {
+  const [, forceTick] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => forceTick((t) => t + 1), 30_000)
+    return () => clearInterval(id)
+  }, [])
+  const seconds = Math.floor((Date.now() - since) / 1000)
+  let text: string
+  if (seconds < 30) text = 'most'
+  else if (seconds < 60) text = `${seconds} mp-e`
+  else if (seconds < 3600) text = `${Math.floor(seconds / 60)} perce`
+  else if (seconds < 86400) text = `${Math.floor(seconds / 3600)} órája`
+  else text = `${Math.floor(seconds / 86400)} napja`
+  return (
+    <span className="text-xs text-gray-400" title={new Date(since).toLocaleString()}>
+      Utolsó mentés: {text}
+    </span>
+  )
+}
+
 export default function EditorPage({ user }: Props) {
   const [locale, setLocaleState] = useState<Locale>(() => {
     const saved = localStorage.getItem(LOCALE_STORAGE_KEY)
@@ -47,6 +67,20 @@ export default function EditorPage({ user }: Props) {
   const [publishing, setPublishing] = useState(false)
   const [status, setStatus] = useState<Status>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('live')
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null)
+
+  // ── Undo/Redo history ──────────────────────────────────────────────────────
+  type Snapshot = {
+    fields: EditableField[]
+    theme: Record<string, string>
+    layout: LayoutState
+  }
+  const historyRef = useRef<Snapshot[]>([])
+  const historyIdxRef = useRef(-1)
+  const skipSnapshotRef = useRef(false) // set when restoring (undo/redo)
+  const [historyVersion, setHistoryVersion] = useState(0) // forces re-render of undo/redo enabled state
+  const MAX_HISTORY = 40
+  const SNAPSHOT_DEBOUNCE_MS = 400
 
   const localeConfig = getLocale(locale)
 
@@ -102,8 +136,66 @@ export default function EditorPage({ user }: Props) {
     load()
     return () => {
       cancelled = true
+      // Reset undo history when changing locale (each locale gets its own context)
+      historyRef.current = []
+      historyIdxRef.current = -1
     }
   }, [locale, localeConfig.htmlUrl, localeConfig.pageSlug])
+
+  // Snapshot fields/theme/layout for undo history, debounced so mid-typing
+  // edits don't fragment the history into per-keystroke entries.
+  useEffect(() => {
+    if (loading) return
+    if (!layout || !structure) return
+    if (skipSnapshotRef.current) {
+      skipSnapshotRef.current = false
+      return
+    }
+    const timer = setTimeout(() => {
+      const snap: Snapshot = {
+        fields: fields.map((f) => ({ ...f })),
+        theme: { ...theme },
+        layout: JSON.parse(JSON.stringify(layout)),
+      }
+      // Drop any "forward" history we'd shadow
+      const trimmed = historyRef.current.slice(0, historyIdxRef.current + 1)
+      trimmed.push(snap)
+      // Cap history length
+      if (trimmed.length > MAX_HISTORY) trimmed.shift()
+      historyRef.current = trimmed
+      historyIdxRef.current = trimmed.length - 1
+      setHistoryVersion((v) => v + 1)
+    }, SNAPSHOT_DEBOUNCE_MS)
+    return () => clearTimeout(timer)
+  }, [fields, theme, layout, loading, structure])
+
+  const restoreSnapshot = (snap: Snapshot) => {
+    skipSnapshotRef.current = true
+    setFields(snap.fields.map((f) => ({ ...f })))
+    setTheme({ ...snap.theme })
+    setLayout(JSON.parse(JSON.stringify(snap.layout)))
+  }
+
+  const handleUndo = () => {
+    if (historyIdxRef.current <= 0) return
+    historyIdxRef.current -= 1
+    const snap = historyRef.current[historyIdxRef.current]
+    if (snap) restoreSnapshot(snap)
+    setHistoryVersion((v) => v + 1)
+  }
+
+  const handleRedo = () => {
+    if (historyIdxRef.current >= historyRef.current.length - 1) return
+    historyIdxRef.current += 1
+    const snap = historyRef.current[historyIdxRef.current]
+    if (snap) restoreSnapshot(snap)
+    setHistoryVersion((v) => v + 1)
+  }
+
+  const canUndo = historyIdxRef.current > 0
+  const canRedo = historyIdxRef.current < historyRef.current.length - 1
+  // historyVersion is referenced so React re-evaluates canUndo/canRedo after a state push
+  void historyVersion
 
   const grouped = useMemo(() => {
     const map = new Map<string, EditableField[]>()
@@ -226,6 +318,7 @@ export default function EditorPage({ user }: Props) {
       return false
     }
     setStatus({ type: 'success', text: `Mentve (${localeConfig.label}).` })
+    setLastSavedAt(Date.now())
     return true
   }
 
@@ -251,6 +344,60 @@ export default function EditorPage({ user }: Props) {
       })
     }
   }
+
+  // Auto-save: 5s idle after a change → save draft silently. Skip if already
+  // saving, publishing, or there's nothing changed.
+  const saveRef = useRef(handleSave)
+  saveRef.current = handleSave
+  useEffect(() => {
+    if (loading || saving || publishing) return
+    if (!structure || !layout) return
+    const dirty =
+      fields.some((f) => f.value !== f.defaultValue) ||
+      Object.keys(diffLayoutState(structure, layout)).length > 0
+    if (!dirty) return
+    const timer = setTimeout(() => {
+      saveRef.current()
+    }, 5000)
+    return () => clearTimeout(timer)
+  }, [fields, theme, layout, loading, saving, publishing, structure])
+
+  // Keyboard shortcuts. Ctrl/Cmd+S = save, Ctrl/Cmd+Z = undo,
+  // Ctrl/Cmd+Shift+Z (or Ctrl+Y) = redo. 1/2/3 = switch view mode (but
+  // not when an input is focused).
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const isMod = e.ctrlKey || e.metaKey
+      const target = e.target as HTMLElement | null
+      const isTextEntry =
+        !!target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          (target as HTMLElement).isContentEditable)
+
+      if (isMod && e.key.toLowerCase() === 's') {
+        e.preventDefault()
+        if (!saving && !publishing) handleSave()
+        return
+      }
+      if (isMod && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        handleUndo()
+        return
+      }
+      if (isMod && ((e.key.toLowerCase() === 'z' && e.shiftKey) || e.key.toLowerCase() === 'y')) {
+        e.preventDefault()
+        handleRedo()
+        return
+      }
+      if (isTextEntry) return
+      if (e.key === '1') setViewMode('live')
+      else if (e.key === '2') setViewMode('layout')
+      else if (e.key === '3') setViewMode('form')
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [saving, publishing])
 
   if (loading) {
     return (
@@ -350,6 +497,7 @@ export default function EditorPage({ user }: Props) {
           </div>
 
           <div className="flex gap-2 flex-wrap items-center">
+            {lastSavedAt && !status && <SavedAgo since={lastSavedAt} />}
             {status && (
               <span
                 className={`text-xs ${
@@ -363,6 +511,24 @@ export default function EditorPage({ user }: Props) {
                 {status.text}
               </span>
             )}
+            <div className="inline-flex rounded border border-gray-600 overflow-hidden text-xs">
+              <button
+                onClick={handleUndo}
+                disabled={!canUndo}
+                className="px-2 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed text-white"
+                title="Visszavonás (Ctrl+Z)"
+              >
+                ↶
+              </button>
+              <button
+                onClick={handleRedo}
+                disabled={!canRedo}
+                className="px-2 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed text-white border-l border-gray-600"
+                title="Újra (Ctrl+Shift+Z)"
+              >
+                ↷
+              </button>
+            </div>
             <button
               onClick={() => supabase.auth.signOut()}
               className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-xs"
@@ -373,8 +539,9 @@ export default function EditorPage({ user }: Props) {
               onClick={handleSave}
               disabled={saving || publishing}
               className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-900 disabled:cursor-not-allowed rounded text-xs font-medium"
+              title="Mentés piszkozatba (Ctrl+S)"
             >
-              {saving ? 'Mentés…' : 'Mentés piszkozatba'}
+              {saving ? 'Mentés…' : 'Mentés'}
             </button>
             <button
               onClick={handlePublish}

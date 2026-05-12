@@ -52,6 +52,7 @@ export default function LivePreview({
   const [overlayMode, setOverlayMode] = useState<OverlayMode>('edit')
   const layoutOverlayMode = overlayMode === 'layout'
   const freeformMode = overlayMode === 'freeform'
+  const [mobilePreview, setMobilePreview] = useState(false)
 
   // Keep refs current so click handler always sees latest state
   useEffect(() => {
@@ -262,6 +263,17 @@ export default function LivePreview({
           </button>
         )}
         <button
+          onClick={() => setMobilePreview((m) => !m)}
+          className={`px-3 py-1 rounded backdrop-blur ${
+            mobilePreview
+              ? 'bg-orange-600 text-white'
+              : 'bg-gray-700/80 hover:bg-gray-600 text-white'
+          }`}
+          title="375px szélességű iframe — mobil nézet előnézete"
+        >
+          📱 Mobil {mobilePreview ? 'BE' : 'KI'}
+        </button>
+        <button
           onClick={reloadIframe}
           className="px-3 py-1 bg-gray-700/80 hover:bg-gray-600 text-white rounded backdrop-blur"
           title="Iframe újratöltése"
@@ -269,13 +281,39 @@ export default function LivePreview({
           ↻ Frissítés
         </button>
       </div>
+      {overlayMode !== 'edit' && (
+        <div
+          className={`absolute top-12 left-1/2 -translate-x-1/2 z-[1100] text-xs px-3 py-1.5 rounded-full shadow-md backdrop-blur ${
+            layoutOverlayMode
+              ? 'bg-purple-900/80 text-purple-100'
+              : 'bg-green-900/80 text-green-100'
+          }`}
+        >
+          {layoutOverlayMode &&
+            '📐 Húzd a ☰ ikonokat — drop helyét zöld csík mutatja. Szekciók csak szekciókkal, kártyák csak listán belül.'}
+          {freeformMode &&
+            '🎯 Húzd a ⊕ ikonokat — pixel-szintű mozgatás. Shift = 10px snap. Csak desktop nézeten érvényesül.'}
+        </div>
+      )}
+
       <iframe
         key={`${iframeSrc}-${iframeKey}`}
         ref={iframeRef}
         src={iframeSrc}
         title="Live preview"
         onLoad={handleIframeLoad}
-        className="w-full h-full bg-white"
+        style={
+          mobilePreview
+            ? {
+                width: '375px',
+                margin: '0 auto',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.1), 0 0 24px rgba(0,0,0,0.5)',
+                display: 'block',
+                height: '100%',
+              }
+            : undefined
+        }
+        className={mobilePreview ? 'bg-white' : 'w-full h-full bg-white'}
       />
 
       {iframeReady && (
