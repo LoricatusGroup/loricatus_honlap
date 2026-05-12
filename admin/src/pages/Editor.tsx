@@ -338,7 +338,12 @@ export default function EditorPage({ user }: Props) {
       </header>
 
       {viewMode === 'live' && (
-        <LivePreview fields={fields} layout={layout} onFieldChange={handleFieldChange} />
+        <LivePreview
+          fields={fields}
+          layout={layout}
+          onFieldChange={handleFieldChange}
+          onLayoutChange={setLayout}
+        />
       )}
 
       {viewMode === 'layout' && (
