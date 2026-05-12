@@ -6,6 +6,9 @@ import {
   parseLayoutStructure,
   mergeLayoutState,
   diffLayoutState,
+  bootstrapVirtualFields,
+  getItemPrefix,
+  generateItemId,
 } from '../lib/parseLayout'
 import type {
   EditableField,
@@ -59,11 +62,20 @@ export default function EditorPage({ user }: Props) {
           ...f,
           value: savedContent[f.key] ?? f.defaultValue,
         }))
+        const merged = mergeLayoutState(layoutStructure, pageData?.layout)
 
-        setFields(mergedFields)
+        // Bootstrap virtual fields for user-added (cloned) items
+        const virtualFields = bootstrapVirtualFields(
+          layoutStructure,
+          merged,
+          mergedFields,
+          savedContent,
+        )
+
+        setFields([...mergedFields, ...virtualFields])
         setTheme(pageData?.theme ?? {})
         setStructure(layoutStructure)
-        setLayout(mergeLayoutState(layoutStructure, pageData?.layout))
+        setLayout(merged)
         setLoading(false)
       } catch (err) {
         if (cancelled) return
@@ -100,6 +112,55 @@ export default function EditorPage({ user }: Props) {
 
   const handleFieldChange = (key: string, value: string) => {
     setFields((prev) => prev.map((f) => (f.key === key ? { ...f, value } : f)))
+  }
+
+  const handleAddItem = (listName: string) => {
+    if (!structure || !layout) return
+    const list = structure.lists.find((l) => l.name === listName)
+    if (!list) return
+    const templateId = list.itemIds[0]
+    if (!templateId) return
+    const prefix = getItemPrefix(templateId)
+    const newId = generateItemId(prefix)
+
+    // Find template's fields (from current fields[], so we capture any edits
+    // the user already made to the template) and clone them with the new ID.
+    const templateFields = fields.filter((f) => f.key.startsWith(templateId + '-'))
+    const newFields: EditableField[] = templateFields.map((tf) => ({
+      ...tf,
+      key: newId + tf.key.substring(templateId.length),
+      value: tf.value, // snapshot template's current value
+      defaultValue: '', // ensure save persists every clone field
+    }))
+
+    setFields((prev) => [...prev, ...newFields])
+    setLayout((prev) => {
+      if (!prev) return prev
+      const order = prev.list_order[listName] ?? list.itemIds
+      return {
+        ...prev,
+        list_order: { ...prev.list_order, [listName]: [...order, newId] },
+      }
+    })
+  }
+
+  const handleDeleteItem = (listName: string, itemId: string) => {
+    if (!layout) return
+    setFields((prev) => prev.filter((f) => !f.key.startsWith(itemId + '-')))
+    setLayout((prev) => {
+      if (!prev) return prev
+      const order = prev.list_order[listName] ?? []
+      const nextHidden = { ...prev.item_hidden }
+      delete nextHidden[itemId]
+      return {
+        ...prev,
+        list_order: {
+          ...prev.list_order,
+          [listName]: order.filter((id) => id !== itemId),
+        },
+        item_hidden: nextHidden,
+      }
+    })
   }
 
   const buildContent = (): Record<string, string> => {
@@ -281,7 +342,14 @@ export default function EditorPage({ user }: Props) {
       )}
 
       {viewMode === 'layout' && (
-        <LayoutEditor structure={structure} state={layout} onChange={setLayout} />
+        <LayoutEditor
+          structure={structure}
+          state={layout}
+          fields={fields}
+          onChange={setLayout}
+          onAddItem={handleAddItem}
+          onDeleteItem={handleDeleteItem}
+        />
       )}
 
       {viewMode === 'form' && (

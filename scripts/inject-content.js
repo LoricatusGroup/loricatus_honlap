@@ -97,9 +97,78 @@ function reorderChildren(parent, idAttr, order) {
   }
 }
 
+const EDIT_ATTRS_LIST = [
+  'data-edit',
+  'data-edit-html',
+  'data-edit-src',
+  'data-edit-href',
+  'data-edit-color',
+  'data-edit-target',
+  'data-edit-content',
+]
+
+function cloneListItem(templateEl, templateId, newId) {
+  const clone = templateEl.cloneNode(true)
+  clone.setAttribute('data-list-item', newId)
+  const prefix = templateId + '-'
+  const rewrite = (el) => {
+    for (const attr of EDIT_ATTRS_LIST) {
+      const v = el.getAttribute(attr)
+      if (v && v.startsWith(prefix)) {
+        el.setAttribute(attr, newId + '-' + v.substring(prefix.length))
+      }
+    }
+  }
+  rewrite(clone)
+  clone.querySelectorAll('*').forEach(rewrite)
+  return clone
+}
+
+function materializeAddedItems(doc, layout) {
+  let cloned = 0
+  for (const [listName, order] of Object.entries(layout.list_order ?? {})) {
+    if (!Array.isArray(order)) continue
+    const listEl = doc.querySelector(`[data-list="${escapeAttr(listName)}"]`)
+    if (!listEl) continue
+    const existing = Array.from(listEl.querySelectorAll('[data-list-item]'))
+    if (!existing.length) continue
+    const templateEl = existing[0]
+    const templateId = templateEl.getAttribute('data-list-item')
+    const existingIds = new Set(existing.map((el) => el.getAttribute('data-list-item')))
+    for (const id of order) {
+      if (existingIds.has(id)) continue
+      listEl.appendChild(cloneListItem(templateEl, templateId, id))
+      cloned++
+    }
+  }
+  return cloned
+}
+
+function removeStrayItems(doc, layout) {
+  let removed = 0
+  for (const [listName, order] of Object.entries(layout.list_order ?? {})) {
+    if (!Array.isArray(order) || !order.length) continue
+    const orderSet = new Set(order)
+    const listEl = doc.querySelector(`[data-list="${escapeAttr(listName)}"]`)
+    if (!listEl) continue
+    listEl.querySelectorAll('[data-list-item]').forEach((el) => {
+      const id = el.getAttribute('data-list-item')
+      if (id && !orderSet.has(id)) {
+        el.remove()
+        removed++
+      }
+    })
+  }
+  return removed
+}
+
 function applyLayout(doc, layout) {
   if (!layout || typeof layout !== 'object') return
-  const stats = { sectionsReordered: 0, listsReordered: 0, hidden: 0 }
+  const stats = { sectionsReordered: 0, listsReordered: 0, hidden: 0, cloned: 0, removed: 0 }
+
+  // 0. Materialize added items + remove deleted ones
+  stats.cloned = materializeAddedItems(doc, layout)
+  stats.removed = removeStrayItems(doc, layout)
 
   // 1. Section order: reorder children of <body>, matching by data-section
   if (Array.isArray(layout.section_order) && layout.section_order.length) {
@@ -147,7 +216,8 @@ function applyLayout(doc, layout) {
   }
 
   console.log(
-    `Applied layout: ${stats.sectionsReordered} section(s) reordered, ` +
+    `Applied layout: ${stats.cloned} added, ${stats.removed} removed, ` +
+      `${stats.sectionsReordered} section(s) reordered, ` +
       `${stats.listsReordered} list(s) reordered, ${stats.hidden} element(s) hidden`,
   )
 }
@@ -181,6 +251,12 @@ async function main() {
   const dom = new JSDOM(html)
   const doc = dom.window.document
 
+  // Materialize cloned items first, so applyContent can target their fields.
+  const clonedCount = materializeAddedItems(doc, layout)
+  const removedCount = removeStrayItems(doc, layout)
+  if (clonedCount) console.log(`Cloned ${clonedCount} new list item(s) from templates`)
+  if (removedCount) console.log(`Removed ${removedCount} deleted list item(s)`)
+
   const { applied, missing } = applyContent(doc, content)
   console.log(`Applied ${applied} content overrides`)
   if (missing.length) {
@@ -188,6 +264,8 @@ async function main() {
     missing.forEach((k) => console.warn(`  - ${k}`))
   }
 
+  // Now do the rest of layout (reorder + visibility). Materialize/remove
+  // already ran above, so re-entering them inside applyLayout is a no-op.
   applyLayout(doc, layout)
 
   if (applyTheme(doc, theme)) {

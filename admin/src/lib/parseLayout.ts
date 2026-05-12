@@ -4,6 +4,7 @@
 // is merged with whatever is stored in Supabase.
 
 import type {
+  EditableField,
   LayoutStructure,
   LayoutState,
   SectionInfo,
@@ -116,14 +117,14 @@ export function mergeLayoutState(
   const filtered = savedSectionOrder.filter((s) => validSections.has(s))
   for (const s of def.section_order) if (!filtered.includes(s)) filtered.push(s)
 
-  // list_order: same idea per list
+  // list_order: keep all saved entries (including user-added items not in
+  // structure), then append any missing originals at the end.
   const list_order: Record<string, string[]> = {}
   for (const list of structure.lists) {
-    const validItems = new Set(list.itemIds)
     const savedList = Array.isArray(saved.list_order?.[list.name])
       ? saved.list_order![list.name]
       : []
-    const filtList = savedList.filter((i) => validItems.has(i))
+    const filtList = [...savedList]
     for (const i of list.itemIds) if (!filtList.includes(i)) filtList.push(i)
     list_order[list.name] = filtList
   }
@@ -134,6 +135,87 @@ export function mergeLayoutState(
     list_order,
     item_hidden: saved.item_hidden ?? {},
   }
+}
+
+// "service-1" → "service" ; "about-value-1" → "about-value"
+export function getItemPrefix(itemId: string): string {
+  return itemId.replace(/-[^-]+$/, '')
+}
+
+// Generate a short unique ID for a newly-added item: "service" → "service-x7k2"
+export function generateItemId(prefix: string): string {
+  const rand = Math.floor(Math.random() * 36 ** 5).toString(36).padStart(5, '0')
+  return `${prefix}-${rand}`
+}
+
+// An item is "added" if it's in the saved list_order but not among the
+// original items discovered from HTML.
+export function isAddedItem(structure: LayoutStructure, itemId: string): boolean {
+  for (const list of structure.lists) {
+    if (list.itemIds.includes(itemId)) return false
+  }
+  return true
+}
+
+// Given a field key like "service-x7k2-title", return the item ID that owns it
+// (e.g., "service-x7k2"). Picks the longest itemId prefix that matches.
+export function findOwningItemId(
+  fieldKey: string,
+  allItemIds: string[],
+): string | null {
+  let best: string | null = null
+  for (const id of allItemIds) {
+    if (fieldKey === id || fieldKey.startsWith(id + '-')) {
+      if (!best || id.length > best.length) best = id
+    }
+  }
+  return best
+}
+
+// Bootstrap virtual fields for all "added" items found in the saved layout.
+// Each added item gets one virtual EditableField per template-suffix the
+// admin discovered for the template (e.g., title/desc/link/image for services).
+// value = content[newKey] ?? template's current value ;  defaultValue = ""
+// so any value the user keeps still gets persisted in content (clones are
+// independent snapshots of the template at add-time).
+export function bootstrapVirtualFields(
+  structure: LayoutStructure,
+  layout: LayoutState,
+  htmlFields: EditableField[],
+  savedContent: Record<string, string>,
+): EditableField[] {
+  const virtual: EditableField[] = []
+
+  for (const list of structure.lists) {
+    const templateId = list.itemIds[0]
+    if (!templateId) continue
+    const templateFields = htmlFields.filter((f) => f.key.startsWith(templateId + '-'))
+    if (!templateFields.length) continue
+
+    const order = layout.list_order[list.name] ?? list.itemIds
+    for (const itemId of order) {
+      if (list.itemIds.includes(itemId)) continue // original, already in htmlFields
+      // Added item — synthesize fields from template
+      for (const tf of templateFields) {
+        const suffix = tf.key.substring(templateId.length + 1)
+        const newKey = `${itemId}-${suffix}`
+        const templateValue = tf.value
+        const savedValue = savedContent[newKey]
+        virtual.push({
+          key: newKey,
+          type: tf.type,
+          label: tf.label,
+          section: tf.section,
+          value: savedValue ?? templateValue,
+          // Empty defaultValue → buildContent will always save this key
+          // (added items must persist all values, they have no HTML default).
+          defaultValue: '',
+        })
+      }
+    }
+  }
+
+  return virtual
 }
 
 // Build the minimal layout JSON to save: only non-default values.

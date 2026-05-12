@@ -13,15 +13,51 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import type { LayoutState, LayoutStructure } from '../lib/types'
+import type { EditableField, LayoutState, LayoutStructure } from '../lib/types'
 
 interface Props {
   structure: LayoutStructure
   state: LayoutState
+  fields: EditableField[]
   onChange: (next: LayoutState) => void
+  onAddItem: (listName: string) => void
+  onDeleteItem: (listName: string, itemId: string) => void
 }
 
-export default function LayoutEditor({ structure, state, onChange }: Props) {
+// Item-label priority by list type — first matching field's value is the label
+const LABEL_SUFFIXES: Record<string, string[]> = {
+  services: ['title'],
+  'about-values': ['title'],
+  equipment: ['title'],
+  portfolio: ['category', 'title'],
+  partners: ['link', 'image'],
+  testimonials: ['author', 'quote'],
+}
+
+function labelForItem(
+  listName: string,
+  itemId: string,
+  fields: EditableField[],
+  fallbackLabels: Record<string, string>,
+): string {
+  if (fallbackLabels[itemId]) return fallbackLabels[itemId]
+  const suffixes = LABEL_SUFFIXES[listName] ?? ['title']
+  for (const suf of suffixes) {
+    const f = fields.find((field) => field.key === `${itemId}-${suf}`)
+    if (f?.value) return f.value.slice(0, 60)
+  }
+  const any = fields.find((field) => field.key.startsWith(itemId + '-') && field.value)
+  return any?.value?.slice(0, 60) || itemId
+}
+
+export default function LayoutEditor({
+  structure,
+  state,
+  fields,
+  onChange,
+  onAddItem,
+  onDeleteItem,
+}: Props) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
   const setSectionOrder = (next: string[]) => onChange({ ...state, section_order: next })
@@ -32,11 +68,10 @@ export default function LayoutEditor({ structure, state, onChange }: Props) {
   const setItemHidden = (itemId: string, hidden: boolean) =>
     onChange({ ...state, item_hidden: { ...state.item_hidden, [itemId]: hidden } })
 
-  // Map for quick label lookups
   const sectionLabels = new Map(structure.sections.map((s) => [s.name, s.label]))
   const lists = new Map(structure.lists.map((l) => [l.name, l]))
 
-  // Section drag-end
+  // Section drag
   const onSectionDragEnd = (e: DragEndEvent) => {
     const { active, over } = e
     if (!over || active.id === over.id) return
@@ -46,7 +81,6 @@ export default function LayoutEditor({ structure, state, onChange }: Props) {
     setSectionOrder(arrayMove(state.section_order, oldIdx, newIdx))
   }
 
-  // Items drag-end (per-list)
   const onItemsDragEnd = (listName: string) => (e: DragEndEvent) => {
     const { active, over } = e
     if (!over || active.id === over.id) return
@@ -85,11 +119,12 @@ export default function LayoutEditor({ structure, state, onChange }: Props) {
 
       {structure.lists.map((list) => {
         const order = state.list_order[list.name] ?? list.itemIds
+        const originalIds = new Set(list.itemIds)
         return (
           <section key={list.name} className="bg-gray-800 p-6 rounded-lg">
             <h2 className="text-xl font-bold mb-1">{list.label}</h2>
             <p className="text-xs text-gray-400 mb-4">
-              {order.length} elem · sorrend és láthatóság
+              {order.length} elem · sorrend, láthatóság, hozzáadás, törlés
             </p>
             <DndContext
               sensors={sensors}
@@ -98,18 +133,43 @@ export default function LayoutEditor({ structure, state, onChange }: Props) {
             >
               <SortableContext items={order} strategy={verticalListSortingStrategy}>
                 <div className="space-y-2">
-                  {order.map((itemId) => (
-                    <SortableRow
-                      key={itemId}
-                      id={itemId}
-                      label={lists.get(list.name)?.itemLabels[itemId] ?? itemId}
-                      hidden={!!state.item_hidden[itemId]}
-                      onToggleHidden={(h) => setItemHidden(itemId, h)}
-                    />
-                  ))}
+                  {order.map((itemId) => {
+                    const isOriginal = originalIds.has(itemId)
+                    const label = labelForItem(list.name, itemId, fields, lists.get(list.name)?.itemLabels ?? {})
+                    return (
+                      <SortableRow
+                        key={itemId}
+                        id={itemId}
+                        label={label}
+                        hidden={!!state.item_hidden[itemId]}
+                        onToggleHidden={isOriginal ? (h) => setItemHidden(itemId, h) : undefined}
+                        onDelete={
+                          isOriginal
+                            ? undefined
+                            : () => {
+                                if (
+                                  window.confirm(
+                                    `Biztos törlöd a "${label}" kártyát? A változtatás csak mentés után végleges.`,
+                                  )
+                                ) {
+                                  onDeleteItem(list.name, itemId)
+                                }
+                              }
+                        }
+                        addedBadge={!isOriginal}
+                      />
+                    )
+                  })}
                 </div>
               </SortableContext>
             </DndContext>
+            <button
+              type="button"
+              onClick={() => onAddItem(list.name)}
+              className="mt-3 px-3 py-2 text-sm bg-blue-700 hover:bg-blue-600 rounded text-white font-medium"
+            >
+              + Új {list.label.toLowerCase()} hozzáadása
+            </button>
           </section>
         )
       })}
@@ -121,11 +181,21 @@ interface SortableRowProps {
   id: string
   label: string
   hidden: boolean
-  onToggleHidden: (hidden: boolean) => void
+  onToggleHidden?: (hidden: boolean) => void
+  onDelete?: () => void
+  addedBadge?: boolean
   large?: boolean
 }
 
-function SortableRow({ id, label, hidden, onToggleHidden, large }: SortableRowProps) {
+function SortableRow({
+  id,
+  label,
+  hidden,
+  onToggleHidden,
+  onDelete,
+  addedBadge,
+  large,
+}: SortableRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
 
   const style = {
@@ -151,16 +221,33 @@ function SortableRow({ id, label, hidden, onToggleHidden, large }: SortableRowPr
       >
         ☰
       </button>
-      <span className="flex-1 truncate">{label}</span>
-      <label className="text-xs text-gray-300 flex items-center gap-2 cursor-pointer select-none">
-        <input
-          type="checkbox"
-          checked={!hidden}
-          onChange={(e) => onToggleHidden(!e.target.checked)}
-          className="accent-blue-500"
-        />
-        Látható
-      </label>
+      <span className="flex-1 truncate">
+        {label}
+        {addedBadge && (
+          <span className="ml-2 text-xs px-1.5 py-0.5 bg-blue-900 text-blue-200 rounded">új</span>
+        )}
+      </span>
+      {onToggleHidden && (
+        <label className="text-xs text-gray-300 flex items-center gap-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={!hidden}
+            onChange={(e) => onToggleHidden(!e.target.checked)}
+            className="accent-blue-500"
+          />
+          Látható
+        </label>
+      )}
+      {onDelete && (
+        <button
+          type="button"
+          onClick={onDelete}
+          className="text-red-400 hover:text-red-300 px-2 py-1 text-sm"
+          title="Törlés"
+        >
+          🗑
+        </button>
+      )}
     </div>
   )
 }

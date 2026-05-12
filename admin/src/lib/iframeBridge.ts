@@ -155,6 +155,64 @@ export function setEditingClass(el: Element, on: boolean): void {
 // Inserts each target before the next sibling of the original LAST match,
 // so e.g. <nav> stays first and <footer> stays last even though they have no
 // idAttr.
+// Clone a list-item element, rewriting its data-list-item and all descendant
+// data-edit* attributes to use newId instead of templateId.
+export function cloneListItem(
+  templateEl: Element,
+  templateId: string,
+  newId: string,
+): Element {
+  const clone = templateEl.cloneNode(true) as Element
+  clone.setAttribute('data-list-item', newId)
+  const prefix = templateId + '-'
+  const rewrite = (el: Element) => {
+    for (const attr of EDIT_ATTRS) {
+      const v = el.getAttribute(attr)
+      if (v && v.startsWith(prefix)) {
+        el.setAttribute(attr, newId + '-' + v.substring(prefix.length))
+      }
+    }
+  }
+  rewrite(clone)
+  clone.querySelectorAll('*').forEach(rewrite)
+  return clone
+}
+
+// Ensure every itemId mentioned in layout.list_order exists in the iframe DOM,
+// cloning the first existing item as a template when needed.
+export function materializeAddedItems(doc: Document, layout: LayoutState): void {
+  for (const [listName, order] of Object.entries(layout.list_order ?? {})) {
+    const listEl = doc.querySelector(`[data-list="${escapeAttr(listName)}"]`)
+    if (!listEl) continue
+    const existing = Array.from(listEl.querySelectorAll('[data-list-item]'))
+    if (!existing.length) continue
+    const templateEl = existing[0]
+    const templateId = templateEl.getAttribute('data-list-item')!
+    const existingIds = new Set(existing.map((el) => el.getAttribute('data-list-item')!))
+    for (const id of order) {
+      if (existingIds.has(id)) continue
+      listEl.appendChild(cloneListItem(templateEl, templateId, id))
+    }
+  }
+}
+
+// Remove DOM items whose data-list-item is not present in layout.list_order
+// (the user deleted an added item, or layout simply has fewer entries).
+// Only runs for lists that have a list_order entry — empty/missing list_order
+// means "no user changes to this list", leave it alone.
+export function removeStrayItems(doc: Document, layout: LayoutState): void {
+  for (const [listName, order] of Object.entries(layout.list_order ?? {})) {
+    if (!order.length) continue
+    const orderSet = new Set(order)
+    const listEl = doc.querySelector(`[data-list="${escapeAttr(listName)}"]`)
+    if (!listEl) continue
+    listEl.querySelectorAll('[data-list-item]').forEach((el) => {
+      const id = el.getAttribute('data-list-item')
+      if (id && !orderSet.has(id)) el.remove()
+    })
+  }
+}
+
 function reorderChildren(parent: Element | null, idAttr: string, order: string[]): void {
   if (!parent || !order.length) return
   const byId = new Map<string, Element>()
@@ -182,23 +240,27 @@ function reorderChildren(parent: Element | null, idAttr: string, order: string[]
 }
 
 export function applyLayout(doc: Document, layout: LayoutState): void {
-  // Sections
+  // 1. Materialize added items (clone templates for items in list_order not yet in DOM)
+  materializeAddedItems(doc, layout)
+  // 2. Remove items present in DOM but not in list_order (deletions)
+  removeStrayItems(doc, layout)
+  // 3. Sections reorder
   if (Array.isArray(layout.section_order) && layout.section_order.length) {
     reorderChildren(doc.body, 'data-section', layout.section_order)
   }
-  // List item orders
+  // 4. List item orders
   for (const [listName, order] of Object.entries(layout.list_order ?? {})) {
     const listEl = doc.querySelector(`[data-list="${escapeAttr(listName)}"]`)
     if (listEl) reorderChildren(listEl, 'data-list-item', order)
   }
-  // Section visibility
+  // 5. Section visibility
   for (const [name, hidden] of Object.entries(layout.section_hidden ?? {})) {
     const el = doc.querySelector(`[data-section="${escapeAttr(name)}"]`)
     if (!el) continue
     if (hidden) el.setAttribute('hidden', '')
     else el.removeAttribute('hidden')
   }
-  // Item visibility
+  // 6. Item visibility
   for (const [id, hidden] of Object.entries(layout.item_hidden ?? {})) {
     const el = doc.querySelector(`[data-list-item="${escapeAttr(id)}"]`)
     if (!el) continue
