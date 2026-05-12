@@ -12,10 +12,12 @@ import {
 } from '../lib/parseLayout'
 import type {
   EditableField,
+  Locale,
   LayoutState,
   LayoutStructure,
   ViewMode,
 } from '../lib/types'
+import { LOCALES, getLocale } from '../lib/types'
 import FieldEditor from '../components/FieldEditor'
 import ThemeEditor from '../components/ThemeEditor'
 import LivePreview from '../components/LivePreview'
@@ -27,7 +29,14 @@ interface Props {
 
 type Status = { type: 'info' | 'error' | 'success'; text: string } | null
 
+const LOCALE_STORAGE_KEY = 'loricatus-cms-locale'
+
 export default function EditorPage({ user }: Props) {
+  const [locale, setLocaleState] = useState<Locale>(() => {
+    const saved = localStorage.getItem(LOCALE_STORAGE_KEY)
+    if (saved === 'en' || saved === 'it') return saved
+    return 'hu'
+  })
   const [fields, setFields] = useState<EditableField[]>([])
   const [theme, setTheme] = useState<Record<string, string>>({})
   const [structure, setStructure] = useState<LayoutStructure | null>(null)
@@ -39,20 +48,28 @@ export default function EditorPage({ user }: Props) {
   const [status, setStatus] = useState<Status>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('live')
 
+  const localeConfig = getLocale(locale)
+
+  // (Re)load everything whenever locale changes.
   useEffect(() => {
     let cancelled = false
+    setLoading(true)
+    setLoadError(null)
+    setFields([])
+    setStructure(null)
+    setLayout(null)
 
     const load = async () => {
       try {
         const [htmlFields, layoutStructure] = await Promise.all([
-          parseEditableFields(),
-          parseLayoutStructure(),
+          parseEditableFields(localeConfig.htmlUrl),
+          parseLayoutStructure(localeConfig.htmlUrl),
         ])
         const { data: pageData, error } = await supabase
           .from('page_content')
           .select('*')
-          .eq('page_slug', 'index')
-          .single()
+          .eq('page_slug', localeConfig.pageSlug)
+          .maybeSingle()
         if (error) throw error
 
         if (cancelled) return
@@ -63,8 +80,6 @@ export default function EditorPage({ user }: Props) {
           value: savedContent[f.key] ?? f.defaultValue,
         }))
         const merged = mergeLayoutState(layoutStructure, pageData?.layout)
-
-        // Bootstrap virtual fields for user-added (cloned) items
         const virtualFields = bootstrapVirtualFields(
           layoutStructure,
           merged,
@@ -88,7 +103,7 @@ export default function EditorPage({ user }: Props) {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [locale, localeConfig.htmlUrl, localeConfig.pageSlug])
 
   const grouped = useMemo(() => {
     const map = new Map<string, EditableField[]>()
@@ -110,6 +125,23 @@ export default function EditorPage({ user }: Props) {
     return Object.keys(diffLayoutState(structure, layout)).length > 0
   }, [structure, layout])
 
+  const hasUnsaved = changedCount > 0 || layoutDirty
+
+  const setLocale = (next: Locale) => {
+    if (next === locale) return
+    if (
+      hasUnsaved &&
+      !window.confirm(
+        'Vannak mentetlen változások. Tényleg váltasz nyelvre? A változások elvesznek.',
+      )
+    ) {
+      return
+    }
+    localStorage.setItem(LOCALE_STORAGE_KEY, next)
+    setStatus(null)
+    setLocaleState(next)
+  }
+
   const handleFieldChange = (key: string, value: string) => {
     setFields((prev) => prev.map((f) => (f.key === key ? { ...f, value } : f)))
   }
@@ -123,14 +155,12 @@ export default function EditorPage({ user }: Props) {
     const prefix = getItemPrefix(templateId)
     const newId = generateItemId(prefix)
 
-    // Find template's fields (from current fields[], so we capture any edits
-    // the user already made to the template) and clone them with the new ID.
     const templateFields = fields.filter((f) => f.key.startsWith(templateId + '-'))
     const newFields: EditableField[] = templateFields.map((tf) => ({
       ...tf,
       key: newId + tf.key.substring(templateId.length),
-      value: tf.value, // snapshot template's current value
-      defaultValue: '', // ensure save persists every clone field
+      value: tf.value,
+      defaultValue: '',
     }))
 
     setFields((prev) => [...prev, ...newFields])
@@ -179,20 +209,23 @@ export default function EditorPage({ user }: Props) {
     const layoutDiff = diffLayoutState(structure, layout)
     const { error } = await supabase
       .from('page_content')
-      .update({
-        content,
-        theme,
-        layout: layoutDiff,
-        updated_by: user.id,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('page_slug', 'index')
+      .upsert(
+        {
+          page_slug: localeConfig.pageSlug,
+          content,
+          theme,
+          layout: layoutDiff,
+          updated_by: user.id,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'page_slug' },
+      )
     setSaving(false)
     if (error) {
       setStatus({ type: 'error', text: `Mentés sikertelen: ${error.message}` })
       return false
     }
-    setStatus({ type: 'success', text: 'Mentve.' })
+    setStatus({ type: 'success', text: `Mentve (${localeConfig.label}).` })
     return true
   }
 
@@ -204,7 +237,9 @@ export default function EditorPage({ user }: Props) {
       return
     }
 
-    const { error } = await supabase.functions.invoke('publish-site')
+    const { error } = await supabase.functions.invoke('publish-site', {
+      body: { locale },
+    })
     setPublishing(false)
 
     if (error) {
@@ -212,7 +247,7 @@ export default function EditorPage({ user }: Props) {
     } else {
       setStatus({
         type: 'success',
-        text: 'Publikálás elindítva. A weboldal ~1 perc múlva frissül.',
+        text: `Publikálás elindítva (${localeConfig.label}). A weboldal ~1 perc múlva frissül.`,
       })
     }
   }
@@ -220,7 +255,7 @@ export default function EditorPage({ user }: Props) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-        Mezők betöltése…
+        Mezők betöltése ({localeConfig.label})…
       </div>
     )
   }
@@ -230,6 +265,7 @@ export default function EditorPage({ user }: Props) {
       <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-6">
         <div className="max-w-lg bg-red-900/50 p-6 rounded">
           <h2 className="text-xl font-bold mb-2">Betöltési hiba</h2>
+          <p className="text-sm mb-2">Locale: {localeConfig.label}</p>
           <p className="text-sm">{loadError}</p>
           <button
             onClick={() => window.location.reload()}
@@ -248,7 +284,7 @@ export default function EditorPage({ user }: Props) {
     <div className="min-h-screen bg-gray-900 text-white">
       <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-20">
         <div className="px-4 sm:px-6 py-3 flex flex-wrap gap-3 justify-between items-center">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
             <div>
               <h1 className="text-xl font-bold leading-tight">Loricatus Editor</h1>
               <p className="text-xs text-gray-400">
@@ -263,6 +299,23 @@ export default function EditorPage({ user }: Props) {
             </div>
 
             <div className="inline-flex rounded border border-gray-600 overflow-hidden text-xs">
+              {LOCALES.map((l) => (
+                <button
+                  key={l.code}
+                  onClick={() => setLocale(l.code)}
+                  className={`px-3 py-1.5 ${
+                    locale === l.code
+                      ? 'bg-amber-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  } ${l.code !== 'hu' ? 'border-l border-gray-600' : ''}`}
+                  title={`Váltás: ${l.label}`}
+                >
+                  {l.flag} {l.code.toUpperCase()}
+                </button>
+              ))}
+            </div>
+
+            <div className="inline-flex rounded border border-gray-600 overflow-hidden text-xs">
               <button
                 onClick={() => setViewMode('live')}
                 className={`px-3 py-1.5 ${
@@ -270,7 +323,6 @@ export default function EditorPage({ user }: Props) {
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 }`}
-                title="Az élő oldalon kattintva szerkeszthetsz"
               >
                 Élő szerkesztés
               </button>
@@ -281,7 +333,6 @@ export default function EditorPage({ user }: Props) {
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 }`}
-                title="Szekciók és kártyák átrendezése, elrejtése"
               >
                 Elrendezés
               </button>
@@ -292,7 +343,6 @@ export default function EditorPage({ user }: Props) {
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 }`}
-                title="Klasszikus űrlap minden mezővel"
               >
                 Lista
               </button>
@@ -331,7 +381,7 @@ export default function EditorPage({ user }: Props) {
               disabled={saving || publishing}
               className="px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-900 disabled:cursor-not-allowed rounded text-xs font-medium"
             >
-              {publishing ? 'Publikálás…' : 'Publikálás'}
+              {publishing ? 'Publikálás…' : `Publikálás (${locale.toUpperCase()})`}
             </button>
           </div>
         </div>
@@ -341,6 +391,7 @@ export default function EditorPage({ user }: Props) {
         <LivePreview
           fields={fields}
           layout={layout}
+          iframeSrc={localeConfig.iframeSrc}
           onFieldChange={handleFieldChange}
           onLayoutChange={setLayout}
         />

@@ -1,18 +1,14 @@
-<!DOCTYPE html>
-<html lang="it">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Loricatus - Servizi professionali con droni</title>
-  <meta name="description"
-    content="Loricatus offre servizi professionali con droni in Ungheria: rilievi aerei, ispezioni di edifici, mappatura e scansione LiDAR per progetti in cui i dati devono essere affidabili." />
-  <link rel="canonical" href="https://loricatus.hu/it/" />
-  <link rel="alternate" hreflang="hu" href="https://loricatus.hu/" />
-  <link rel="alternate" hreflang="en" href="https://loricatus.hu/en/" />
-  <link rel="alternate" hreflang="it" href="https://loricatus.hu/it/" />
-  <link rel="alternate" hreflang="x-default" href="https://loricatus.hu/" />
-  <link rel="stylesheet" href="/style.css?v=13" />
+<!DOCTYPE html><html lang="it"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-edit="page-title">Loricatus - Servizi professionali con droni</title>
+  <meta name="description" content="Loricatus offre servizi professionali con droni in Ungheria: rilievi aerei, ispezioni di edifici, mappatura e scansione LiDAR per progetti in cui i dati devono essere affidabili." data-edit-content="page-meta-description">
+  <link rel="canonical" href="https://loricatus.hu/it/">
+  <link rel="alternate" hreflang="hu" href="https://loricatus.hu/">
+  <link rel="alternate" hreflang="en" href="https://loricatus.hu/en/">
+  <link rel="alternate" hreflang="it" href="https://loricatus.hu/it/">
+  <link rel="alternate" hreflang="x-default" href="https://loricatus.hu/">
+  <link rel="stylesheet" href="/style.css?v=13">
   <!-- Microsoft Clarity -->
   <script type="text/javascript">
     (function(c,l,a,r,i,t,y){
@@ -28,21 +24,21 @@
   <nav id="navbar" class="navbar">
     <div class="nav-container">
       <a href="#hero" class="nav-logo" aria-label="Pagina principale Loricatus">
-        <img src="/assets/logo.svg" alt="Loricatus" class="logo-svg" />
+        <img src="/assets/logo.svg" alt="Loricatus" class="logo-svg">
       </a>
       <ul class="nav-links" id="navLinks">
-        <li><a href="#services">Servizi</a></li>
-        <li><a href="#about">Chi siamo</a></li>
-        <li><a href="#equipment">Parco mezzi</a></li>
-        <li><a href="#portfolio">Progetti</a></li>
-        <li><a href="#contact" class="nav-cta-link">Richiedi un preventivo</a></li>
+        <li><a href="#services" data-edit="nav-menu-services">Servizi</a></li>
+        <li><a href="#about" data-edit="nav-menu-about">Chi siamo</a></li>
+        <li><a href="#equipment" data-edit="nav-menu-equipment">Parco mezzi</a></li>
+        <li><a href="#portfolio" data-edit="nav-menu-portfolio">Progetti</a></li>
+        <li><a href="#contact" class="nav-cta-link" data-edit="nav-menu-contact">Richiedi un preventivo</a></li>
       </ul>
       <div class="lang-switcher" aria-label="Selettore lingua">
         <a href="/" class="lang-link">HU</a>
         <a href="/en/" class="lang-link">EN</a>
         <a href="/it/" class="lang-link is-active" aria-current="page">IT</a>
       </div>
-      <button class="nav-cta" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+      <button class="nav-cta" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})" data-edit="nav-cta-button">
         Richiedi un preventivo
       </button>
       <button class="hamburger" id="hamburger" aria-label="Menu">
@@ -51,9 +47,9 @@
     </div>
   </nav>
 
-  <section id="hero" class="hero">
+  <section id="hero" class="hero" data-section="hero">
     <div class="hero-bg">
-      <img src="/assets/drone4.webp" alt="Rilievo con drone Loricatus" class="hero-img" id="heroParallax" fetchpriority="high" />
+      <img src="/assets/drone4.webp" alt="Rilievo con drone Loricatus" class="hero-img" id="heroParallax" fetchpriority="high" data-edit-src="hero-bg-image">
       <div class="hero-overlay"></div>
     </div>
     <canvas id="heroCanvas" class="hero-canvas"></canvas>
@@ -63,23 +59,21 @@
           Geointelligenza per l'edilizia · Certificazione A2 CofC
       </div>
       <h1 class="hero-title">
-          Leggi il mondo<br />
+          Leggi il mondo<br data-edit="hero-title-line1">
           <span class="accent-text">con chiarezza</span>
       </h1>
-      <p class="hero-subtitle">
-        Droni, LiDAR, coordinamento BIM. Ciò che non può essere misurato non può essere costruito.<br />
+      <p class="hero-subtitle" data-edit-html="hero-subtitle">
+        Droni, LiDAR, coordinamento BIM. Ciò che non può essere misurato non può essere costruito.<br>
         Precisione dall'alto per progetti in cui il dato deve reggere alla prova del cantiere.
       </p>
       <div class="hero-actions">
-        <button class="btn btn-primary"
-          onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+        <button class="btn btn-primary" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
           Richiedi un preventivo
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M5 12h14M12 5l7 7-7 7" />
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-edit="hero-cta-primary">
+            <path d="M5 12h14M12 5l7 7-7 7"></path>
           </svg>
         </button>
-        <button class="btn btn-secondary"
-          onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})">
+        <button class="btn btn-secondary" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})" data-edit="hero-cta-secondary">
           Scopri i servizi
         </button>
       </div>
@@ -90,208 +84,206 @@
     </div>
     <div class="hero-stats">
       <div class="hero-stat">
-        <span class="stat-num" data-target="500">0</span><span class="stat-suffix">+</span>
-        <span class="stat-label">Progetti completati</span>
+        <span class="stat-num" data-target="500" data-edit-target="hero-stat-1-num">0</span><span class="stat-suffix" data-edit="hero-stat-1-suffix">+</span>
+        <span class="stat-label" data-edit="hero-stat-1-label">Progetti completati</span>
       </div>
       <div class="hero-stat-divider"></div>
       <div class="hero-stat">
-        <span class="stat-num" data-target="1200">0</span><span class="stat-suffix">+</span>
-        <span class="stat-label">Ore di volo</span>
+        <span class="stat-num" data-target="1200" data-edit-target="hero-stat-2-num">0</span><span class="stat-suffix" data-edit="hero-stat-2-suffix">+</span>
+        <span class="stat-label" data-edit="hero-stat-2-label">Ore di volo</span>
       </div>
       <div class="hero-stat-divider"></div>
       <div class="hero-stat">
-        <span class="stat-num" data-target="98">0</span><span class="stat-suffix">%</span>
-        <span class="stat-label">Soddisfazione clienti</span>
+        <span class="stat-num" data-target="98" data-edit-target="hero-stat-3-num">0</span><span class="stat-suffix" data-edit="hero-stat-3-suffix">%</span>
+        <span class="stat-label" data-edit="hero-stat-3-label">Soddisfazione clienti</span>
       </div>
       <div class="hero-stat-divider"></div>
       <div class="hero-stat">
-        <span class="stat-num" data-target="8">0</span><span class="stat-suffix">+</span>
-        <span class="stat-label">Anni di esperienza</span>
+        <span class="stat-num" data-target="8" data-edit-target="hero-stat-4-num">0</span><span class="stat-suffix" data-edit="hero-stat-4-suffix">+</span>
+        <span class="stat-label" data-edit="hero-stat-4-label">Anni di esperienza</span>
       </div>
     </div>
   </section>
 
-  <section id="services" class="services section">
+  <section id="services" class="services section" data-section="services">
     <div class="section-bg-label">02 / SERVIZI</div>
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-tag">Cosa offriamo</div>
-        <h2 class="section-title">Soluzioni complete<br /><span class="accent-text">con droni</span></h2>
-        <p class="section-desc">Voliamo, rileviamo, elaboriamo e coordiniamo. Ogni progetto riceve la tecnologia che serve davvero alla decisione.</p>
+        <div class="section-tag" data-edit="services-tag">Cosa offriamo</div>
+        <h2 class="section-title">Soluzioni complete<br data-edit="services-title-line1"><span class="accent-text">con droni</span></h2>
+        <p class="section-desc" data-edit="services-desc">Voliamo, rileviamo, elaboriamo e coordiniamo. Ogni progetto riceve la tecnologia che serve davvero alla decisione.</p>
       </div>
-      <div class="services-grid">
+      <div class="services-grid" data-list="services">
 
-        <div class="service-card reveal" style="--delay: 0.05s">
+        <div class="service-card reveal" style="--delay: 0.05s" data-list-item="service-1">
           <div class="service-num">01</div>
           <div class="service-icon">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="24" cy="24" r="10" stroke="currentColor" stroke-width="2" />
-              <path
-                d="M24 4v4M24 40v4M4 24h4M40 24h4M8.69 8.69l2.83 2.83M36.48 36.48l2.83 2.83M36.48 11.52l-2.83 2.83M11.52 36.48l-2.83 2.83"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              <circle cx="24" cy="24" r="10" stroke="currentColor" stroke-width="2"></circle>
+              <path d="M24 4v4M24 40v4M4 24h4M40 24h4M8.69 8.69l2.83 2.83M36.48 36.48l2.83 2.83M36.48 11.52l-2.83 2.83M11.52 36.48l-2.83 2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
             </svg>
           </div>
-          <h3>Foto e video aerei</h3>
-          <p>Riprese aeree di livello cinematografico per immobili, eventi, siti industriali e paesaggi, in 4K-8K con sistemi gimbal stabilizzati.</p>
-          <a href="#contact" class="service-link">Richiedi un preventivo <span>→</span></a>
+          <h3 data-edit="service-1-title">Foto e video aerei</h3>
+          <p data-edit="service-1-desc">Riprese aeree di livello cinematografico per immobili, eventi, siti industriali e paesaggi, in 4K-8K con sistemi gimbal stabilizzati.</p>
+          <a href="#contact" class="service-link">Richiedi un preventivo <span data-edit="service-1-link">→</span></a>
         </div>
 
-        <div class="service-card reveal" style="--delay: 0.1s">
+        <div class="service-card reveal" style="--delay: 0.1s" data-list-item="service-2">
           <div class="service-num">02</div>
           <div class="service-icon">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="6" y="6" width="36" height="36" rx="3" stroke="currentColor" stroke-width="2" />
-              <path d="M6 18h36M18 6v36" stroke="currentColor" stroke-width="2" />
-              <circle cx="30" cy="30" r="4" stroke="currentColor" stroke-width="2" />
+              <rect x="6" y="6" width="36" height="36" rx="3" stroke="currentColor" stroke-width="2"></rect>
+              <path d="M6 18h36M18 6v36" stroke="currentColor" stroke-width="2"></path>
+              <circle cx="30" cy="30" r="4" stroke="currentColor" stroke-width="2"></circle>
             </svg>
           </div>
-          <h3>Rilievo e mappatura</h3>
-          <p>Modelli del terreno e dataset GIS basati su nuvole di punti, utili per progettare, costruire e verificare. Supportati da RTK GNSS e correzioni in tempo reale.</p>
-          <a href="#contact" class="service-link">Richiedi un preventivo <span>→</span></a>
+          <h3 data-edit="service-2-title">Rilievo e mappatura</h3>
+          <p data-edit="service-2-desc">Modelli del terreno e dataset GIS basati su nuvole di punti, utili per progettare, costruire e verificare. Supportati da RTK GNSS e correzioni in tempo reale.</p>
+          <a href="#contact" class="service-link">Richiedi un preventivo <span data-edit="service-2-link">→</span></a>
         </div>
 
-        <div class="service-card reveal" style="--delay: 0.15s">
+        <div class="service-card reveal" style="--delay: 0.15s" data-list-item="service-3">
           <div class="service-num">03</div>
           <div class="service-icon">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 38V20M24 38V10M36 38V28" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-              <rect x="6" y="38" width="36" height="3" rx="1.5" fill="currentColor" opacity="0.3" />
+              <path d="M12 38V20M24 38V10M36 38V28" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+              <rect x="6" y="38" width="36" height="3" rx="1.5" fill="currentColor" opacity="0.3"></rect>
             </svg>
           </div>
-          <h3>Ispezione di edifici</h3>
-          <p>Workflow sicuri per ponti, ciminiere, edifici alti e impianti industriali. Il risultato non è solo immagine, ma evidenza documentata.</p>
-          <a href="#contact" class="service-link">Richiedi un preventivo <span>→</span></a>
+          <h3 data-edit="service-3-title">Ispezione di edifici</h3>
+          <p data-edit="service-3-desc">Workflow sicuri per ponti, ciminiere, edifici alti e impianti industriali. Il risultato non è solo immagine, ma evidenza documentata.</p>
+          <a href="#contact" class="service-link">Richiedi un preventivo <span data-edit="service-3-link">→</span></a>
         </div>
 
-        <div class="service-card reveal" style="--delay: 0.2s">
+        <div class="service-card reveal" style="--delay: 0.2s" data-list-item="service-4">
           <div class="service-num">04</div>
           <div class="service-icon">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 40L24 8l16 32H8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
-              <path d="M16 32h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              <path d="M8 40L24 8l16 32H8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+              <path d="M16 32h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
             </svg>
           </div>
-          <h3>Scansione LiDAR</h3>
-          <p>Nuvole di punti 3D con precisione millimetrica per progettazione BIM e documentazione ingegneristica su edifici, terreno e infrastrutture.</p>
-          <a href="#contact" class="service-link">Richiedi un preventivo <span>→</span></a>
+          <h3 data-edit="service-4-title">Scansione LiDAR</h3>
+          <p data-edit="service-4-desc">Nuvole di punti 3D con precisione millimetrica per progettazione BIM e documentazione ingegneristica su edifici, terreno e infrastrutture.</p>
+          <a href="#contact" class="service-link">Richiedi un preventivo <span data-edit="service-4-link">→</span></a>
         </div>
 
-        <div class="service-card reveal" style="--delay: 0.25s">
+        <div class="service-card reveal" style="--delay: 0.25s" data-list-item="service-5">
           <div class="service-num">05</div>
           <div class="service-icon">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="24" cy="24" r="16" stroke="currentColor" stroke-width="2" />
-              <path d="M24 8v4M24 36v4M8 24h4M36 24h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-              <circle cx="24" cy="24" r="6" fill="currentColor" opacity="0.15" stroke="currentColor" stroke-width="2" />
+              <circle cx="24" cy="24" r="16" stroke="currentColor" stroke-width="2"></circle>
+              <path d="M24 8v4M24 36v4M8 24h4M36 24h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+              <circle cx="24" cy="24" r="6" fill="currentColor" opacity="0.15" stroke="currentColor" stroke-width="2"></circle>
             </svg>
           </div>
-          <h3>Termografia</h3>
-          <p>Rilevamento delle dispersioni termiche negli edifici, ispezione di pannelli fotovoltaici e mappe termiche industriali. Diagnosi rapide e utilizzabili.</p>
-          <a href="#contact" class="service-link">Richiedi un preventivo <span>→</span></a>
+          <h3 data-edit="service-5-title">Termografia</h3>
+          <p data-edit="service-5-desc">Rilevamento delle dispersioni termiche negli edifici, ispezione di pannelli fotovoltaici e mappe termiche industriali. Diagnosi rapide e utilizzabili.</p>
+          <a href="#contact" class="service-link">Richiedi un preventivo <span data-edit="service-5-link">→</span></a>
         </div>
 
-        <div class="service-card reveal" style="--delay: 0.3s">
+        <div class="service-card reveal" style="--delay: 0.3s" data-list-item="service-6">
           <div class="service-num">06</div>
           <div class="service-icon">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 36c6-12 30-12 36 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-              <path d="M14 28c4-8 16-8 20 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-              <circle cx="24" cy="22" r="4" stroke="currentColor" stroke-width="2" />
+              <path d="M6 36c6-12 30-12 36 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+              <path d="M14 28c4-8 16-8 20 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+              <circle cx="24" cy="22" r="4" stroke="currentColor" stroke-width="2"></circle>
             </svg>
           </div>
-          <h3>Agricoltura di precisione</h3>
-          <p>Analisi NDVI e NDRE, previsione della resa e monitoraggio intelligente delle colture per operazioni agricole guidate dai dati.</p>
-          <a href="#contact" class="service-link">Richiedi un preventivo <span>→</span></a>
+          <h3 data-edit="service-6-title">Agricoltura di precisione</h3>
+          <p data-edit="service-6-desc">Analisi NDVI e NDRE, previsione della resa e monitoraggio intelligente delle colture per operazioni agricole guidate dai dati.</p>
+          <a href="#contact" class="service-link">Richiedi un preventivo <span data-edit="service-6-link">→</span></a>
         </div>
 
-        <div class="service-card reveal" style="--delay: 0.35s">
+        <div class="service-card reveal" style="--delay: 0.35s" data-list-item="service-7">
           <div class="service-num">07</div>
           <div class="service-icon">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="8" y="8" width="32" height="32" rx="3" stroke="currentColor" stroke-width="2" />
-              <path d="M16 20h16M16 28h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-              <circle cx="34" cy="28" r="4" stroke="currentColor" stroke-width="2" />
-              <path d="M32 28l4 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              <rect x="8" y="8" width="32" height="32" rx="3" stroke="currentColor" stroke-width="2"></rect>
+              <path d="M16 20h16M16 28h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+              <circle cx="34" cy="28" r="4" stroke="currentColor" stroke-width="2"></circle>
+              <path d="M32 28l4 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
             </svg>
           </div>
-          <h3>Coordinamento BIM</h3>
-          <p>Il modello digitale come strumento operativo. Allineiamo elaborati, versioni e flussi dati in modo che la fonte valida sia sempre chiara.</p>
-          <a href="#contact" class="service-link">Richiedi un preventivo <span>→</span></a>
+          <h3 data-edit="service-7-title">Coordinamento BIM</h3>
+          <p data-edit="service-7-desc">Il modello digitale come strumento operativo. Allineiamo elaborati, versioni e flussi dati in modo che la fonte valida sia sempre chiara.</p>
+          <a href="#contact" class="service-link">Richiedi un preventivo <span data-edit="service-7-link">→</span></a>
         </div>
 
       </div>
     </div>
   </section>
 
-  <section id="about" class="about section">
+  <section id="about" class="about section" data-section="about">
     <div class="section-bg-label">03 / CHI SIAMO</div>
     <div class="container about-container">
       <div class="about-visual reveal">
         <div class="about-img-wrap">
-          <img src="/assets/mernok.webp" alt="Progettazione e realizzazione ingegneristica Loricatus" class="about-img" loading="lazy" />
+          <img src="/assets/mernok.webp" alt="Progettazione e realizzazione ingegneristica Loricatus" class="about-img" loading="lazy" data-edit-src="about-image">
           <div class="about-img-badge">
-            <span class="badge-num">8+</span>
-            <span>anni di<br />esperienza</span>
+            <span class="badge-num" data-edit="about-badge-num">8+</span>
+            <span data-edit-html="about-badge-text">anni di<br>esperienza</span>
           </div>
         </div>
         <div class="about-cert-row">
           <div class="cert-pill">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="20 6 9 17 4 12" />
+              <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
             Certificazione A2 CofC
           </div>
           <div class="cert-pill">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="20 6 9 17 4 12" />
+              <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
             Permessi aeronautici attivi
           </div>
         </div>
       </div>
       <div class="about-content reveal">
-        <div class="section-tag">La differenza Loricatus</div>
-        <h2 class="section-title">Dove il dato diventa<br /><span class="accent-text">realtà operativa</span>
+        <div class="section-tag" data-edit="about-tag">La differenza Loricatus</div>
+        <h2 class="section-title">Dove il dato diventa<br data-edit="about-title-line1"><span class="accent-text">realtà operativa</span>
         </h2>
-        <p class="about-lead">
+        <p class="about-lead" data-edit="about-lead">
           In Loricatus il nostro lavoro è rendere il mondo costruito più preciso e più leggibile. A volte è semplice, a volte no. Ogni incarico migliora il successivo.
         </p>
-        <p class="about-body">
+        <p class="about-body" data-edit="about-body">
           Non ci limitiamo a far volare droni. Costruiamo un contesto digitale affidabile per progettazione, cantiere, ispezione e consegna finale. Il nostro team unisce competenze di ingegneria, rilievo e coordinamento BIM, dal primo sopralluogo fino al deliverable conclusivo. Che si tratti di rilievo con nuvola di punti, ispezione di asset o coordinamento del modello, qui il dato non è decorazione. È la base di lavoro.
         </p>
-        <div class="about-values">
-          <div class="value-item">
+        <div class="about-values" data-list="about-values">
+          <div class="value-item" data-list-item="about-value-1">
             <div class="value-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
               </svg>
             </div>
             <div>
-              <strong>Piena conformità normativa</strong>
-              <span>Normativa droni ungherese ed europea, permessi aeronautici e copertura assicurativa allineati al progetto</span>
+              <strong data-edit="about-value-1-title">Piena conformità normativa</strong>
+              <span data-edit="about-value-1-desc">Normativa droni ungherese ed europea, permessi aeronautici e copertura assicurativa allineati al progetto</span>
             </div>
           </div>
-          <div class="value-item">
+          <div class="value-item" data-list-item="about-value-2">
             <div class="value-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
               </svg>
             </div>
             <div>
-              <strong>Elaborazione su misura</strong>
-              <span>I tempi di elaborazione e consegna seguono la reale complessità tecnica e decisionale di ogni incarico</span>
+              <strong data-edit="about-value-2-title">Elaborazione su misura</strong>
+              <span data-edit="about-value-2-desc">I tempi di elaborazione e consegna seguono la reale complessità tecnica e decisionale di ogni incarico</span>
             </div>
           </div>
-          <div class="value-item">
+          <div class="value-item" data-list-item="about-value-3">
             <div class="value-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
               </svg>
             </div>
             <div>
-              <strong>Output misurati e documentati</strong>
-              <span>Report dettagliati, nuvole di punti, export CAD e dataset GIS pronti per essere utilizzati subito</span>
+              <strong data-edit="about-value-3-title">Output misurati e documentati</strong>
+              <span data-edit="about-value-3-desc">Report dettagliati, nuvole di punti, export CAD e dataset GIS pronti per essere utilizzati subito</span>
             </div>
           </div>
         </div>
@@ -299,95 +291,95 @@
     </div>
   </section>
 
-  <section id="equipment" class="equipment section">
+  <section id="equipment" class="equipment section" data-section="equipment">
     <div class="section-bg-label">04 / PARCO MEZZI</div>
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-tag">Tecnologia</div>
-        <h2 class="section-title">Attrezzatura di livello<br /><span class="accent-text">industriale</span></h2>
-        <p class="section-desc">Utilizziamo solo hardware professionale certificato, perché la qualità del risultato nasce dallo strumento giusto sul campo.</p>
+        <div class="section-tag" data-edit="equipment-tag">Tecnologia</div>
+        <h2 class="section-title">Attrezzatura di livello<br data-edit="equipment-title-line1"><span class="accent-text">industriale</span></h2>
+        <p class="section-desc" data-edit="equipment-desc">Utilizziamo solo hardware professionale certificato, perché la qualità del risultato nasce dallo strumento giusto sul campo.</p>
       </div>
-      <div class="equipment-grid">
-        <div class="equipment-card reveal" style="--delay: 0.05s">
+      <div class="equipment-grid" data-list="equipment">
+        <div class="equipment-card reveal" style="--delay: 0.05s" data-list-item="equipment-1">
           <div class="eq-img-wrap">
-            <img src="/assets/eq1.webp" alt="DJI Matrice 400 SP Plus" class="eq-img" loading="lazy" />
+            <img src="/assets/eq1.webp" alt="DJI Matrice 400 SP Plus" class="eq-img" loading="lazy" data-edit-src="equipment-1-image">
           </div>
           <div class="eq-info">
-            <span class="eq-tag">Piattaforma principale</span>
-            <h3>DJI MATRICE 400 SP PLUS</h3>
-            <p>Piattaforma drone industriale ad alta capacità per missioni complesse di rilievo, ispezione e acquisizione dati</p>
+            <span class="eq-tag" data-edit="equipment-1-tag">Piattaforma principale</span>
+            <h3 data-edit="equipment-1-title">DJI MATRICE 400 SP PLUS</h3>
+            <p data-edit="equipment-1-desc">Piattaforma drone industriale ad alta capacità per missioni complesse di rilievo, ispezione e acquisizione dati</p>
           </div>
         </div>
-        <div class="equipment-card reveal" style="--delay: 0.12s">
+        <div class="equipment-card reveal" style="--delay: 0.12s" data-list-item="equipment-2">
           <div class="eq-img-wrap">
-            <img src="/assets/eq2.webp" alt="DJI Matrice 4 E SP Plus" class="eq-img eq-img-2" loading="lazy" />
+            <img src="/assets/eq2.webp" alt="DJI Matrice 4 E SP Plus" class="eq-img eq-img-2" loading="lazy" data-edit-src="equipment-2-image">
           </div>
           <div class="eq-info">
-            <span class="eq-tag">Piattaforma compatta</span>
-            <h3>DJI MATRICE 4 E SP PLUS</h3>
-            <p>Piattaforma compatta a rapido impiego per documentazione di sito, rilievo e ispezione visiva</p>
+            <span class="eq-tag" data-edit="equipment-2-tag">Piattaforma compatta</span>
+            <h3 data-edit="equipment-2-title">DJI MATRICE 4 E SP PLUS</h3>
+            <p data-edit="equipment-2-desc">Piattaforma compatta a rapido impiego per documentazione di sito, rilievo e ispezione visiva</p>
           </div>
         </div>
-        <div class="equipment-card reveal" style="--delay: 0.19s">
+        <div class="equipment-card reveal" style="--delay: 0.19s" data-list-item="equipment-3">
           <div class="eq-img-wrap">
-            <img src="/DJI-Zenmuse-L1-scaled.webp" alt="Sensore LiDAR DJI Zenmuse L3 (EU) SP Plus" class="eq-img" loading="lazy" decoding="async" />
+            <img src="/DJI-Zenmuse-L1-scaled.webp" alt="Sensore LiDAR DJI Zenmuse L3 (EU) SP Plus" class="eq-img" loading="lazy" decoding="async" data-edit-src="equipment-3-image">
           </div>
           <div class="eq-info">
-            <span class="eq-tag">Sensore LiDAR</span>
-            <h3>DJI Zenmuse L3 (EU) SP Plus</h3>
-            <p>Sensore LiDAR per acquisizioni ad alta precisione di nuvole di punti e dati spaziali dettagliati</p>
+            <span class="eq-tag" data-edit="equipment-3-tag">Sensore LiDAR</span>
+            <h3 data-edit="equipment-3-title">DJI Zenmuse L3 (EU) SP Plus</h3>
+            <p data-edit="equipment-3-desc">Sensore LiDAR per acquisizioni ad alta precisione di nuvole di punti e dati spaziali dettagliati</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="portfolio" class="portfolio section">
+  <section id="portfolio" class="portfolio section" data-section="portfolio">
     <div class="section-bg-label">05 / PROGETTI</div>
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-tag">Referenze selezionate</div>
-        <h2 class="section-title">Progetti<br /><span class="accent-text">realizzati</span></h2>
-        <p class="section-desc">Progetti reali, vincoli reali, risultati concreti consegnati dove il cantiere lavora davvero.</p>
+        <div class="section-tag" data-edit="portfolio-tag">Referenze selezionate</div>
+        <h2 class="section-title">Progetti<br data-edit="portfolio-title-line1"><span class="accent-text">realizzati</span></h2>
+        <p class="section-desc" data-edit="portfolio-desc">Progetti reali, vincoli reali, risultati concreti consegnati dove il cantiere lavora davvero.</p>
       </div>
-      <div class="portfolio-grid">
-        <div class="portfolio-card large reveal" style="--delay:0.05s">
+      <div class="portfolio-grid" data-list="portfolio">
+        <div class="portfolio-card large reveal" style="--delay:0.05s" data-list-item="portfolio-1">
           <div class="portfolio-img-wrap">
-            <img src="/assets/proj1.webp" alt="Documentazione BIM del laboratorio EMC NMHH" class="portfolio-img" loading="lazy" />
+            <img src="/assets/proj1.webp" alt="Documentazione BIM del laboratorio EMC NMHH" class="portfolio-img" loading="lazy" data-edit-src="portfolio-1-image">
             <div class="portfolio-overlay">
-              <span class="portfolio-cat">Coordinamento BIM</span>
-              <h3>Laboratorio EMC NMHH -<br />documentazione BIM</h3>
-              <p>Via Esztergomi · export IFC · integrazione CDE</p>
+              <span class="portfolio-cat" data-edit="portfolio-1-category">Coordinamento BIM</span>
+              <h3 data-edit-html="portfolio-1-title">Laboratorio EMC NMHH -<br>documentazione BIM</h3>
+              <p data-edit="portfolio-1-subtitle">Via Esztergomi · export IFC · integrazione CDE</p>
             </div>
           </div>
         </div>
-        <div class="portfolio-card reveal" style="--delay:0.12s">
+        <div class="portfolio-card reveal" style="--delay:0.12s" data-list-item="portfolio-2">
           <div class="portfolio-img-wrap">
-            <img src="/assets/proj2.webp" alt="Ispezione termografica di ciminiera industriale" class="portfolio-img" loading="lazy" />
+            <img src="/assets/proj2.webp" alt="Ispezione termografica di ciminiera industriale" class="portfolio-img" loading="lazy" data-edit-src="portfolio-2-image">
             <div class="portfolio-overlay">
-              <span class="portfolio-cat">Ispezione di edifici</span>
-              <h3>Ciminiera industriale<br />ispezione termografica</h3>
-              <p>LiDAR + termografia · mappa difetti</p>
+              <span class="portfolio-cat" data-edit="portfolio-2-category">Ispezione di edifici</span>
+              <h3 data-edit-html="portfolio-2-title">Ciminiera industriale<br>ispezione termografica</h3>
+              <p data-edit="portfolio-2-subtitle">LiDAR + termografia · mappa difetti</p>
             </div>
           </div>
         </div>
-        <div class="portfolio-card reveal" style="--delay:0.19s">
+        <div class="portfolio-card reveal" style="--delay:0.19s" data-list-item="portfolio-3">
           <div class="portfolio-img-wrap">
-            <img src="/assets/proj-matyas-church.jpg" alt="Rilievo con drone della Chiesa di Mattia" class="portfolio-img" loading="lazy" />
+            <img src="/assets/proj-matyas-church.jpg" alt="Rilievo con drone della Chiesa di Mattia" class="portfolio-img" loading="lazy" data-edit-src="portfolio-3-image">
             <div class="portfolio-overlay">
-              <span class="portfolio-cat">Rilievo 3D con drone</span>
-              <h3>Chiesa di Mattia -<br />riqualificazione del Castello di Buda</h3>
-              <p>Fotogrammetria da drone · nuvola di punti 3D · tutela del patrimonio</p>
+              <span class="portfolio-cat" data-edit="portfolio-3-category">Rilievo 3D con drone</span>
+              <h3 data-edit-html="portfolio-3-title">Chiesa di Mattia -<br>riqualificazione del Castello di Buda</h3>
+              <p data-edit="portfolio-3-subtitle">Fotogrammetria da drone · nuvola di punti 3D · tutela del patrimonio</p>
             </div>
           </div>
         </div>
-        <div class="portfolio-card reveal" style="--delay:0.25s">
+        <div class="portfolio-card reveal" style="--delay:0.25s" data-list-item="portfolio-4">
           <div class="portfolio-img-wrap">
-            <img src="/assets/proj-budapest-aerial.jpg" alt="Rilievo aereo di Budapest - Statua di Gellert" class="portfolio-img" loading="lazy" />
+            <img src="/assets/proj-budapest-aerial.jpg" alt="Rilievo aereo di Budapest - Statua di Gellert" class="portfolio-img" loading="lazy" data-edit-src="portfolio-4-image">
             <div class="portfolio-overlay">
-              <span class="portfolio-cat">Rilievo aereo</span>
-              <h3>Budapest - Statua di Gellert<br />rilievo aereo e documentazione</h3>
-              <p>Ortofoto da drone · database GIS · topografia urbana</p>
+              <span class="portfolio-cat" data-edit="portfolio-4-category">Rilievo aereo</span>
+              <h3 data-edit-html="portfolio-4-title">Budapest - Statua di Gellert<br>rilievo aereo e documentazione</h3>
+              <p data-edit="portfolio-4-subtitle">Ortofoto da drone · database GIS · topografia urbana</p>
             </div>
           </div>
         </div>
@@ -395,70 +387,70 @@
     </div>
   </section>
 
-  <section class="partners section">
+  <section class="partners section" data-section="partners">
     <div class="section-bg-label">07 / PARTNER</div>
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-tag">Con chi lavoriamo</div>
-        <h2 class="section-title">Clienti e<br /><span class="accent-text">partner</span></h2>
-        <p class="section-desc">Operatori industriali, imprese di costruzione ed enti pubblici ci affidano progetti in cui la precisione non è negoziabile.</p>
+        <div class="section-tag" data-edit="partners-tag">Con chi lavoriamo</div>
+        <h2 class="section-title">Clienti e<br data-edit="partners-title-line1"><span class="accent-text">partner</span></h2>
+        <p class="section-desc" data-edit="partners-desc">Operatori industriali, imprese di costruzione ed enti pubblici ci affidano progetti in cui la precisione non è negoziabile.</p>
       </div>
-      <div class="partners-grid reveal">
-        <div class="partner-item">
-          <img src="/assets/partner-adriaport.webp" alt="Adria Port" loading="lazy" />
+      <div class="partners-grid reveal" data-list="partners">
+        <div class="partner-item" data-list-item="partner-1">
+          <img src="/assets/partner-adriaport.webp" alt="Adria Port" loading="lazy" data-edit-href="partner-1-link">
         </div>
-        <div class="partner-item">
-          <img src="/assets/partner-confector.webp" alt="Confector" loading="lazy" />
+        <div class="partner-item" data-list-item="partner-2">
+          <img src="/assets/partner-confector.webp" alt="Confector" loading="lazy" data-edit-href="partner-2-link">
         </div>
-        <div class="partner-item">
-          <img src="/assets/partner-crec.webp" alt="CREG" loading="lazy" />
+        <div class="partner-item" data-list-item="partner-3">
+          <img src="/assets/partner-crec.webp" alt="CREG" loading="lazy" data-edit-href="partner-3-link">
         </div>
-        <div class="partner-item">
-          <img src="/assets/partner-indupro.webp" alt="Indupro" loading="lazy" />
+        <div class="partner-item" data-list-item="partner-4">
+          <img src="/assets/partner-indupro.webp" alt="Indupro" loading="lazy" data-edit-href="partner-4-link">
         </div>
       </div>
-      <p class="partners-more reveal">E molti altri clienti ancora.</p>
+      <p class="partners-more reveal" data-edit="partners-more">E molti altri clienti ancora.</p>
     </div>
   </section>
 
-  <section class="testimonials section">
+  <section class="testimonials section" data-section="testimonials">
     <div class="section-bg-label">08 / FEEDBACK</div>
     <div class="container">
       <div class="section-header reveal">
-        <div class="section-tag">Cosa dicono i clienti</div>
-        <h2 class="section-title">L'esperienza dei nostri <span class="accent-text">partner</span></h2>
+        <div class="section-tag" data-edit="testimonials-tag">Cosa dicono i clienti</div>
+        <h2 class="section-title">L'esperienza dei nostri <span class="accent-text" data-edit="testimonials-title-line1">partner</span></h2>
       </div>
-      <div class="testimonials-grid">
-        <div class="testi-card reveal" style="--delay:0.05s">
+      <div class="testimonials-grid" data-list="testimonials">
+        <div class="testi-card reveal" style="--delay:0.05s" data-list-item="testi-1">
           <div class="testi-quote">"</div>
-          <p>A un certo punto ho chiesto: qual è la versione davvero valida? Loro lo sapevano. Abbiamo aperto il modello e tutto era lì, nominato, stratificato e coordinato.</p>
+          <p data-edit="testi-1-quote">A un certo punto ho chiesto: qual è la versione davvero valida? Loro lo sapevano. Abbiamo aperto il modello e tutto era lì, nominato, stratificato e coordinato.</p>
           <div class="testi-author">
             <div class="testi-avatar" style="background: var(--accent);">K</div>
             <div>
-              <strong>Attila Kovacs</strong>
-              <span>Project Manager, Magyar Epito Zrt.</span>
+              <strong data-edit="testi-1-author">Attila Kovacs</strong>
+              <span data-edit="testi-1-role">Project Manager, Magyar Epito Zrt.</span>
             </div>
           </div>
         </div>
-        <div class="testi-card reveal" style="--delay:0.12s">
+        <div class="testi-card reveal" style="--delay:0.12s" data-list-item="testi-2">
           <div class="testi-quote">"</div>
-          <p>Grazie alle mappe NDVI abbiamo ridotto del 18% l'uso di fitofarmaci. Loricatus non ci ha consegnato una brochure, ma numeri su cui prendere decisioni.</p>
+          <p data-edit="testi-2-quote">Grazie alle mappe NDVI abbiamo ridotto del 18% l'uso di fitofarmaci. Loricatus non ci ha consegnato una brochure, ma numeri su cui prendere decisioni.</p>
           <div class="testi-author">
             <div class="testi-avatar" style="background: #2B3B46;">S</div>
             <div>
-              <strong>Peter Szabo</strong>
-              <span>Agricoltore, 650 ha</span>
+              <strong data-edit="testi-2-author">Peter Szabo</strong>
+              <span data-edit="testi-2-role">Agricoltore, 650 ha</span>
             </div>
           </div>
         </div>
-        <div class="testi-card reveal" style="--delay:0.19s">
+        <div class="testi-card reveal" style="--delay:0.19s" data-list-item="testi-3">
           <div class="testi-quote">"</div>
-          <p>La loro ispezione termica ha individuato il problema di isolamento che non riuscivamo a trovare da tre anni. Ci ha evitato un intervento di ristrutturazione molto costoso.</p>
+          <p data-edit="testi-3-quote">La loro ispezione termica ha individuato il problema di isolamento che non riuscivamo a trovare da tre anni. Ci ha evitato un intervento di ristrutturazione molto costoso.</p>
           <div class="testi-author">
             <div class="testi-avatar" style="background: #3d5a70;">N</div>
             <div>
-              <strong>Eva Nagy</strong>
-              <span>Property Manager, BPM Group</span>
+              <strong data-edit="testi-3-author">Eva Nagy</strong>
+              <span data-edit="testi-3-role">Property Manager, BPM Group</span>
             </div>
           </div>
         </div>
@@ -466,80 +458,79 @@
     </div>
   </section>
 
-  <section id="contact" class="contact section">
+  <section id="contact" class="contact section" data-section="contact">
     <div class="section-bg-label">09 / CONTATTI</div>
     <div class="container contact-container">
       <div class="contact-info reveal">
-        <div class="section-tag">Parliamone</div>
-        <h2 class="section-title">Richiedi un<br /><span class="accent-text">preventivo gratuito</span></h2>
-        <p class="contact-desc">Compila il modulo e ti ricontatteremo. Ogni progetto è diverso, quindi anche la proposta viene costruita sul compito reale.</p>
+        <div class="section-tag" data-edit="contact-tag">Parliamone</div>
+        <h2 class="section-title">Richiedi un<br data-edit="contact-title-line1"><span class="accent-text">preventivo gratuito</span></h2>
+        <p class="contact-desc" data-edit="contact-desc">Compila il modulo e ti ricontatteremo. Ogni progetto è diverso, quindi anche la proposta viene costruita sul compito reale.</p>
         <div class="contact-details">
           <div class="contact-detail-item">
             <div class="contact-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path
-                  d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.3h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6.06 6.06l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.3h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6.06 6.06l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
               </svg>
             </div>
             <div>
-              <strong>Telefono</strong>
-              <a href="tel:+36204931222">+36 20 493 1222</a>
+              <strong data-edit="contact-phone-label">Telefono</strong>
+              <a href="tel:+36204931222" data-edit="contact-phone-value" data-edit-href="contact-phone-href">+36 20 493 1222</a>
             </div>
           </div>
           <div class="contact-detail-item">
             <div class="contact-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                <polyline points="22,6 12,13 2,6" />
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
               </svg>
             </div>
             <div>
-              <strong>Email</strong>
-              <a href="mailto:info@loricatus.hu">info@loricatus.hu</a>
+              <strong data-edit="contact-email-label">Email</strong>
+              <a href="mailto:info@loricatus.hu" data-edit="contact-email-value" data-edit-href="contact-email-href">info@loricatus.hu</a>
             </div>
           </div>
           <div class="contact-detail-item">
             <div class="contact-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                <circle cx="12" cy="10" r="3" />
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
               </svg>
             </div>
             <div>
-              <strong>Ufficio</strong>
-              <span>Budapest, Toldy Ferenc u. 19.<br />3° piano, porta 18, 1015</span>
+              <strong data-edit="contact-address-label">Ufficio</strong>
+              <span data-edit-html="contact-address-value">Budapest, Toldy Ferenc u. 19.<br>3° piano, porta 18, 1015</span>
             </div>
           </div>
         </div>
       </div>
       <div class="contact-form-wrap reveal" style="--delay: 0.1s">
-        <form id="contactForm" class="contact-form" novalidate>
+        <form id="contactForm" class="contact-form" novalidate="">
           <div class="form-row">
             <div class="form-group">
               <label for="name">Nome completo *</label>
-              <input type="text" id="name" name="name" placeholder="Ad esempio: Attila Kovacs" required />
+              <input type="text" id="name" name="name" placeholder="Ad esempio: Attila Kovacs" required="">
               <span class="form-error" id="nameError">Inserisci il tuo nome</span>
             </div>
             <div class="form-group">
               <label for="company">Azienda</label>
-              <input type="text" id="company" name="company" placeholder="Ad esempio: Magyar Epito Zrt." />
+              <input type="text" id="company" name="company" placeholder="Ad esempio: Magyar Epito Zrt.">
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label for="email">Email *</label>
-              <input type="email" id="email" name="email" placeholder="esempio@azienda.com" required />
+              <input type="email" id="email" name="email" placeholder="esempio@azienda.com" required="">
               <span class="form-error" id="emailError">È richiesta un'email valida</span>
             </div>
             <div class="form-group">
               <label for="phone">Telefono</label>
-              <input type="tel" id="phone" name="phone" placeholder="+36 30 ..." />
+              <input type="tel" id="phone" name="phone" placeholder="+36 30 ...">
             </div>
           </div>
           <div class="form-group">
             <label for="service">Di quale servizio hai bisogno? *</label>
-            <select id="service" name="service" required>
-              <option value="" disabled selected>Seleziona un servizio</option>
+            <select id="service" name="service" required="">
+              <option value="" disabled="" selected="">Seleziona un servizio</option>
               <option>Foto e video aerei</option>
               <option>Rilievo e mappatura</option>
               <option>Ispezione di edifici</option>
@@ -552,25 +543,23 @@
           </div>
           <div class="form-group">
             <label for="message">Descrizione del progetto *</label>
-            <textarea id="message" name="message" rows="4"
-              placeholder="Descrivi brevemente il progetto, la località e il risultato atteso..." required></textarea>
+            <textarea id="message" name="message" rows="4" placeholder="Descrivi brevemente il progetto, la località e il risultato atteso..." required=""></textarea>
             <span class="form-error" id="messageError">Descrivi il progetto</span>
           </div>
           <div class="form-check">
-            <input type="checkbox" id="gdpr" name="gdpr" required />
+            <input type="checkbox" id="gdpr" name="gdpr" required="">
             <label for="gdpr">Accetto l'<a href="/it/privacy/">informativa sulla privacy</a> e autorizzo il trattamento dei miei dati. *</label>
           </div>
           <button type="submit" class="btn btn-primary btn-full" id="submitBtn">
             <span id="btnText">Invia la mia richiesta di preventivo</span>
-            <svg id="btnArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2">
-              <path d="M5 12h14M12 5l7 7-7 7" />
+            <svg id="btnArrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"></path>
             </svg>
             <span id="btnLoader" class="btn-loader" style="display:none"></span>
           </button>
           <div id="formSuccess" class="form-success" style="display:none">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="20 6 9 17 4 12" />
+              <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
             <strong>Grazie!</strong> Abbiamo ricevuto la tua richiesta e ti ricontatteremo al più presto.
           </div>
@@ -583,22 +572,22 @@
     <div class="lightbox-backdrop"></div>
     <button class="lightbox-close" aria-label="Chiudi">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="6" x2="6" y2="18" />
-        <line x1="6" y1="6" x2="18" y2="18" />
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
     </button>
     <button class="lightbox-arrow lightbox-prev" aria-label="Precedente">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="15 18 9 12 15 6" />
+        <polyline points="15 18 9 12 15 6"></polyline>
       </svg>
     </button>
     <button class="lightbox-arrow lightbox-next" aria-label="Successivo">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="9 6 15 12 9 18" />
+        <polyline points="9 6 15 12 9 18"></polyline>
       </svg>
     </button>
     <div class="lightbox-content">
-      <img id="lightboxImg" class="lightbox-img" src="" alt="" />
+      <img id="lightboxImg" class="lightbox-img" src="" alt="">
       <div class="lightbox-info">
         <span class="lightbox-cat" id="lightboxCat"></span>
         <h3 id="lightboxTitle"></h3>
@@ -612,39 +601,38 @@
     <div class="footer-top">
       <div class="container footer-grid">
         <div class="footer-brand">
-          <img src="/assets/logo.svg" alt="Loricatus" class="footer-logo" />
-          <p>Servizi professionali con droni per clienti industriali e commerciali. Operazioni conformi alla normativa UE, con piloti abilitati e deliverable orientati al progetto.</p>
+          <img src="/assets/logo.svg" alt="Loricatus" class="footer-logo">
+          <p data-edit="footer-brand-desc">Servizi professionali con droni per clienti industriali e commerciali. Operazioni conformi alla normativa UE, con piloti abilitati e deliverable orientati al progetto.</p>
           <div class="footer-social">
-            <a href="https://www.facebook.com/droneloricatus/mentions/" aria-label="Facebook" class="social-btn" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.facebook.com/droneloricatus/mentions/" aria-label="Facebook" class="social-btn" target="_blank" rel="noopener noreferrer" data-edit-href="footer-social-facebook">
               <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
               </svg>
             </a>
-            <a href="https://hu.linkedin.com/company/loricatus-ltd" aria-label="LinkedIn" class="social-btn" target="_blank" rel="noopener noreferrer">
+            <a href="https://hu.linkedin.com/company/loricatus-ltd" aria-label="LinkedIn" class="social-btn" target="_blank" rel="noopener noreferrer" data-edit-href="footer-social-linkedin">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-                <rect x="2" y="9" width="4" height="12" />
-                <circle cx="4" cy="4" r="2" />
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                <rect x="2" y="9" width="4" height="12"></rect>
+                <circle cx="4" cy="4" r="2"></circle>
               </svg>
             </a>
-            <a href="https://www.instagram.com/loricatus_ltd/" aria-label="Instagram" class="social-btn" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.instagram.com/loricatus_ltd/" aria-label="Instagram" class="social-btn" target="_blank" rel="noopener noreferrer" data-edit-href="footer-social-instagram">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
               </svg>
             </a>
-            <a href="https://www.youtube.com/@loricatuskft.684" aria-label="YouTube" class="social-btn" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.youtube.com/@loricatuskft.684" aria-label="YouTube" class="social-btn" target="_blank" rel="noopener noreferrer" data-edit-href="footer-social-youtube">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path
-                  d="M22.54 6.42a2.78 2.78 0 0 0-1.94-1.96C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.4 19.54C5.12 20 12 20 12 20s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" />
-                <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" />
+                <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-1.96C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.4 19.54C5.12 20 12 20 12 20s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"></path>
+                <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"></polygon>
               </svg>
             </a>
           </div>
         </div>
         <div class="footer-col">
-          <h4>Servizi</h4>
+          <h4 data-edit="footer-col-services-title">Servizi</h4>
           <ul>
             <li><a href="#services">Foto e video aerei</a></li>
             <li><a href="#services">Rilievo e mappatura</a></li>
@@ -656,7 +644,7 @@
           </ul>
         </div>
         <div class="footer-col">
-          <h4>Azienda</h4>
+          <h4 data-edit="footer-col-company-title">Azienda</h4>
           <ul>
             <li><a href="#about">Chi siamo</a></li>
             <li><a href="#equipment">Parco mezzi</a></li>
@@ -668,15 +656,14 @@
           </ul>
         </div>
         <div class="footer-col">
-          <h4>Contatti</h4>
+          <h4 data-edit="footer-col-contact-title">Contatti</h4>
           <ul class="footer-contact-list">
-            <li><a href="tel:+36204931222">+36 20 493 1222</a></li>
-            <li><a href="mailto:info@loricatus.hu">info@loricatus.hu</a></li>
-            <li>Budapest, Toldy Ferenc u. 19.<br />3° piano, porta 18, 1015</li>
-            <li class="footer-hours">Lun-Gio: 8:00-14:30 · Ven: 8:00-14:00</li>
+            <li><a href="tel:+36204931222" data-edit="footer-contact-phone" data-edit-href="footer-contact-phone-href">+36 20 493 1222</a></li>
+            <li><a href="mailto:info@loricatus.hu" data-edit="footer-contact-email" data-edit-href="footer-contact-email-href">info@loricatus.hu</a></li>
+            <li data-edit-html="footer-contact-address">Budapest, Toldy Ferenc u. 19.<br>3° piano, porta 18, 1015</li>
+            <li class="footer-hours" data-edit="footer-contact-hours">Lun-Gio: 8:00-14:30 · Ven: 8:00-14:00</li>
           </ul>
-          <button class="btn btn-primary btn-sm"
-            onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+          <button class="btn btn-primary btn-sm" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
             Richiedi un preventivo
           </button>
         </div>
@@ -684,8 +671,8 @@
     </div>
     <div class="footer-bottom">
       <div class="container footer-bottom-inner">
-        <span>© 2025 Loricatus. Tutti i diritti riservati.</span>
-        <span>Operatore drone UE autorizzato · A2 CofC</span>
+        <span data-edit="footer-copyright">© 2025 Loricatus. Tutti i diritti riservati.</span>
+        <span data-edit="footer-license">Operatore drone UE autorizzato · A2 CofC</span>
       </div>
     </div>
   </footer>
@@ -702,7 +689,7 @@
     </div>
   </div>
 
-  <script src="/script.js?v=6" defer></script>
-</body>
+  <script src="/script.js?v=6" defer=""></script>
 
-</html>
+
+</body></html>

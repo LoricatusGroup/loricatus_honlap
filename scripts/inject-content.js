@@ -8,15 +8,31 @@ const { JSDOM } = require('jsdom')
 
 const SUPABASE_URL = process.env.SUPABASE_URL
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY
+const LOCALE = process.env.LOCALE || 'hu'
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_KEY')
   process.exit(1)
 }
 
+const LOCALE_CONFIG = {
+  hu: { pageSlug: 'index', filePath: 'index.html' },
+  en: { pageSlug: 'index-en', filePath: 'en/index.html' },
+  it: { pageSlug: 'index-it', filePath: 'it/index.html' },
+}
+
+const config = LOCALE_CONFIG[LOCALE]
+if (!config) {
+  console.error(`Unknown LOCALE: ${LOCALE} (expected hu, en, or it)`)
+  process.exit(1)
+}
+console.log(`Publishing locale=${LOCALE} (slug=${config.pageSlug}, file=${config.filePath})`)
+
 async function fetchPageContent() {
   // Use select=* so this still works before the `layout` column migration runs.
-  const url = `${SUPABASE_URL}/rest/v1/page_content?page_slug=eq.index&select=*`
+  const url = `${SUPABASE_URL}/rest/v1/page_content?page_slug=eq.${encodeURIComponent(
+    config.pageSlug,
+  )}&select=*`
   const res = await fetch(url, {
     headers: {
       apikey: SUPABASE_KEY,
@@ -27,7 +43,12 @@ async function fetchPageContent() {
     throw new Error(`Supabase fetch failed: ${res.status} ${await res.text()}`)
   }
   const rows = await res.json()
-  if (!rows.length) throw new Error('No row found for page_slug=index')
+  if (!rows.length) {
+    // No row for this locale yet — nothing to inject, but not an error.
+    // Return a no-op shape so main() exits cleanly.
+    console.log(`No row for page_slug=${config.pageSlug} — nothing to inject`)
+    return { content: {}, theme: {}, layout: {} }
+  }
   return rows[0]
 }
 
@@ -246,7 +267,7 @@ async function main() {
   const theme = pageData.theme || {}
   const layout = pageData.layout || {}
 
-  const htmlPath = path.join(__dirname, '..', 'index.html')
+  const htmlPath = path.join(__dirname, '..', config.filePath)
   const html = fs.readFileSync(htmlPath, 'utf-8')
   const dom = new JSDOM(html)
   const doc = dom.window.document

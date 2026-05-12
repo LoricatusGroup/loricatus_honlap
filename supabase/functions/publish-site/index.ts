@@ -23,9 +23,24 @@ function json(body: unknown, status: number): Response {
   })
 }
 
+const VALID_LOCALES = new Set(['hu', 'en', 'it'])
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: CORS_HEADERS })
+  }
+
+  // Optional body { locale: "hu" | "en" | "it" } — defaults to "hu".
+  let locale = 'hu'
+  try {
+    if (req.headers.get('content-type')?.includes('application/json')) {
+      const body = await req.json()
+      if (body && typeof body.locale === 'string' && VALID_LOCALES.has(body.locale)) {
+        locale = body.locale
+      }
+    }
+  } catch {
+    // Body is optional; ignore parse errors and stick with default
   }
 
   const authHeader = req.headers.get('Authorization')
@@ -79,7 +94,7 @@ Deno.serve(async (req) => {
     },
     body: JSON.stringify({
       event_type: 'publish-site',
-      client_payload: { triggered_by: user.email },
+      client_payload: { triggered_by: user.email, locale },
     }),
   })
 
@@ -88,5 +103,5 @@ Deno.serve(async (req) => {
     return json({ error: `GitHub API error (${ghRes.status}): ${text}` }, 502)
   }
 
-  return json({ success: true, triggered_by: user.email }, 200)
+  return json({ success: true, triggered_by: user.email, locale }, 200)
 })

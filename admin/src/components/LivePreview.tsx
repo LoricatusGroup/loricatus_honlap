@@ -18,6 +18,7 @@ import LiveLayoutOverlay from './LiveLayoutOverlay'
 interface Props {
   fields: EditableField[]
   layout: LayoutState
+  iframeSrc: string
   onFieldChange: (key: string, value: string) => void
   onLayoutChange: (next: LayoutState) => void
 }
@@ -33,6 +34,7 @@ type ModalState =
 export default function LivePreview({
   fields,
   layout,
+  iframeSrc,
   onFieldChange,
   onLayoutChange,
 }: Props) {
@@ -232,9 +234,9 @@ export default function LivePreview({
         </button>
       </div>
       <iframe
-        key={iframeKey}
+        key={`${iframeSrc}-${iframeKey}`}
         ref={iframeRef}
-        src="/"
+        src={iframeSrc}
         title="Live preview"
         onLoad={handleIframeLoad}
         className="w-full h-full bg-white"

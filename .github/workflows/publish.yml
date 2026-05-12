@@ -32,21 +32,24 @@ jobs:
         working-directory: scripts
         run: npm install --no-audit --no-fund
 
-      - name: Inject CMS content into index.html
+      - name: Inject CMS content
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          LOCALE: ${{ github.event.client_payload.locale || 'hu' }}
         run: node scripts/inject-content.js
 
       - name: Commit and push if changed
         run: |
           git config user.name "Loricatus CMS"
           git config user.email "noreply@loricatus.hu"
-          git add index.html
+          # Stage every locale's index.html; only the one we just modified will diff
+          git add index.html en/index.html it/index.html
           if git diff --staged --quiet; then
             echo "No content changes to publish"
           else
             TRIGGERED_BY="${{ github.event.client_payload.triggered_by }}"
-            git commit -m "CMS: update index.html (by ${TRIGGERED_BY:-manual})"
+            LOCALE="${{ github.event.client_payload.locale || 'hu' }}"
+            git commit -m "CMS: update ${LOCALE} content (by ${TRIGGERED_BY:-manual})"
             git push
           fi

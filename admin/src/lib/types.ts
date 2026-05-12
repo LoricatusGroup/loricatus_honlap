@@ -20,6 +20,54 @@ export type PageContent = {
 
 export type ViewMode = 'live' | 'form' | 'layout'
 
+export type Locale = 'hu' | 'en' | 'it'
+
+export interface LocaleConfig {
+  code: Locale
+  label: string
+  flag: string
+  pageSlug: string  // page_content.page_slug value
+  htmlUrl: string   // path used by parseEditableFields / parseLayoutStructure
+  iframeSrc: string // iframe src to load the live page
+  filePath: string  // relative path in the repo for publish (Node-side)
+}
+
+export const LOCALES: LocaleConfig[] = [
+  {
+    code: 'hu',
+    label: 'Magyar',
+    flag: '🇭🇺',
+    pageSlug: 'index',
+    htmlUrl: '../index.html',
+    iframeSrc: '/',
+    filePath: 'index.html',
+  },
+  {
+    code: 'en',
+    label: 'English',
+    flag: '🇬🇧',
+    pageSlug: 'index-en',
+    htmlUrl: '../en/index.html',
+    iframeSrc: '/en/',
+    filePath: 'en/index.html',
+  },
+  {
+    code: 'it',
+    label: 'Italiano',
+    flag: '🇮🇹',
+    pageSlug: 'index-it',
+    htmlUrl: '../it/index.html',
+    iframeSrc: '/it/',
+    filePath: 'it/index.html',
+  },
+]
+
+export function getLocale(code: Locale): LocaleConfig {
+  const config = LOCALES.find((l) => l.code === code)
+  if (!config) throw new Error(`Unknown locale: ${code}`)
+  return config
+}
+
 export type SectionInfo = {
   name: string        // "hero", "services", ...
   label: string       // "Hero", "Szolgáltatások", ...
