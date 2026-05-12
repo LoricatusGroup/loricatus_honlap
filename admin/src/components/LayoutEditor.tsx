@@ -32,6 +32,23 @@ const LABEL_SUFFIXES: Record<string, string[]> = {
   portfolio: ['category', 'title'],
   partners: ['link', 'image'],
   testimonials: ['author', 'quote'],
+  'nav-menu': [],
+}
+
+// Lists whose child elements' data-edit keys don't follow the templateId-suffix
+// prefix convention, so cloneListItem can't produce a clean unique new item.
+// Reorder + hide are still fine on these lists.
+const NON_ADDABLE_LISTS = new Set(['nav-menu'])
+
+// For nav-menu items, use the data-edit text directly as the row label
+// (the field key is "nav-menu-services", not "nav-1-..." — no prefix match).
+function navMenuLabel(itemId: string, fields: EditableField[]): string | null {
+  const navKeys = ['services', 'about', 'equipment', 'portfolio', 'contact']
+  const idx = parseInt(itemId.replace(/^\D+/, ''), 10) - 1
+  const key = navKeys[idx]
+  if (!key) return null
+  const f = fields.find((field) => field.key === `nav-menu-${key}`)
+  return f?.value ?? null
 }
 
 function labelForItem(
@@ -40,6 +57,10 @@ function labelForItem(
   fields: EditableField[],
   fallbackLabels: Record<string, string>,
 ): string {
+  if (listName === 'nav-menu') {
+    const navLabel = navMenuLabel(itemId, fields)
+    if (navLabel) return navLabel
+  }
   if (fallbackLabels[itemId]) return fallbackLabels[itemId]
   const suffixes = LABEL_SUFFIXES[listName] ?? ['title']
   for (const suf of suffixes) {
@@ -163,13 +184,15 @@ export default function LayoutEditor({
                 </div>
               </SortableContext>
             </DndContext>
-            <button
-              type="button"
-              onClick={() => onAddItem(list.name)}
-              className="mt-3 px-3 py-2 text-sm bg-blue-700 hover:bg-blue-600 rounded text-white font-medium"
-            >
-              + Új {list.label.toLowerCase()} hozzáadása
-            </button>
+            {!NON_ADDABLE_LISTS.has(list.name) && (
+              <button
+                type="button"
+                onClick={() => onAddItem(list.name)}
+                className="mt-3 px-3 py-2 text-sm bg-blue-700 hover:bg-blue-600 rounded text-white font-medium"
+              >
+                + Új {list.label.toLowerCase()} hozzáadása
+              </button>
+            )}
           </section>
         )
       })}

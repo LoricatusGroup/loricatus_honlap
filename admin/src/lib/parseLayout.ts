@@ -23,6 +23,7 @@ const SECTION_LABELS: Record<string, string> = {
 }
 
 const LIST_LABELS: Record<string, string> = {
+  'nav-menu': 'Navigáció menüpontok',
   services: 'Szolgáltatás-kártyák',
   'about-values': 'Értékeink-kártyák',
   equipment: 'Eszköz-kártyák',

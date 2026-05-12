@@ -129,17 +129,49 @@ export function attachEditClickHandler(
     // iframe's realm, so they fail `instanceof window.Element` in the parent.
     const target = e.target as { closest?: (sel: string) => Element | null } | null
     if (!target || typeof target.closest !== 'function') return
+
     const editable = target.closest(ATTR_SELECTOR)
-    if (!editable) return
-    // Don't hijack clicks on elements that are currently being edited
-    if (editable.classList.contains('cms-editing')) return
+    // Always neutralise links and buttons inside the iframe (anchor jumps,
+    // inline onclick scrolls, the language switcher pills, etc.) so they
+    // never navigate away or run their site behaviour while editing.
+    const interactive = target.closest('a[href], button')
+
+    if (!editable && !interactive) return
+
+    // Don't hijack a click on the element currently being edited (the user
+    // is just positioning the cursor inside contenteditable).
+    if (editable?.classList.contains('cms-editing')) return
+
     e.preventDefault()
     e.stopPropagation()
-    const info = infoFromElement(editable)
-    if (info) onClick(info)
+    // stopImmediatePropagation so any same-element listeners script.js may
+    // have attached in capture phase ALSO don't fire.
+    e.stopImmediatePropagation?.()
+
+    if (editable) {
+      const info = infoFromElement(editable)
+      if (info) onClick(info)
+    }
   }
   doc.addEventListener('click', handler, { capture: true })
-  return () => doc.removeEventListener('click', handler, { capture: true })
+  // mousedown is also worth swallowing — some scripts use it instead of click
+  // (and contenteditable focus must not race with a parallel mousedown).
+  const mdHandler = (e: MouseEvent) => {
+    const target = e.target as { closest?: (sel: string) => Element | null } | null
+    if (!target || typeof target.closest !== 'function') return
+    if (target.closest('a[href], button')) {
+      // Don't preventDefault on mousedown — that would block contenteditable
+      // focus on editable buttons. Just stop the iframe site's mousedown
+      // listeners from running their own logic.
+      e.stopPropagation()
+      e.stopImmediatePropagation?.()
+    }
+  }
+  doc.addEventListener('mousedown', mdHandler, { capture: true })
+  return () => {
+    doc.removeEventListener('click', handler, { capture: true })
+    doc.removeEventListener('mousedown', mdHandler, { capture: true })
+  }
 }
 
 export function setEditingClass(el: Element, on: boolean): void {
