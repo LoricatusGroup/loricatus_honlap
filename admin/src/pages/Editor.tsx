@@ -20,7 +20,7 @@ import type {
 import { LOCALES, getLocale } from '../lib/types'
 import FieldEditor from '../components/FieldEditor'
 import ThemeEditor from '../components/ThemeEditor'
-import LivePreview from '../components/LivePreview'
+import LivePreview, { type OverlayMode } from '../components/LivePreview'
 import LayoutEditor from '../components/LayoutEditor'
 
 interface Props {
@@ -68,6 +68,15 @@ export default function EditorPage({ user }: Props) {
   const [status, setStatus] = useState<Status>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('live')
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null)
+
+  // Live-preview iframe toolbar state, lifted up so the buttons can live in
+  // the main header (clean iframe area, no overlap with the website content).
+  const [overlayMode, setOverlayMode] = useState<OverlayMode>('edit')
+  const [mobilePreview, setMobilePreview] = useState(false)
+  const [iframeKey, setIframeKey] = useState(0)
+  const reloadIframe = () => setIframeKey((k) => k + 1)
+  const layoutOverlayMode = overlayMode === 'layout'
+  const freeformMode = overlayMode === 'freeform'
 
   // ── Undo/Redo history ──────────────────────────────────────────────────────
   type Snapshot = {
@@ -494,6 +503,72 @@ export default function EditorPage({ user }: Props) {
                 Lista
               </button>
             </div>
+
+            {viewMode === 'live' && (
+              <div className="flex gap-1 items-center text-xs">
+                <button
+                  onClick={() =>
+                    setOverlayMode((m) => (m === 'layout' ? 'edit' : 'layout'))
+                  }
+                  className={`px-2 py-1.5 rounded ${
+                    layoutOverlayMode
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
+                  }`}
+                  title="Drag-and-drop az iframe-en a szekciók és kártyák átrendezésére"
+                >
+                  📐 Elrendezés
+                </button>
+                <button
+                  onClick={() =>
+                    setOverlayMode((m) => (m === 'freeform' ? 'edit' : 'freeform'))
+                  }
+                  className={`px-2 py-1.5 rounded ${
+                    freeformMode
+                      ? 'bg-green-600 text-white'
+                      : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
+                  }`}
+                  title="Pixel-szintű szabad pozícionálás (csak desktop nézet)"
+                >
+                  🎯 Szabad pozíció
+                </button>
+                {freeformMode && Object.keys(layout.positions ?? {}).length > 0 && (
+                  <button
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          'Minden szabad pozíció törlése? Az elemek visszaállnak default helyükre.',
+                        )
+                      ) {
+                        setLayout({ ...layout, positions: {} })
+                      }
+                    }}
+                    className="px-2 py-1.5 bg-amber-700 hover:bg-amber-600 text-white rounded"
+                    title="Minden pozíció törlése"
+                  >
+                    ↺ pozíciók
+                  </button>
+                )}
+                <button
+                  onClick={() => setMobilePreview((m) => !m)}
+                  className={`px-2 py-1.5 rounded ${
+                    mobilePreview
+                      ? 'bg-orange-600 text-white'
+                      : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
+                  }`}
+                  title="375px szélességű iframe — mobil nézet előnézete"
+                >
+                  📱 Mobil
+                </button>
+                <button
+                  onClick={reloadIframe}
+                  className="px-2 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded"
+                  title="Iframe újratöltése"
+                >
+                  ↻
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-2 flex-wrap items-center">
@@ -559,6 +634,9 @@ export default function EditorPage({ user }: Props) {
           fields={fields}
           layout={layout}
           iframeSrc={localeConfig.iframeSrc}
+          overlayMode={overlayMode}
+          mobilePreview={mobilePreview}
+          iframeKey={iframeKey}
           onFieldChange={handleFieldChange}
           onLayoutChange={setLayout}
         />

@@ -16,10 +16,15 @@ import ContentEditModal from './inline/ContentEditModal'
 import LiveLayoutOverlay from './LiveLayoutOverlay'
 import LiveFreeformOverlay from './LiveFreeformOverlay'
 
+export type OverlayMode = 'edit' | 'layout' | 'freeform'
+
 interface Props {
   fields: EditableField[]
   layout: LayoutState
   iframeSrc: string
+  overlayMode: OverlayMode
+  mobilePreview: boolean
+  iframeKey: number
   onFieldChange: (key: string, value: string) => void
   onLayoutChange: (next: LayoutState) => void
 }
@@ -36,6 +41,9 @@ export default function LivePreview({
   fields,
   layout,
   iframeSrc,
+  overlayMode,
+  mobilePreview,
+  iframeKey,
   onFieldChange,
   onLayoutChange,
 }: Props) {
@@ -46,13 +54,9 @@ export default function LivePreview({
   const cleanupClickRef = useRef<(() => void) | null>(null)
   const inlineCleanupRef = useRef<(() => void) | null>(null)
   const [modal, setModal] = useState<ModalState>(null)
-  const [iframeKey, setIframeKey] = useState(0)
   const [iframeReady, setIframeReady] = useState(false)
-  type OverlayMode = 'edit' | 'layout' | 'freeform'
-  const [overlayMode, setOverlayMode] = useState<OverlayMode>('edit')
   const layoutOverlayMode = overlayMode === 'layout'
   const freeformMode = overlayMode === 'freeform'
-  const [mobilePreview, setMobilePreview] = useState(false)
 
   // Keep refs current so click handler always sees latest state
   useEffect(() => {
@@ -207,80 +211,18 @@ export default function LivePreview({
 
   const closeModal = () => setModal(null)
 
-  const reloadIframe = () => {
+  // When the parent bumps iframeKey, tear down handlers + mark not-ready so
+  // handleIframeLoad re-runs cleanly against the fresh document.
+  useEffect(() => {
     cleanupClickRef.current?.()
     cleanupClickRef.current = null
     inlineCleanupRef.current?.()
     inlineCleanupRef.current = null
     setIframeReady(false)
-    setIframeKey((k) => k + 1)
-  }
+  }, [iframeKey])
 
   return (
     <div className="relative w-full h-[calc(100vh-72px)] bg-gray-950">
-      <div className="absolute top-2 right-4 z-[1100] flex gap-2 text-xs">
-        <button
-          onClick={() =>
-            setOverlayMode((m) => (m === 'layout' ? 'edit' : 'layout'))
-          }
-          className={`px-3 py-1 rounded backdrop-blur ${
-            layoutOverlayMode
-              ? 'bg-purple-600 text-white'
-              : 'bg-gray-700/80 hover:bg-gray-600 text-white'
-          }`}
-          title="Drag-and-drop az iframe-en a szekciók és kártyák átrendezésére"
-        >
-          📐 Elrendezés {layoutOverlayMode ? 'BE' : 'KI'}
-        </button>
-        <button
-          onClick={() =>
-            setOverlayMode((m) => (m === 'freeform' ? 'edit' : 'freeform'))
-          }
-          className={`px-3 py-1 rounded backdrop-blur ${
-            freeformMode
-              ? 'bg-green-600 text-white'
-              : 'bg-gray-700/80 hover:bg-gray-600 text-white'
-          }`}
-          title="Pixel-szintű szabad pozícionálás (csak desktop nézet)"
-        >
-          🎯 Szabad pozíció {freeformMode ? 'BE' : 'KI'}
-        </button>
-        {freeformMode && Object.keys(layout.positions ?? {}).length > 0 && (
-          <button
-            onClick={() => {
-              if (
-                window.confirm(
-                  'Minden szabad pozíció törlése? Az elemek visszaállnak default helyükre.',
-                )
-              ) {
-                onLayoutChange({ ...layout, positions: {} })
-              }
-            }}
-            className="px-3 py-1 bg-amber-700/80 hover:bg-amber-600 text-white rounded backdrop-blur"
-            title="Minden pozíció törlése"
-          >
-            ↺ Mindent visszaállít
-          </button>
-        )}
-        <button
-          onClick={() => setMobilePreview((m) => !m)}
-          className={`px-3 py-1 rounded backdrop-blur ${
-            mobilePreview
-              ? 'bg-orange-600 text-white'
-              : 'bg-gray-700/80 hover:bg-gray-600 text-white'
-          }`}
-          title="375px szélességű iframe — mobil nézet előnézete"
-        >
-          📱 Mobil {mobilePreview ? 'BE' : 'KI'}
-        </button>
-        <button
-          onClick={reloadIframe}
-          className="px-3 py-1 bg-gray-700/80 hover:bg-gray-600 text-white rounded backdrop-blur"
-          title="Iframe újratöltése"
-        >
-          ↻ Frissítés
-        </button>
-      </div>
       {overlayMode !== 'edit' && (
         <div
           className={`absolute top-12 left-1/2 -translate-x-1/2 z-[1100] text-xs px-3 py-1.5 rounded-full shadow-md backdrop-blur ${
