@@ -85,9 +85,12 @@ export type LayoutStructure = {
   lists: ListInfo[]
 }
 
+export type Position = { x: number; y: number }
+
 export type LayoutState = {
   section_order: string[]                 // current order (CMS may have reordered)
   section_hidden: Record<string, boolean>
   list_order: Record<string, string[]>    // per-list current order
   item_hidden: Record<string, boolean>
+  positions: Record<string, Position>     // free-form pixel offsets keyed by positionable ID
 }

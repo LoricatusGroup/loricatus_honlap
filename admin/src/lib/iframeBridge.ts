@@ -271,6 +271,104 @@ function reorderChildren(parent: Element | null, idAttr: string, order: string[]
   }
 }
 
+// ──────────────────────────────────────────────────────────────────────────────
+// Positionable IDs — desktop-only free-form pixel offsets via transform
+// ──────────────────────────────────────────────────────────────────────────────
+
+// Threshold below which iframe-side positions are NOT applied (mobile/tablet).
+// Mirrors the @media query used by the publish-time CSS.
+export const POSITION_DESKTOP_MIN_PX = 1024
+
+// Encode the stable position ID for a given DOM element.
+export function positionIdForElement(el: Element): string | null {
+  const s = el.getAttribute('data-section')
+  if (s) return `section:${s}`
+  const li = el.getAttribute('data-list-item')
+  if (li) return `item:${li}`
+  for (const attr of EDIT_ATTRS) {
+    const v = el.getAttribute(attr)
+    if (v) return `edit:${v}`
+  }
+  return null
+}
+
+// Find a DOM element given a position ID encoded by positionIdForElement.
+export function findPositionableElement(doc: Document, id: string): Element | null {
+  const colonIdx = id.indexOf(':')
+  if (colonIdx < 0) return null
+  const kind = id.substring(0, colonIdx)
+  const value = id.substring(colonIdx + 1)
+  if (kind === 'section') {
+    return doc.querySelector(`[data-section="${escapeAttr(value)}"]`)
+  }
+  if (kind === 'item') {
+    return doc.querySelector(`[data-list-item="${escapeAttr(value)}"]`)
+  }
+  if (kind === 'edit') {
+    // Try each data-edit* attribute
+    for (const attr of EDIT_ATTRS) {
+      const el = doc.querySelector(`[${attr}="${escapeAttr(value)}"]`)
+      if (el) return el
+    }
+  }
+  return null
+}
+
+// Enumerate every positionable element in the iframe document. Used by
+// LiveFreeformOverlay to render drag handles. Excludes elements inside <head>.
+export function collectPositionableElements(doc: Document): Array<{
+  id: string
+  el: Element
+}> {
+  const seen = new Set<string>()
+  const result: Array<{ id: string; el: Element }> = []
+  const selector = [
+    '[data-section]',
+    '[data-list-item]',
+    ...EDIT_ATTRS.map((a) => `[${a}]`),
+  ].join(',')
+  doc.querySelectorAll(selector).forEach((el) => {
+    // Skip elements inside <head> (not visible/draggable)
+    if (el.closest('head')) return
+    // Skip the meta/title elements that are technically editable but not visible
+    if (el.tagName === 'TITLE' || el.tagName === 'META') return
+    const id = positionIdForElement(el)
+    if (!id || seen.has(id)) return
+    seen.add(id)
+    result.push({ id, el })
+  })
+  return result
+}
+
+// Apply free-form pixel offsets to elements via inline transform.
+// Iframe-side guard: only apply when iframe viewport is >= 1024px wide so we
+// match the @media query used at publish time.
+export function applyPositions(
+  doc: Document,
+  positions: LayoutState['positions'],
+): void {
+  if (!positions) return
+
+  const win = doc.defaultView
+  const desktop = win ? win.innerWidth >= POSITION_DESKTOP_MIN_PX : true
+
+  // First clear any previous CMS-applied transforms (data-cms-positioned marker)
+  doc.querySelectorAll('[data-cms-positioned]').forEach((el) => {
+    ;(el as HTMLElement).style.transform = ''
+    el.removeAttribute('data-cms-positioned')
+  })
+
+  if (!desktop) return
+
+  for (const [id, pos] of Object.entries(positions)) {
+    if (!pos || (pos.x === 0 && pos.y === 0)) continue
+    const el = findPositionableElement(doc, id)
+    if (!el) continue
+    ;(el as HTMLElement).style.transform = `translate(${pos.x}px, ${pos.y}px)`
+    el.setAttribute('data-cms-positioned', '')
+  }
+}
+
 export function applyLayout(doc: Document, layout: LayoutState): void {
   // 1. Materialize added items (clone templates for items in list_order not yet in DOM)
   materializeAddedItems(doc, layout)
@@ -299,4 +397,6 @@ export function applyLayout(doc: Document, layout: LayoutState): void {
     if (hidden) el.setAttribute('hidden', '')
     else el.removeAttribute('hidden')
   }
+  // 7. Free-form positions (transform: translate)
+  applyPositions(doc, layout.positions)
 }

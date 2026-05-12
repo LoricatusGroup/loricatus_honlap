@@ -102,6 +102,7 @@ export function defaultLayoutState(structure: LayoutStructure): LayoutState {
       structure.lists.map((l) => [l.name, [...l.itemIds]]),
     ),
     item_hidden: {},
+    positions: {},
   }
 }
 
@@ -135,6 +136,7 @@ export function mergeLayoutState(
     section_hidden: saved.section_hidden ?? {},
     list_order,
     item_hidden: saved.item_hidden ?? {},
+    positions: saved.positions ?? {},
   }
 }
 
@@ -255,6 +257,12 @@ export function diffLayoutState(
     Object.entries(state.item_hidden).filter(([, v]) => v),
   )
   if (Object.keys(hiddenItems).length) out.item_hidden = hiddenItems
+
+  // Positions: only include non-zero entries
+  const nonzeroPositions = Object.fromEntries(
+    Object.entries(state.positions ?? {}).filter(([, p]) => p.x !== 0 || p.y !== 0),
+  )
+  if (Object.keys(nonzeroPositions).length) out.positions = nonzeroPositions
 
   return out
 }

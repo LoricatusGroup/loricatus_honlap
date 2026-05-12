@@ -14,6 +14,7 @@ import HrefEditModal from './inline/HrefEditModal'
 import NumberEditModal from './inline/NumberEditModal'
 import ContentEditModal from './inline/ContentEditModal'
 import LiveLayoutOverlay from './LiveLayoutOverlay'
+import LiveFreeformOverlay from './LiveFreeformOverlay'
 
 interface Props {
   fields: EditableField[]
@@ -47,7 +48,10 @@ export default function LivePreview({
   const [modal, setModal] = useState<ModalState>(null)
   const [iframeKey, setIframeKey] = useState(0)
   const [iframeReady, setIframeReady] = useState(false)
-  const [layoutOverlayMode, setLayoutOverlayMode] = useState(false)
+  type OverlayMode = 'edit' | 'layout' | 'freeform'
+  const [overlayMode, setOverlayMode] = useState<OverlayMode>('edit')
+  const layoutOverlayMode = overlayMode === 'layout'
+  const freeformMode = overlayMode === 'freeform'
 
   // Keep refs current so click handler always sees latest state
   useEffect(() => {
@@ -128,9 +132,9 @@ export default function LivePreview({
     markChangedElements(doc, fieldsRef.current)
 
     cleanupClickRef.current?.()
-    // When the user is in layout-overlay mode, suppress click-to-edit so the
-    // overlay drag handles are the only interaction.
-    if (layoutOverlayMode) {
+    // When in layout or freeform mode, suppress click-to-edit so the overlay
+    // drag handles are the only interaction.
+    if (overlayMode !== 'edit') {
       setIframeReady(true)
       return
     }
@@ -153,7 +157,7 @@ export default function LivePreview({
     })
 
     setIframeReady(true)
-  }, [startInlineTextEdit, layoutOverlayMode])
+  }, [startInlineTextEdit, overlayMode])
 
   // Re-attach (or detach) the click handler when overlay mode toggles
   useEffect(() => {
@@ -162,7 +166,7 @@ export default function LivePreview({
     if (!doc) return
     cleanupClickRef.current?.()
     cleanupClickRef.current = null
-    if (layoutOverlayMode) return
+    if (overlayMode !== 'edit') return
     cleanupClickRef.current = attachEditClickHandler(doc, ({ key, type, element }) => {
       const field = fieldsRef.current.find((f) => f.key === key)
       if (!field) return
@@ -180,7 +184,7 @@ export default function LivePreview({
         setModal({ kind: 'content', field })
       }
     })
-  }, [layoutOverlayMode, iframeReady, startInlineTextEdit])
+  }, [overlayMode, iframeReady, startInlineTextEdit])
 
   // Sync iframe DOM with field/layout changes (from any source)
   useEffect(() => {
@@ -215,7 +219,9 @@ export default function LivePreview({
     <div className="relative w-full h-[calc(100vh-72px)] bg-gray-950">
       <div className="absolute top-2 right-4 z-[1100] flex gap-2 text-xs">
         <button
-          onClick={() => setLayoutOverlayMode((m) => !m)}
+          onClick={() =>
+            setOverlayMode((m) => (m === 'layout' ? 'edit' : 'layout'))
+          }
           className={`px-3 py-1 rounded backdrop-blur ${
             layoutOverlayMode
               ? 'bg-purple-600 text-white'
@@ -223,8 +229,38 @@ export default function LivePreview({
           }`}
           title="Drag-and-drop az iframe-en a szekciók és kártyák átrendezésére"
         >
-          📐 Elrendezés mód {layoutOverlayMode ? 'BE' : 'KI'}
+          📐 Elrendezés {layoutOverlayMode ? 'BE' : 'KI'}
         </button>
+        <button
+          onClick={() =>
+            setOverlayMode((m) => (m === 'freeform' ? 'edit' : 'freeform'))
+          }
+          className={`px-3 py-1 rounded backdrop-blur ${
+            freeformMode
+              ? 'bg-green-600 text-white'
+              : 'bg-gray-700/80 hover:bg-gray-600 text-white'
+          }`}
+          title="Pixel-szintű szabad pozícionálás (csak desktop nézet)"
+        >
+          🎯 Szabad pozíció {freeformMode ? 'BE' : 'KI'}
+        </button>
+        {freeformMode && Object.keys(layout.positions ?? {}).length > 0 && (
+          <button
+            onClick={() => {
+              if (
+                window.confirm(
+                  'Minden szabad pozíció törlése? Az elemek visszaállnak default helyükre.',
+                )
+              ) {
+                onLayoutChange({ ...layout, positions: {} })
+              }
+            }}
+            className="px-3 py-1 bg-amber-700/80 hover:bg-amber-600 text-white rounded backdrop-blur"
+            title="Minden pozíció törlése"
+          >
+            ↺ Mindent visszaállít
+          </button>
+        )}
         <button
           onClick={reloadIframe}
           className="px-3 py-1 bg-gray-700/80 hover:bg-gray-600 text-white rounded backdrop-blur"
@@ -248,6 +284,15 @@ export default function LivePreview({
           layout={layout}
           onChange={onLayoutChange}
           enabled={layoutOverlayMode}
+        />
+      )}
+
+      {iframeReady && (
+        <LiveFreeformOverlay
+          iframeRef={iframeRef}
+          layout={layout}
+          onChange={onLayoutChange}
+          enabled={freeformMode}
         />
       )}
 

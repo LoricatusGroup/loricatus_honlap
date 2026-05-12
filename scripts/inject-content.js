@@ -236,11 +236,68 @@ function applyLayout(doc, layout) {
     }
   }
 
+  // 5. Free-form positions — inject a <style> with desktop-only @media rule
+  stats.positions = applyPositionsCss(doc, layout.positions || {})
+
   console.log(
     `Applied layout: ${stats.cloned} added, ${stats.removed} removed, ` +
       `${stats.sectionsReordered} section(s) reordered, ` +
-      `${stats.listsReordered} list(s) reordered, ${stats.hidden} element(s) hidden`,
+      `${stats.listsReordered} list(s) reordered, ${stats.hidden} element(s) hidden, ` +
+      `${stats.positions} position(s) set`,
   )
+}
+
+function selectorForPositionId(id) {
+  const colonIdx = id.indexOf(':')
+  if (colonIdx < 0) return null
+  const kind = id.substring(0, colonIdx)
+  const value = id.substring(colonIdx + 1)
+  // CSS attribute selectors don't need quote-escaping for our [a-z0-9-] keys,
+  // but use them defensively in case of future special chars.
+  const esc = value.replace(/["\\]/g, '\\$&')
+  if (kind === 'section') return `[data-section="${esc}"]`
+  if (kind === 'item') return `[data-list-item="${esc}"]`
+  if (kind === 'edit') {
+    // First match wins — try every data-edit* variant.
+    return [
+      `[data-edit="${esc}"]`,
+      `[data-edit-html="${esc}"]`,
+      `[data-edit-src="${esc}"]`,
+      `[data-edit-href="${esc}"]`,
+      `[data-edit-color="${esc}"]`,
+      `[data-edit-target="${esc}"]`,
+      `[data-edit-content="${esc}"]`,
+    ].join(',')
+  }
+  return null
+}
+
+function applyPositionsCss(doc, positions) {
+  // Remove any previous cms-positions block (so deleted entries actually disappear)
+  const existing = doc.getElementById('cms-positions')
+  if (existing) existing.remove()
+
+  const entries = Object.entries(positions).filter(
+    ([, p]) => p && (p.x !== 0 || p.y !== 0),
+  )
+  if (!entries.length) return 0
+
+  const rules = entries
+    .map(([id, p]) => {
+      const sel = selectorForPositionId(id)
+      if (!sel) return null
+      return `  ${sel} { transform: translate(${p.x}px, ${p.y}px); }`
+    })
+    .filter(Boolean)
+    .join('\n')
+
+  if (!rules) return 0
+
+  const style = doc.createElement('style')
+  style.id = 'cms-positions'
+  style.textContent = `@media (min-width: 1024px) {\n${rules}\n}`
+  doc.head.appendChild(style)
+  return entries.length
 }
 
 function applyTheme(doc, theme) {
