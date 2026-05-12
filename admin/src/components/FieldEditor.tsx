@@ -57,6 +57,25 @@ export default function FieldEditor({ field, onChange }: Props) {
           className="h-10 w-20 bg-gray-700 rounded cursor-pointer"
         />
       )}
+
+      {field.type === 'target' && (
+        <input
+          type="number"
+          value={field.value}
+          onChange={(e) => onChange(e.target.value)}
+          min="0"
+          className="w-32 px-3 py-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      )}
+
+      {field.type === 'content' && (
+        <textarea
+          value={field.value}
+          onChange={(e) => onChange(e.target.value)}
+          rows={2}
+          className="w-full px-3 py-2 bg-gray-700 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      )}
     </div>
   )
 }

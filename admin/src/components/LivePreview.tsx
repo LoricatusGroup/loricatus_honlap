@@ -11,6 +11,8 @@ import {
 import HtmlEditModal from './inline/HtmlEditModal'
 import ImageEditModal from './inline/ImageEditModal'
 import HrefEditModal from './inline/HrefEditModal'
+import NumberEditModal from './inline/NumberEditModal'
+import ContentEditModal from './inline/ContentEditModal'
 
 interface Props {
   fields: EditableField[]
@@ -22,6 +24,8 @@ type ModalState =
   | { kind: 'html'; field: EditableField }
   | { kind: 'image'; field: EditableField }
   | { kind: 'href'; field: EditableField }
+  | { kind: 'number'; field: EditableField }
+  | { kind: 'content'; field: EditableField }
   | null
 
 export default function LivePreview({ fields, layout, onFieldChange }: Props) {
@@ -125,6 +129,10 @@ export default function LivePreview({ fields, layout, onFieldChange }: Props) {
         setModal({ kind: 'image', field })
       } else if (type === 'href') {
         setModal({ kind: 'href', field })
+      } else if (type === 'target') {
+        setModal({ kind: 'number', field })
+      } else if (type === 'content') {
+        setModal({ kind: 'content', field })
       }
     })
 
@@ -200,6 +208,24 @@ export default function LivePreview({ fields, layout, onFieldChange }: Props) {
 
       {modal?.kind === 'href' && (
         <HrefEditModal
+          label={modal.field.label}
+          initialValue={modal.field.value}
+          onSave={(v) => onChangeRef.current(modal.field.key, v)}
+          onClose={closeModal}
+        />
+      )}
+
+      {modal?.kind === 'number' && (
+        <NumberEditModal
+          label={modal.field.label}
+          initialValue={modal.field.value}
+          onSave={(v) => onChangeRef.current(modal.field.key, v)}
+          onClose={closeModal}
+        />
+      )}
+
+      {modal?.kind === 'content' && (
+        <ContentEditModal
           label={modal.field.label}
           initialValue={modal.field.value}
           onSave={(v) => onChangeRef.current(modal.field.key, v)}

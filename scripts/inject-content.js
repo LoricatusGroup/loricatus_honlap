@@ -48,6 +48,10 @@ function applyContent(doc, content) {
       ['data-edit-src', (el) => el.setAttribute('src', value)],
       ['data-edit-href', (el) => el.setAttribute('href', value)],
       ['data-edit-color', (el) => el.setAttribute('style', value)],
+      // data-target only — keep textContent at "0" so the count-up animation
+      // starts from 0 on every page load.
+      ['data-edit-target', (el) => el.setAttribute('data-target', value)],
+      ['data-edit-content', (el) => el.setAttribute('content', value)],
     ]
 
     let hit = false

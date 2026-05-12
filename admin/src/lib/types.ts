@@ -1,4 +1,4 @@
-export type FieldType = 'text' | 'html' | 'image' | 'href' | 'color'
+export type FieldType = 'text' | 'html' | 'image' | 'href' | 'color' | 'target' | 'content'
 
 export type EditableField = {
   key: string

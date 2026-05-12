@@ -6,9 +6,12 @@ const ATTR_TYPE_MAP: Record<string, FieldType> = {
   'data-edit-src': 'image',
   'data-edit-href': 'href',
   'data-edit-color': 'color',
+  'data-edit-target': 'target',
+  'data-edit-content': 'content',
 }
 
 const SECTION_LABELS: Record<string, string> = {
+  page: 'Oldal beállítások (SEO)',
   nav: 'Navigáció',
   hero: 'Hero',
   services: 'Szolgáltatások',
@@ -30,6 +33,8 @@ function readValue(el: Element, type: FieldType): string {
   if (type === 'image') return el.getAttribute('src') || ''
   if (type === 'href') return el.getAttribute('href') || ''
   if (type === 'color') return el.getAttribute('style') || ''
+  if (type === 'target') return el.getAttribute('data-target') || ''
+  if (type === 'content') return el.getAttribute('content') || ''
   return ''
 }
 

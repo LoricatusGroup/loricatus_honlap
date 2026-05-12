@@ -9,6 +9,8 @@ const EDIT_ATTR_BY_TYPE: Record<FieldType, string> = {
   image: 'data-edit-src',
   href: 'data-edit-href',
   color: 'data-edit-color',
+  target: 'data-edit-target',
+  content: 'data-edit-content',
 }
 
 export const EDIT_ATTRS = Object.values(EDIT_ATTR_BY_TYPE)
@@ -73,6 +75,15 @@ export function applyOneEdit(
   else if (type === 'image') el.setAttribute('src', value)
   else if (type === 'href') el.setAttribute('href', value)
   else if (type === 'color') el.setAttribute('style', value)
+  else if (type === 'target') {
+    // data-target drives the stat-count-up animation. Update the attribute
+    // (next page load will animate to the new value) AND the textContent so
+    // the user sees the change immediately in the live preview.
+    el.setAttribute('data-target', value)
+    el.textContent = value
+  } else if (type === 'content') {
+    el.setAttribute('content', value)
+  }
 }
 
 export function applyAllEdits(doc: Document, fields: EditableField[]): void {
