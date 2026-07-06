@@ -64,11 +64,9 @@ Deno.serve(async (req) => {
   }
 
   // Gatekeeping: user must be authorized — either an exact allowlist entry or a
-  // whole-domain entry like '@loricatus.hu'. The logic lives in the DB function
-  // email_is_allowed() so it stays in sync with the table-driven RLS policies.
-  const { data: isAllowed, error: allowErr } = await supabase.rpc('email_is_allowed', {
-    p_email: user.email,
-  })
+  // whole-domain entry like '@loricatus.hu'. current_user_allowed() reads the
+  // caller's own JWT email and mirrors the table-driven RLS policies.
+  const { data: isAllowed, error: allowErr } = await supabase.rpc('current_user_allowed')
 
   if (allowErr || !isAllowed) {
     return json({ error: 'Not authorized to publish' }, 403)
