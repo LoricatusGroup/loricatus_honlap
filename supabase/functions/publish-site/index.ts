@@ -63,14 +63,12 @@ Deno.serve(async (req) => {
     return json({ error: 'Not authenticated' }, 401)
   }
 
-  // Gatekeeping: user must be in allowed_users
-  const { data: allowed } = await supabase
-    .from('allowed_users')
-    .select('email')
-    .ilike('email', user.email)
-    .maybeSingle()
+  // Gatekeeping: user must be authorized — either an exact allowlist entry or a
+  // whole-domain entry like '@loricatus.hu'. current_user_allowed() reads the
+  // caller's own JWT email and mirrors the table-driven RLS policies.
+  const { data: isAllowed, error: allowErr } = await supabase.rpc('current_user_allowed')
 
-  if (!allowed) {
+  if (allowErr || !isAllowed) {
     return json({ error: 'Not authorized to publish' }, 403)
   }
 
