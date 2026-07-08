@@ -160,18 +160,24 @@ export function attachEditClickHandler(
     const target = e.target as { closest?: (sel: string) => Element | null } | null
     if (!target || typeof target.closest !== 'function') return
 
-    const editable = target.closest(ATTR_SELECTOR)
-    // Always neutralise links and buttons inside the iframe (anchor jumps,
-    // inline onclick scrolls, the language switcher pills, etc.) so they
-    // never navigate away or run their site behaviour while editing.
-    const interactive = target.closest('a[href], button')
-
-    if (!editable && !interactive) return
+    // Resolve the editable under the cursor. First the target's ancestor chain;
+    // if that finds nothing (e.g. the click landed on a caption overlay painted
+    // ON TOP of an editable image, as in the portfolio cards), scan the full
+    // paint stack at the click point so the covered image is still reachable.
+    let editable = target.closest(ATTR_SELECTOR)
+    if (!editable && typeof doc.elementsFromPoint === 'function') {
+      const stack = doc.elementsFromPoint(e.clientX, e.clientY)
+      editable = stack.find((el) => (el as Element).matches?.(ATTR_SELECTOR)) ?? null
+    }
 
     // Don't hijack a click on the element currently being edited (the user
     // is just positioning the cursor inside contenteditable).
     if (editable?.classList.contains('cms-editing')) return
 
+    // In edit mode NO site behaviour should run — swallow every click so the
+    // page's own handlers (lightbox gallery, smooth-scroll, nav jumps, inline
+    // onclick, form submit, …) never fire and trap the editor. Open the field
+    // editor when the click resolved to an editable element.
     e.preventDefault()
     e.stopPropagation()
     e.stopImmediatePropagation?.()
