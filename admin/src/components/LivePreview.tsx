@@ -3,6 +3,7 @@ import type { EditableField, LayoutState } from '../lib/types'
 import {
   applyAllEdits,
   applyLayout,
+  applyThemeToIframe,
   attachEditClickHandler,
   injectEditorStyles,
   markChangedElements,
@@ -21,6 +22,7 @@ export type OverlayMode = 'edit' | 'layout' | 'freeform'
 interface Props {
   fields: EditableField[]
   layout: LayoutState
+  theme: Record<string, string>
   iframeSrc: string
   overlayMode: OverlayMode
   mobilePreview: boolean
@@ -40,6 +42,7 @@ type ModalState =
 export default function LivePreview({
   fields,
   layout,
+  theme,
   iframeSrc,
   overlayMode,
   mobilePreview,
@@ -50,6 +53,7 @@ export default function LivePreview({
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const fieldsRef = useRef(fields)
   const layoutRef = useRef(layout)
+  const themeRef = useRef(theme)
   const onChangeRef = useRef(onFieldChange)
   const cleanupClickRef = useRef<(() => void) | null>(null)
   const inlineCleanupRef = useRef<(() => void) | null>(null)
@@ -62,8 +66,9 @@ export default function LivePreview({
   useEffect(() => {
     fieldsRef.current = fields
     layoutRef.current = layout
+    themeRef.current = theme
     onChangeRef.current = onFieldChange
-  }, [fields, layout, onFieldChange])
+  }, [fields, layout, theme, onFieldChange])
 
   const startInlineTextEdit = useCallback((element: Element, field: EditableField) => {
     // Tear down any previous inline edit
@@ -135,6 +140,7 @@ export default function LivePreview({
     applyLayout(doc, layoutRef.current)
     applyAllEdits(doc, fieldsRef.current)
     markChangedElements(doc, fieldsRef.current)
+    applyThemeToIframe(doc, themeRef.current)
 
     cleanupClickRef.current?.()
     // When in layout or freeform mode, suppress click-to-edit so the overlay
@@ -191,7 +197,7 @@ export default function LivePreview({
     })
   }, [overlayMode, iframeReady, startInlineTextEdit])
 
-  // Sync iframe DOM with field/layout changes (from any source)
+  // Sync iframe DOM with field/layout/theme changes (from any source)
   useEffect(() => {
     if (!iframeReady) return
     const doc = iframeRef.current?.contentDocument
@@ -199,7 +205,8 @@ export default function LivePreview({
     applyLayout(doc, layout)
     applyAllEdits(doc, fields)
     markChangedElements(doc, fields)
-  }, [fields, layout, iframeReady])
+    applyThemeToIframe(doc, theme)
+  }, [fields, layout, theme, iframeReady])
 
   // Cleanup on unmount
   useEffect(() => {

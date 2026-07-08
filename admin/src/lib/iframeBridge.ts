@@ -39,6 +39,15 @@ ${EDIT_ATTRS.map((a) => `[${a}]:hover`).join(',')} {
 .cms-changed {
   outline-color: #f59e0b !important;
 }
+/* Reveal the service "Bővebben" disclosure and its body — even when empty or
+   collapsed — so a description can be added/edited in the CMS, although the
+   published page hides an empty one. */
+details.service-more,
+details.service-more > .service-body { display: block !important; }
+[data-edit-html]:empty {
+  min-height: 1.2em;
+  min-width: 6em;
+}
 `
 
 export function injectEditorStyles(doc: Document): void {
@@ -103,6 +112,27 @@ export function markChangedElements(doc: Document, fields: EditableField[]): voi
       el?.classList.add('cms-changed')
     }
   }
+}
+
+// Live-preview the theme colours in the iframe by writing the same
+// <style id="cms-theme"> block that scripts/inject-content.js bakes at publish
+// time: `:root { --<key>: <value> }` for each provided key. Passing an empty
+// theme clears the block (falls back to style.css defaults) — this also wipes
+// any stale block already baked into the loaded page.
+export function applyThemeToIframe(doc: Document, theme: Record<string, string>): void {
+  const keys = Object.keys(theme).filter((k) => theme[k])
+  let styleEl = doc.getElementById('cms-theme') as HTMLStyleElement | null
+  if (!keys.length) {
+    if (styleEl) styleEl.textContent = ''
+    return
+  }
+  if (!styleEl) {
+    styleEl = doc.createElement('style')
+    styleEl.id = 'cms-theme'
+    doc.head.appendChild(styleEl)
+  }
+  const rules = keys.map((k) => `  --${k}: ${theme[k]};`).join('\n')
+  styleEl.textContent = `:root {\n${rules}\n}`
 }
 
 export interface IframeClickInfo {

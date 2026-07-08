@@ -1497,3 +1497,48 @@ html[lang="it"] .nav-cta {
   .cert-pill { width: 100%; }
   .footer-top { padding: 48px 0 36px; }
 }
+
+/* ── SERVICE "BŐVEBBEN" (expandable rich description) ─────────────── */
+.service-more { margin-bottom: 24px; }
+.service-more > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  list-style: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 0.2s;
+}
+.service-more > summary::-webkit-details-marker { display: none; }
+.service-more > summary::after {
+  content: '↓';
+  font-size: 0.85em;
+  transition: transform 0.25s var(--ease);
+}
+.service-more[open] > summary::after { transform: rotate(180deg); }
+.service-more > summary:hover { color: var(--text); }
+.service-body {
+  margin-top: 14px;
+  font-size: 0.875rem;
+  color: var(--muted);
+  line-height: 1.72;
+}
+.service-body > *:last-child { margin-bottom: 0; }
+.service-body p { margin-bottom: 10px; }
+.service-body ul,
+.service-body ol { padding-left: 18px; margin-bottom: 10px; }
+.service-body ul { list-style: disc; }
+.service-body ol { list-style: decimal; }
+.service-body li { margin-bottom: 4px; }
+.service-body strong { color: var(--text); font-weight: 600; }
+.service-body a {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+/* Hide the disclosure entirely when the CMS body has no content. */
+.service-more:has(.service-body:empty) { display: none; }
