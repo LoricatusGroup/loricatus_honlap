@@ -46,27 +46,51 @@ export default function ImageUploader({ value, onChange }: Props) {
   }
 
   return (
-    <div className="space-y-2">
-      {value && (
-        <img
-          src={value}
-          alt=""
-          className="max-w-xs h-32 object-cover rounded border border-gray-600"
-          onError={(e) => {
-            ;(e.target as HTMLImageElement).style.opacity = '0.3'
-          }}
-        />
-      )}
+    <div className="space-y-3">
+      {/* Framed 16:9 preview */}
+      <div
+        className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/25"
+        style={{ aspectRatio: '16 / 9' }}
+      >
+        {value ? (
+          <img
+            src={value}
+            alt=""
+            className="h-full w-full object-cover"
+            onError={(e) => {
+              ;(e.target as HTMLImageElement).style.opacity = '0.25'
+            }}
+          />
+        ) : (
+          <div className="grid h-full place-items-center text-center text-xs text-gray-500">
+            <div>
+              <div className="mb-1 text-2xl opacity-50">🖼️</div>
+              Nincs kép megadva
+            </div>
+          </div>
+        )}
+        {uploading && (
+          <div className="absolute inset-0 grid place-items-center bg-black/50 text-sm text-white">
+            Feltöltés…
+          </div>
+        )}
+      </div>
+
+      {/* URL + upload */}
       <div className="flex gap-2">
         <input
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Kép URL vagy töltsd fel jobbra →"
-          className="flex-1 px-3 py-2 bg-gray-700 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Kép URL, vagy tölts fel jobbra →"
+          className="cms-input flex-1"
         />
-        <label className="cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm whitespace-nowrap">
-          {uploading ? 'Feltöltés…' : 'Feltöltés'}
+        <label
+          className={`cms-btn-secondary shrink-0 ${
+            uploading ? 'pointer-events-none opacity-60' : ''
+          }`}
+        >
+          {uploading ? 'Feltöltés…' : '⬆ Feltöltés'}
           <input
             type="file"
             accept="image/*"
@@ -76,6 +100,7 @@ export default function ImageUploader({ value, onChange }: Props) {
           />
         </label>
       </div>
+
       {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   )
