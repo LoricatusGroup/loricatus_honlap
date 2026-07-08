@@ -10,11 +10,6 @@ const SUPABASE_URL = process.env.SUPABASE_URL
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY
 const LOCALE = process.env.LOCALE || 'hu'
 
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_KEY')
-  process.exit(1)
-}
-
 const LOCALE_CONFIG = {
   hu: { pageSlug: 'index', filePath: 'index.html' },
   en: { pageSlug: 'index-en', filePath: 'en/index.html' },
@@ -22,11 +17,6 @@ const LOCALE_CONFIG = {
 }
 
 const config = LOCALE_CONFIG[LOCALE]
-if (!config) {
-  console.error(`Unknown LOCALE: ${LOCALE} (expected hu, en, or it)`)
-  process.exit(1)
-}
-console.log(`Publishing locale=${LOCALE} (slug=${config.pageSlug}, file=${config.filePath})`)
 
 async function fetchPageContent() {
   // Use select=* so this still works before the `layout` column migration runs.
@@ -183,6 +173,85 @@ function removeStrayItems(doc, layout) {
   return removed
 }
 
+// Instance ids of catalog sections inserted via the editor all start with this,
+// so removeStraySections can tell them apart from the original HTML sections.
+const ADDED_SECTION_PREFIX = 'asec-'
+
+// Load a catalog partial (sections/<template>.html), import its [data-section]
+// root into `doc`, and rewrite data-section + every data-edit* / data-list-item
+// key from the template prefix to the instance id.
+function buildAddedSection(doc, template, id) {
+  const partialPath = path.join(__dirname, '..', 'sections', `${template}.html`)
+  let partialHtml
+  try {
+    partialHtml = fs.readFileSync(partialPath, 'utf-8')
+  } catch {
+    console.warn(`  ! section template not found: sections/${template}.html`)
+    return null
+  }
+  const src = JSDOM.fragment(partialHtml).querySelector('[data-section]')
+  if (!src) {
+    console.warn(`  ! partial ${template} has no [data-section] root`)
+    return null
+  }
+  const templateName = src.getAttribute('data-section')
+  const el = doc.importNode(src, true)
+  el.setAttribute('data-section', id)
+  const prefix = templateName + '-'
+  const rewrite = (node) => {
+    if (!node.getAttribute) return
+    for (const attr of EDIT_ATTRS_LIST) {
+      const v = node.getAttribute(attr)
+      if (v && v.startsWith(prefix)) node.setAttribute(attr, id + '-' + v.substring(prefix.length))
+    }
+    const li = node.getAttribute('data-list-item')
+    if (li && li.startsWith(prefix)) node.setAttribute('data-list-item', id + '-' + li.substring(prefix.length))
+    const dl = node.getAttribute('data-list')
+    if (dl && dl.startsWith(prefix)) node.setAttribute('data-list', id + '-' + dl.substring(prefix.length))
+  }
+  rewrite(el)
+  el.querySelectorAll('*').forEach(rewrite)
+  return el
+}
+
+// Insert catalog sections listed in layout.added_sections (idempotent). New
+// sections go just before <footer> so they land in the content flow;
+// section_order (if set) then reorders them into their exact place.
+function materializeAddedSections(doc, layout) {
+  const added = Array.isArray(layout.added_sections) ? layout.added_sections : []
+  let count = 0
+  const footer = doc.querySelector('footer')
+  for (const entry of added) {
+    if (!entry || !entry.id || !entry.template) continue
+    if (doc.querySelector(`[data-section="${escapeAttr(entry.id)}"]`)) continue
+    const el = buildAddedSection(doc, entry.template, entry.id)
+    if (!el) continue
+    if (footer) doc.body.insertBefore(el, footer)
+    else doc.body.appendChild(el)
+    count++
+  }
+  return count
+}
+
+// Remove baked added-sections (asec-*) that are no longer in added_sections
+// (i.e. the editor removed them).
+function removeStraySections(doc, layout) {
+  const keep = new Set(
+    (Array.isArray(layout.added_sections) ? layout.added_sections : [])
+      .map((e) => e && e.id)
+      .filter(Boolean),
+  )
+  let removed = 0
+  doc.querySelectorAll('[data-section]').forEach((el) => {
+    const id = el.getAttribute('data-section')
+    if (id && id.startsWith(ADDED_SECTION_PREFIX) && !keep.has(id)) {
+      el.remove()
+      removed++
+    }
+  })
+  return removed
+}
+
 function applyLayout(doc, layout) {
   if (!layout || typeof layout !== 'object') return
   const stats = { sectionsReordered: 0, listsReordered: 0, hidden: 0, cloned: 0, removed: 0 }
@@ -319,6 +388,16 @@ function applyTheme(doc, theme) {
 }
 
 async function main() {
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_KEY')
+    process.exit(1)
+  }
+  if (!config) {
+    console.error(`Unknown LOCALE: ${LOCALE} (expected hu, en, or it)`)
+    process.exit(1)
+  }
+  console.log(`Publishing locale=${LOCALE} (slug=${config.pageSlug}, file=${config.filePath})`)
+
   const pageData = await fetchPageContent()
   const content = pageData.content || {}
   const theme = pageData.theme || {}
@@ -329,11 +408,16 @@ async function main() {
   const dom = new JSDOM(html)
   const doc = dom.window.document
 
-  // Materialize cloned items first, so applyContent can target their fields.
+  // Materialize cloned items + catalog sections first, so applyContent can
+  // target their fields.
   const clonedCount = materializeAddedItems(doc, layout)
   const removedCount = removeStrayItems(doc, layout)
+  const sectionCount = materializeAddedSections(doc, layout)
+  const straySectionCount = removeStraySections(doc, layout)
   if (clonedCount) console.log(`Cloned ${clonedCount} new list item(s) from templates`)
   if (removedCount) console.log(`Removed ${removedCount} deleted list item(s)`)
+  if (sectionCount) console.log(`Inserted ${sectionCount} catalog section(s)`)
+  if (straySectionCount) console.log(`Removed ${straySectionCount} deleted section(s)`)
 
   const { applied, missing } = applyContent(doc, content)
   console.log(`Applied ${applied} content overrides`)
@@ -354,7 +438,22 @@ async function main() {
   console.log(`Wrote ${htmlPath}`)
 }
 
-main().catch((err) => {
-  console.error(err)
-  process.exit(1)
-})
+// Run only when invoked directly (CI). When required as a module (tests), the
+// functions above are exported instead of executing the publish flow.
+if (require.main === module) {
+  main().catch((err) => {
+    console.error(err)
+    process.exit(1)
+  })
+}
+
+module.exports = {
+  applyContent,
+  applyLayout,
+  materializeAddedItems,
+  removeStrayItems,
+  materializeAddedSections,
+  removeStraySections,
+  buildAddedSection,
+  applyTheme,
+}

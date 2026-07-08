@@ -16,8 +16,15 @@ import type {
   LayoutState,
   LayoutStructure,
   ViewMode,
+  CatalogEntry,
 } from '../lib/types'
 import { LOCALES, getLocale } from '../lib/types'
+import {
+  loadCatalog,
+  loadPartial,
+  parsePartialFields,
+  generateSectionId,
+} from '../lib/sectionCatalog'
 import { sanitizeTheme, themesEqual } from '../lib/theme'
 import FieldEditor from '../components/FieldEditor'
 import ThemeEditor from '../components/ThemeEditor'
@@ -76,6 +83,11 @@ export default function EditorPage({ user, membership }: Props) {
   const [status, setStatus] = useState<Status>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('live')
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null)
+
+  // Section catalog (curated block library). `sectionPartials` caches fetched
+  // partial HTML per template so the preview can materialize added sections.
+  const [catalog, setCatalog] = useState<CatalogEntry[]>([])
+  const [sectionPartials, setSectionPartials] = useState<Record<string, string>>({})
 
   // Live-preview iframe toolbar state, lifted up so the buttons can live in
   // the main header (clean iframe area, no overlap with the website content).
@@ -140,7 +152,30 @@ export default function EditorPage({ user, membership }: Props) {
           savedContent,
         )
 
-        setFields([...mergedFields, ...virtualFields])
+        // Added catalog sections not yet baked into the HTML: fetch their
+        // partials + synthesize editable fields (baked ones already come from
+        // htmlFields / structure). The partials cache lets the preview render them.
+        const cat = await loadCatalog().catch(() => [] as CatalogEntry[])
+        const bakedSections = new Set(layoutStructure.sections.map((s) => s.name))
+        const partials: Record<string, string> = {}
+        const sectionFields: EditableField[] = []
+        for (const entry of merged.added_sections) {
+          if (bakedSections.has(entry.id)) continue
+          try {
+            const html = await loadPartial(entry.template)
+            partials[entry.template] = html
+            const label = cat.find((c) => c.template === entry.template)?.label ?? 'Új szekció'
+            sectionFields.push(...parsePartialFields(html, entry.id, label, savedContent))
+          } catch {
+            /* partial unavailable — skip this section */
+          }
+        }
+
+        if (cancelled) return
+
+        setCatalog(cat)
+        setSectionPartials(partials)
+        setFields([...mergedFields, ...virtualFields, ...sectionFields])
         const loadedThemeSan = sanitizeTheme(pageData?.theme)
         setTheme(loadedThemeSan)
         setLoadedTheme(loadedThemeSan)
@@ -325,6 +360,53 @@ export default function EditorPage({ user, membership }: Props) {
           [listName]: order.filter((id) => id !== itemId),
         },
         item_hidden: nextHidden,
+      }
+    })
+  }
+
+  // Insert a catalog section: fetch its partial, synthesize its fields, and add
+  // it to added_sections + the section order. The preview picks it up via the
+  // sectionPartials cache. Advanced-only (gated in the UI + by save_page).
+  const handleAddSection = async (template: string) => {
+    if (!layout) return
+    try {
+      const html = await loadPartial(template)
+      const id = generateSectionId()
+      const label = catalog.find((c) => c.template === template)?.label ?? 'Új szekció'
+      const newFields = parsePartialFields(html, id, label, {})
+      setSectionPartials((prev) => ({ ...prev, [template]: html }))
+      setFields((prev) => [...prev, ...newFields])
+      setLayout((prev) =>
+        prev
+          ? {
+              ...prev,
+              added_sections: [...prev.added_sections, { id, template }],
+              section_order: [...prev.section_order, id],
+            }
+          : prev,
+      )
+      setStatus({ type: 'success', text: `„${label}" szekció beszúrva — rendezd át és mentsd el.` })
+    } catch (err) {
+      setStatus({
+        type: 'error',
+        text: `Szekció betöltése sikertelen: ${err instanceof Error ? err.message : String(err)}`,
+      })
+    }
+  }
+
+  const handleRemoveSection = (id: string) => {
+    if (!layout) return
+    if (!window.confirm('Biztosan törlöd ezt a beszúrt szekciót?')) return
+    setFields((prev) => prev.filter((f) => f.key !== id && !f.key.startsWith(id + '-')))
+    setLayout((prev) => {
+      if (!prev) return prev
+      const nextHidden = { ...prev.section_hidden }
+      delete nextHidden[id]
+      return {
+        ...prev,
+        added_sections: prev.added_sections.filter((s) => s.id !== id),
+        section_order: prev.section_order.filter((s) => s !== id),
+        section_hidden: nextHidden,
       }
     })
   }
@@ -689,6 +771,7 @@ export default function EditorPage({ user, membership }: Props) {
           overlayMode={overlayMode}
           mobilePreview={mobilePreview}
           iframeKey={iframeKey}
+          sectionPartials={sectionPartials}
           onFieldChange={handleFieldChange}
           onLayoutChange={setLayout}
         />
@@ -731,9 +814,12 @@ export default function EditorPage({ user, membership }: Props) {
           structure={structure}
           state={layout}
           fields={fields}
+          catalog={catalog}
           onChange={setLayout}
           onAddItem={handleAddItem}
           onDeleteItem={handleDeleteItem}
+          onAddSection={handleAddSection}
+          onRemoveSection={handleRemoveSection}
         />
       )}
 

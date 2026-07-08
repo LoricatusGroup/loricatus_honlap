@@ -12,6 +12,7 @@ const ATTR_TYPE_MAP: Record<string, FieldType> = {
 
 const SECTION_LABELS: Record<string, string> = {
   page: 'Oldal beállítások (SEO)',
+  og: 'Közösségi megosztás (OG)',
   nav: 'Navigáció',
   hero: 'Hero',
   services: 'Szolgáltatások',

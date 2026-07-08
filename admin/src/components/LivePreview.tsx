@@ -27,6 +27,7 @@ interface Props {
   overlayMode: OverlayMode
   mobilePreview: boolean
   iframeKey: number
+  sectionPartials: Record<string, string>
   onFieldChange: (key: string, value: string) => void
   onLayoutChange: (next: LayoutState) => void
 }
@@ -47,6 +48,7 @@ export default function LivePreview({
   overlayMode,
   mobilePreview,
   iframeKey,
+  sectionPartials,
   onFieldChange,
   onLayoutChange,
 }: Props) {
@@ -54,6 +56,7 @@ export default function LivePreview({
   const fieldsRef = useRef(fields)
   const layoutRef = useRef(layout)
   const themeRef = useRef(theme)
+  const partialsRef = useRef(sectionPartials)
   const onChangeRef = useRef(onFieldChange)
   const cleanupClickRef = useRef<(() => void) | null>(null)
   const inlineCleanupRef = useRef<(() => void) | null>(null)
@@ -67,8 +70,9 @@ export default function LivePreview({
     fieldsRef.current = fields
     layoutRef.current = layout
     themeRef.current = theme
+    partialsRef.current = sectionPartials
     onChangeRef.current = onFieldChange
-  }, [fields, layout, theme, onFieldChange])
+  }, [fields, layout, theme, sectionPartials, onFieldChange])
 
   const startInlineTextEdit = useCallback((element: Element, field: EditableField) => {
     // Tear down any previous inline edit
@@ -137,7 +141,7 @@ export default function LivePreview({
     if (!doc) return
 
     injectEditorStyles(doc)
-    applyLayout(doc, layoutRef.current)
+    applyLayout(doc, layoutRef.current, partialsRef.current)
     applyAllEdits(doc, fieldsRef.current)
     markChangedElements(doc, fieldsRef.current)
     applyThemeToIframe(doc, themeRef.current)
@@ -202,11 +206,11 @@ export default function LivePreview({
     if (!iframeReady) return
     const doc = iframeRef.current?.contentDocument
     if (!doc) return
-    applyLayout(doc, layout)
+    applyLayout(doc, layout, sectionPartials)
     applyAllEdits(doc, fields)
     markChangedElements(doc, fields)
     applyThemeToIframe(doc, theme)
-  }, [fields, layout, theme, iframeReady])
+  }, [fields, layout, theme, sectionPartials, iframeReady])
 
   // Cleanup on unmount
   useEffect(() => {
