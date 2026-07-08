@@ -1,0 +1,17 @@
+[
+  {
+    "template": "cta",
+    "label": "Ajánlatkérő sáv",
+    "description": "Rövid felhívás egy gombbal — a látogatót a kapcsolat felé tereli."
+  },
+  {
+    "template": "faq",
+    "label": "GYIK",
+    "description": "Gyakran ismételt kérdések, lenyíló válaszokkal."
+  },
+  {
+    "template": "text",
+    "label": "Szöveges szekció",
+    "description": "Cím + szabadon formázható szövegtörzs bármilyen tartalomhoz."
+  }
+]

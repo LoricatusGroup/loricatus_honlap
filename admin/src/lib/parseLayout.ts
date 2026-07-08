@@ -103,6 +103,7 @@ export function defaultLayoutState(structure: LayoutStructure): LayoutState {
     ),
     item_hidden: {},
     positions: {},
+    added_sections: [],
   }
 }
 
@@ -113,8 +114,17 @@ export function mergeLayoutState(
   const def = defaultLayoutState(structure)
   if (!saved) return def
 
-  // section_order: keep saved entries that still exist, append any new sections
-  const validSections = new Set(structure.sections.map((s) => s.name))
+  // Added catalog sections: keep the saved list. Their ids are valid section
+  // ids even before they are baked into the HTML (so they survive section_order
+  // filtering below).
+  const added = Array.isArray(saved.added_sections) ? saved.added_sections : []
+
+  // section_order: keep saved entries that still exist (original sections OR
+  // added-section instances), append any new originals.
+  const validSections = new Set([
+    ...structure.sections.map((s) => s.name),
+    ...added.map((a) => a.id),
+  ])
   const savedSectionOrder = Array.isArray(saved.section_order) ? saved.section_order : []
   const filtered = savedSectionOrder.filter((s) => validSections.has(s))
   for (const s of def.section_order) if (!filtered.includes(s)) filtered.push(s)
@@ -137,6 +147,7 @@ export function mergeLayoutState(
     list_order,
     item_hidden: saved.item_hidden ?? {},
     positions: saved.positions ?? {},
+    added_sections: added,
   }
 }
 
@@ -263,6 +274,11 @@ export function diffLayoutState(
     Object.entries(state.positions ?? {}).filter(([, p]) => p.x !== 0 || p.y !== 0),
   )
   if (Object.keys(nonzeroPositions).length) out.positions = nonzeroPositions
+
+  // Added catalog sections
+  if (Array.isArray(state.added_sections) && state.added_sections.length) {
+    out.added_sections = state.added_sections
+  }
 
   return out
 }

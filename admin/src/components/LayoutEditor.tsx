@@ -13,15 +13,18 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import type { EditableField, LayoutState, LayoutStructure } from '../lib/types'
+import type { CatalogEntry, EditableField, LayoutState, LayoutStructure } from '../lib/types'
 
 interface Props {
   structure: LayoutStructure
   state: LayoutState
   fields: EditableField[]
+  catalog: CatalogEntry[]
   onChange: (next: LayoutState) => void
   onAddItem: (listName: string) => void
   onDeleteItem: (listName: string, itemId: string) => void
+  onAddSection: (template: string) => void
+  onRemoveSection: (id: string) => void
 }
 
 // Item-label priority by list type — first matching field's value is the label
@@ -75,11 +78,19 @@ export default function LayoutEditor({
   structure,
   state,
   fields,
+  catalog,
   onChange,
   onAddItem,
   onDeleteItem,
+  onAddSection,
+  onRemoveSection,
 }: Props) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+
+  // Added catalog sections (asec-*): id → catalog entry, for labels + removal.
+  const addedById = new Map(state.added_sections.map((a) => [a.id, a]))
+  const catalogLabel = (template: string) =>
+    catalog.find((c) => c.template === template)?.label ?? 'Szekció'
 
   const setSectionOrder = (next: string[]) => onChange({ ...state, section_order: next })
   const setListOrder = (listName: string, next: string[]) =>
@@ -123,19 +134,43 @@ export default function LayoutEditor({
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onSectionDragEnd}>
           <SortableContext items={state.section_order} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
-              {state.section_order.map((name) => (
-                <SortableRow
-                  key={name}
-                  id={name}
-                  label={sectionLabels.get(name) ?? name}
-                  hidden={!!state.section_hidden[name]}
-                  onToggleHidden={(h) => setSectionHidden(name, h)}
-                  large
-                />
-              ))}
+              {state.section_order.map((name) => {
+                const added = addedById.get(name)
+                return (
+                  <SortableRow
+                    key={name}
+                    id={name}
+                    label={added ? catalogLabel(added.template) : sectionLabels.get(name) ?? name}
+                    hidden={!!state.section_hidden[name]}
+                    onToggleHidden={(h) => setSectionHidden(name, h)}
+                    onDelete={added ? () => onRemoveSection(name) : undefined}
+                    addedBadge={!!added}
+                    large
+                  />
+                )
+              })}
             </div>
           </SortableContext>
         </DndContext>
+
+        {catalog.length > 0 && (
+          <div className="mt-5 border-t border-gray-700 pt-4">
+            <p className="text-xs text-gray-400 mb-2">➕ Új szekció beszúrása a könyvtárból:</p>
+            <div className="flex flex-wrap gap-2">
+              {catalog.map((c) => (
+                <button
+                  key={c.template}
+                  type="button"
+                  title={c.description}
+                  onClick={() => onAddSection(c.template)}
+                  className="px-3 py-2 text-sm bg-blue-700 hover:bg-blue-600 rounded text-white font-medium"
+                >
+                  ➕ {c.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {structure.lists.map((list) => {

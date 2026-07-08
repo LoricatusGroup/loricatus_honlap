@@ -447,7 +447,68 @@ export function applyPositions(
   }
 }
 
-export function applyLayout(doc: Document, layout: LayoutState): void {
+// Clone a catalog partial (HTML string) into the iframe doc as a section
+// instance, rewriting data-section + data-edit*/data-list keys from the template
+// prefix to the instance id. Mirrors scripts/inject-content.js buildAddedSection.
+function buildSectionForPreview(doc: Document, html: string, id: string): Element | null {
+  const src = new DOMParser().parseFromString(html, 'text/html').querySelector('[data-section]')
+  if (!src) return null
+  const prefix = (src.getAttribute('data-section') || '') + '-'
+  const el = doc.importNode(src, true) as Element
+  el.setAttribute('data-section', id)
+  const rewrite = (node: Element) => {
+    for (const attr of EDIT_ATTRS) {
+      const v = node.getAttribute(attr)
+      if (v && v.startsWith(prefix)) node.setAttribute(attr, id + '-' + v.slice(prefix.length))
+    }
+    for (const attr of ['data-list-item', 'data-list']) {
+      const v = node.getAttribute(attr)
+      if (v && v.startsWith(prefix)) node.setAttribute(attr, id + '-' + v.slice(prefix.length))
+    }
+  }
+  rewrite(el)
+  el.querySelectorAll('*').forEach((n) => rewrite(n as Element))
+  return el
+}
+
+// Insert catalog sections from layout.added_sections into the preview (idempotent),
+// before <footer>. Needs the partial HTML cached in `partials`; a template not yet
+// cached is skipped and materialized on a later sync once loaded.
+export function materializeAddedSections(
+  doc: Document,
+  layout: LayoutState,
+  partials: Record<string, string>,
+): void {
+  const footer = doc.querySelector('footer')
+  for (const entry of layout.added_sections ?? []) {
+    if (!entry?.id || !entry.template) continue
+    if (doc.querySelector(`[data-section="${escapeAttr(entry.id)}"]`)) continue
+    const html = partials[entry.template]
+    if (!html) continue
+    const el = buildSectionForPreview(doc, html, entry.id)
+    if (!el) continue
+    if (footer) doc.body.insertBefore(el, footer)
+    else doc.body.appendChild(el)
+  }
+}
+
+// Remove preview added-sections (asec-*) no longer in added_sections.
+export function removeStraySections(doc: Document, layout: LayoutState): void {
+  const keep = new Set((layout.added_sections ?? []).map((e) => e.id).filter(Boolean))
+  doc.querySelectorAll('[data-section]').forEach((el) => {
+    const id = el.getAttribute('data-section')
+    if (id && id.startsWith('asec-') && !keep.has(id)) el.remove()
+  })
+}
+
+export function applyLayout(
+  doc: Document,
+  layout: LayoutState,
+  sectionPartials: Record<string, string> = {},
+): void {
+  // 0. Materialize / remove catalog sections
+  materializeAddedSections(doc, layout, sectionPartials)
+  removeStraySections(doc, layout)
   // 1. Materialize added items (clone templates for items in list_order not yet in DOM)
   materializeAddedItems(doc, layout)
   // 2. Remove items present in DOM but not in list_order (deletions)

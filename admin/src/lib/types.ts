@@ -87,10 +87,18 @@ export type LayoutStructure = {
 
 export type Position = { x: number; y: number }
 
+// A catalog section instance inserted via the editor. `id` starts with "asec-"
+// and prefixes all the instance's data-edit keys; `template` is the catalog name.
+export type AddedSection = { id: string; template: string }
+
 export type LayoutState = {
   section_order: string[]                 // current order (CMS may have reordered)
   section_hidden: Record<string, boolean>
   list_order: Record<string, string[]>    // per-list current order
   item_hidden: Record<string, boolean>
   positions: Record<string, Position>     // free-form pixel offsets keyed by positionable ID
+  added_sections: AddedSection[]          // catalog sections inserted via the editor
 }
+
+// One entry in sections/catalog.json (the curated block library).
+export type CatalogEntry = { template: string; label: string; description: string }
