@@ -197,7 +197,7 @@ input, textarea, [contenteditable="true"] { caret-color: var(--text); }
   height: 100%;
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 20px;
 }
 .nav-logo { flex-shrink: 0; display: flex; align-items: center; }
 .logo-svg { height: 20px; width: auto; object-fit: contain; transition: filter 0.3s; }
@@ -205,12 +205,12 @@ input, textarea, [contenteditable="true"] { caret-color: var(--text); }
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   margin-left: auto;
   min-width: 0;
 }
 .nav-links a {
-  padding: 7px 14px;
+  padding: 7px 11px;
   font-size: 0.82rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -222,7 +222,7 @@ input, textarea, [contenteditable="true"] { caret-color: var(--text); }
 .nav-links .nav-cta-link { display: none; }
 .nav-cta {
   flex-shrink: 0;
-  padding: 9px 22px;
+  padding: 9px 18px;
   border: 1px solid rgba(0,0,0,0.25);
   color: var(--text);
   font-size: 0.8rem;
@@ -235,16 +235,16 @@ input, textarea, [contenteditable="true"] { caret-color: var(--text); }
 .lang-switcher {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  margin-left: 12px;
+  gap: 4px;
+  margin-left: 10px;
   flex-shrink: 0;
 }
 .lang-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 38px;
-  padding: 7px 10px;
+  min-width: 32px;
+  padding: 6px 8px;
   border: 1px solid rgba(0,0,0,0.16);
   font-family: var(--font-mono);
   font-size: 0.68rem;
@@ -1299,7 +1299,7 @@ html[lang="it"] .nav-cta {
   html[lang="it"] .nav-cta { padding: 9px 16px; }
 }
 
-@media (max-width: 980px) {
+@media (max-width: 1150px) {
   :root { --nav-h: 60px; }
 
   .nav-container {
