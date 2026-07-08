@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { supabase } from '../lib/supabase'
+import { supabase, SITE_ID, type Membership } from '../lib/supabase'
 import { parseEditableFields } from '../lib/parseHtml'
 import {
   parseLayoutStructure,
@@ -26,6 +26,7 @@ import LayoutEditor from '../components/LayoutEditor'
 
 interface Props {
   user: User
+  membership: Membership
 }
 
 type Status = { type: 'info' | 'error' | 'success'; text: string } | null
@@ -52,7 +53,12 @@ function SavedAgo({ since }: { since: number }) {
   )
 }
 
-export default function EditorPage({ user }: Props) {
+export default function EditorPage({ user, membership }: Props) {
+  // Text/advanced capability gate. A text-only member sees just the content
+  // editors; all design controls (layout, colours, free positioning) are
+  // hidden. save_page() re-enforces this server-side, so the UI hiding is
+  // convenience, not the security boundary.
+  const canEditAdvanced = membership.can_edit_advanced
   const [locale, setLocaleState] = useState<Locale>(() => {
     const saved = localStorage.getItem(LOCALE_STORAGE_KEY)
     if (saved === 'en' || saved === 'it') return saved
@@ -114,6 +120,7 @@ export default function EditorPage({ user }: Props) {
         const { data: pageData, error } = await supabase
           .from('page_content')
           .select('*')
+          .eq('site_id', SITE_ID)
           .eq('page_slug', localeConfig.pageSlug)
           .maybeSingle()
         if (error) throw error
@@ -233,7 +240,28 @@ export default function EditorPage({ user }: Props) {
 
   const themeDirty = useMemo(() => !themesEqual(theme, loadedTheme), [theme, loadedTheme])
 
-  const hasUnsaved = changedCount > 0 || layoutDirty || themeDirty
+  // Snapshot of exactly what a save persists (content + theme + layout diff).
+  // Unsaved-ness is measured against the LAST SAVE, not against the raw HTML
+  // defaults — otherwise a page that merely has stored content reads as
+  // permanently "dirty" and the auto-save below fires every 5s forever.
+  const savedSnapshotRef = useRef<string | null>(null)
+  const currentSnapshot = useMemo(() => {
+    if (!structure || !layout) return null
+    const content: Record<string, string> = {}
+    for (const f of fields) if (f.value !== f.defaultValue) content[f.key] = f.value
+    return JSON.stringify({ content, theme, layout: diffLayoutState(structure, layout) })
+  }, [fields, theme, structure, layout])
+
+  const hasUnsaved =
+    currentSnapshot !== null && currentSnapshot !== savedSnapshotRef.current
+
+  // Establish the saved baseline whenever a (re)load settles, so a freshly
+  // loaded page is not considered dirty (and locale switches reset it).
+  useEffect(() => {
+    if (loading) return
+    savedSnapshotRef.current = currentSnapshot
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading])
 
   const setLocale = (next: Locale) => {
     if (next === locale) return
@@ -315,24 +343,25 @@ export default function EditorPage({ user }: Props) {
     setStatus(null)
     const content = buildContent()
     const layoutDiff = diffLayoutState(structure, layout)
-    const { error } = await supabase
-      .from('page_content')
-      .upsert(
-        {
-          page_slug: localeConfig.pageSlug,
-          content,
-          theme,
-          layout: layoutDiff,
-          updated_by: user.id,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'page_slug' },
-      )
+    // Write through the save_page RPC: it enforces membership and, for
+    // text-only members, discards any theme/layout change server-side.
+    const { error } = await supabase.rpc('save_page', {
+      p_site: SITE_ID,
+      p_slug: localeConfig.pageSlug,
+      p_content: content,
+      p_theme: theme,
+      p_layout: layoutDiff,
+    })
     setSaving(false)
     if (error) {
       setStatus({ type: 'error', text: `Mentés sikertelen: ${error.message}` })
       return false
     }
+    // Rebase the saved baseline so the auto-save effect goes quiet until the
+    // next genuine edit (breaks the perpetual re-save loop). Same shape/order
+    // as currentSnapshot so the strings compare equal.
+    savedSnapshotRef.current = JSON.stringify({ content, theme, layout: layoutDiff })
+    setLoadedTheme(theme)
     setStatus({ type: 'success', text: `Mentve (${localeConfig.label}).` })
     setLastSavedAt(Date.now())
     return true
@@ -361,23 +390,19 @@ export default function EditorPage({ user }: Props) {
     }
   }
 
-  // Auto-save: 5s idle after a change → save draft silently. Skip if already
-  // saving, publishing, or there's nothing changed.
+  // Auto-save: 5s after a genuine unsaved edit → save draft silently. Fires
+  // only when the current snapshot diverges from the last saved one, so a
+  // freshly loaded (unedited) page never triggers it.
   const saveRef = useRef(handleSave)
   saveRef.current = handleSave
   useEffect(() => {
     if (loading || saving || publishing) return
-    if (!structure || !layout) return
-    const dirty =
-      fields.some((f) => f.value !== f.defaultValue) ||
-      Object.keys(diffLayoutState(structure, layout)).length > 0 ||
-      !themesEqual(theme, loadedTheme)
-    if (!dirty) return
+    if (currentSnapshot === null || currentSnapshot === savedSnapshotRef.current) return
     const timer = setTimeout(() => {
       saveRef.current()
     }, 5000)
     return () => clearTimeout(timer)
-  }, [fields, theme, loadedTheme, layout, loading, saving, publishing, structure])
+  }, [currentSnapshot, loading, saving, publishing])
 
   // Keyboard shortcuts. Ctrl/Cmd+S = save, Ctrl/Cmd+Z = undo,
   // Ctrl/Cmd+Shift+Z (or Ctrl+Y) = redo. 1/2/3 = switch view mode (but
@@ -409,12 +434,12 @@ export default function EditorPage({ user }: Props) {
       }
       if (isTextEntry) return
       if (e.key === '1') setViewMode('live')
-      else if (e.key === '2') setViewMode('layout')
+      else if (e.key === '2' && canEditAdvanced) setViewMode('layout')
       else if (e.key === '3') setViewMode('form')
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [saving, publishing])
+  }, [saving, publishing, canEditAdvanced])
 
   if (loading) {
     return (
@@ -491,16 +516,18 @@ export default function EditorPage({ user }: Props) {
               >
                 Élő szerkesztés
               </button>
-              <button
-                onClick={() => setViewMode('layout')}
-                className={`px-3 py-1.5 border-l border-gray-600 ${
-                  viewMode === 'layout'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
-              >
-                Elrendezés
-              </button>
+              {canEditAdvanced && (
+                <button
+                  onClick={() => setViewMode('layout')}
+                  className={`px-3 py-1.5 border-l border-gray-600 ${
+                    viewMode === 'layout'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                >
+                  Elrendezés
+                </button>
+              )}
               <button
                 onClick={() => setViewMode('form')}
                 className={`px-3 py-1.5 border-l border-gray-600 ${
@@ -515,59 +542,63 @@ export default function EditorPage({ user }: Props) {
 
             {viewMode === 'live' && (
               <div className="flex gap-1 items-center text-xs">
-                <button
-                  onClick={() => setShowTheme((s) => !s)}
-                  className={`px-2 py-1.5 rounded ${
-                    showTheme
-                      ? 'bg-pink-600 text-white'
-                      : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
-                  }`}
-                  title="Téma színek szerkesztése (élő előnézettel)"
-                >
-                  🎨 Színek
-                </button>
-                <button
-                  onClick={() =>
-                    setOverlayMode((m) => (m === 'layout' ? 'edit' : 'layout'))
-                  }
-                  className={`px-2 py-1.5 rounded ${
-                    layoutOverlayMode
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
-                  }`}
-                  title="Drag-and-drop az iframe-en a szekciók és kártyák átrendezésére"
-                >
-                  📐 Elrendezés
-                </button>
-                <button
-                  onClick={() =>
-                    setOverlayMode((m) => (m === 'freeform' ? 'edit' : 'freeform'))
-                  }
-                  className={`px-2 py-1.5 rounded ${
-                    freeformMode
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
-                  }`}
-                  title="Pixel-szintű szabad pozícionálás (csak desktop nézet)"
-                >
-                  🎯 Szabad pozíció
-                </button>
-                {freeformMode && Object.keys(layout.positions ?? {}).length > 0 && (
-                  <button
-                    onClick={() => {
-                      if (
-                        window.confirm(
-                          'Minden szabad pozíció törlése? Az elemek visszaállnak default helyükre.',
-                        )
-                      ) {
-                        setLayout({ ...layout, positions: {} })
+                {canEditAdvanced && (
+                  <>
+                    <button
+                      onClick={() => setShowTheme((s) => !s)}
+                      className={`px-2 py-1.5 rounded ${
+                        showTheme
+                          ? 'bg-pink-600 text-white'
+                          : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
+                      }`}
+                      title="Téma színek szerkesztése (élő előnézettel)"
+                    >
+                      🎨 Színek
+                    </button>
+                    <button
+                      onClick={() =>
+                        setOverlayMode((m) => (m === 'layout' ? 'edit' : 'layout'))
                       }
-                    }}
-                    className="px-2 py-1.5 bg-amber-700 hover:bg-amber-600 text-white rounded"
-                    title="Minden pozíció törlése"
-                  >
-                    ↺ pozíciók
-                  </button>
+                      className={`px-2 py-1.5 rounded ${
+                        layoutOverlayMode
+                          ? 'bg-purple-600 text-white'
+                          : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
+                      }`}
+                      title="Drag-and-drop az iframe-en a szekciók és kártyák átrendezésére"
+                    >
+                      📐 Elrendezés
+                    </button>
+                    <button
+                      onClick={() =>
+                        setOverlayMode((m) => (m === 'freeform' ? 'edit' : 'freeform'))
+                      }
+                      className={`px-2 py-1.5 rounded ${
+                        freeformMode
+                          ? 'bg-green-600 text-white'
+                          : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
+                      }`}
+                      title="Pixel-szintű szabad pozícionálás (csak desktop nézet)"
+                    >
+                      🎯 Szabad pozíció
+                    </button>
+                    {freeformMode && Object.keys(layout.positions ?? {}).length > 0 && (
+                      <button
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              'Minden szabad pozíció törlése? Az elemek visszaállnak default helyükre.',
+                            )
+                          ) {
+                            setLayout({ ...layout, positions: {} })
+                          }
+                        }}
+                        className="px-2 py-1.5 bg-amber-700 hover:bg-amber-600 text-white rounded"
+                        title="Minden pozíció törlése"
+                      >
+                        ↺ pozíciók
+                      </button>
+                    )}
+                  </>
                 )}
                 <button
                   onClick={() => setMobilePreview((m) => !m)}
@@ -663,7 +694,7 @@ export default function EditorPage({ user }: Props) {
         />
       )}
 
-      {viewMode === 'live' && showTheme && (
+      {viewMode === 'live' && showTheme && canEditAdvanced && (
         <div className="fixed top-[56px] right-0 bottom-0 w-full max-w-[360px] bg-gray-800 border-l border-gray-700 z-[1200] flex flex-col shadow-2xl">
           <div className="flex items-center justify-between p-4 border-b border-gray-700">
             <h2 className="font-bold">🎨 Színek</h2>
@@ -695,7 +726,7 @@ export default function EditorPage({ user }: Props) {
         </div>
       )}
 
-      {viewMode === 'layout' && (
+      {viewMode === 'layout' && canEditAdvanced && (
         <LayoutEditor
           structure={structure}
           state={layout}
@@ -708,10 +739,12 @@ export default function EditorPage({ user }: Props) {
 
       {viewMode === 'form' && (
         <main className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
-          <section className="bg-gray-800 p-6 rounded-lg">
-            <h2 className="text-xl font-bold mb-4">Téma színek</h2>
-            <ThemeEditor theme={theme} onChange={setTheme} />
-          </section>
+          {canEditAdvanced && (
+            <section className="bg-gray-800 p-6 rounded-lg">
+              <h2 className="text-xl font-bold mb-4">Téma színek</h2>
+              <ThemeEditor theme={theme} onChange={setTheme} />
+            </section>
+          )}
 
           {grouped.map(([section, sectionFields]) => (
             <section key={section} className="bg-gray-800 p-6 rounded-lg">

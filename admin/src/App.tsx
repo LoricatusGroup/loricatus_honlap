@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { supabase } from './lib/supabase'
+import { supabase, SITE_ID, type Membership } from './lib/supabase'
 import LoginPage from './pages/Login'
 import EditorPage from './pages/Editor'
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null)
-  const [authorized, setAuthorized] = useState<boolean | null>(null)
+  // undefined = not checked yet, null = checked & not a member, object = member
+  const [membership, setMembership] = useState<Membership | null | undefined>(undefined)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -24,20 +25,21 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Whenever the user changes, verify they're allowed to use the editor.
-  // current_user_allowed() returns true for an exact allowlist entry OR a
-  // whole-domain entry (e.g. '@loricatus.hu'). This mirrors the RLS policies,
-  // which are the real enforcement — this check just drives a clean UI.
+  // Whenever the user changes, resolve their membership on this site.
+  // current_membership() returns the caller's {role, can_edit_advanced} for
+  // SITE_ID, or no row if they aren't a member. The RLS policies are the real
+  // enforcement — this drives a clean UI and the text/advanced capability gate.
   useEffect(() => {
     let cancelled = false
     if (!user) {
-      setAuthorized(null)
+      setMembership(undefined)
       return
     }
-    setAuthorized(null)
-    supabase.rpc('current_user_allowed').then(({ data, error }) => {
+    setMembership(undefined)
+    supabase.rpc('current_membership', { p_site: SITE_ID }).then(({ data, error }) => {
       if (cancelled) return
-      setAuthorized(error ? false : Boolean(data))
+      const row = !error && Array.isArray(data) && data.length > 0 ? data[0] : null
+      setMembership(row as Membership | null)
     })
     return () => {
       cancelled = true
@@ -54,7 +56,7 @@ export default function App() {
 
   if (!user) return <LoginPage />
 
-  if (authorized === null) {
+  if (membership === undefined) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
         Jogosultság ellenőrzése…
@@ -62,7 +64,7 @@ export default function App() {
     )
   }
 
-  if (!authorized) {
+  if (membership === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-4">
         <div className="bg-gray-800 p-8 rounded-lg w-full max-w-md shadow-xl text-center">
@@ -82,5 +84,5 @@ export default function App() {
     )
   }
 
-  return <EditorPage user={user} />
+  return <EditorPage user={user} membership={membership} />
 }
