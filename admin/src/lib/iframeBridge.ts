@@ -39,6 +39,15 @@ ${EDIT_ATTRS.map((a) => `[${a}]:hover`).join(',')} {
 .cms-changed {
   outline-color: #f59e0b !important;
 }
+/* Reveal the service "Bővebben" disclosure and its body — even when empty or
+   collapsed — so a description can be added/edited in the CMS, although the
+   published page hides an empty one. */
+details.service-more,
+details.service-more > .service-body { display: block !important; }
+[data-edit-html]:empty {
+  min-height: 1.2em;
+  min-width: 6em;
+}
 `
 
 export function injectEditorStyles(doc: Document): void {
