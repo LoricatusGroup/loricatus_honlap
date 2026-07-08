@@ -1,0 +1,29 @@
+name: Supabase keep-alive
+
+# Free Supabase projects pause after ~7 days of inactivity. A tiny scheduled
+# request every 3 days counts as activity and keeps the shared project awake,
+# so editors are never greeted by a paused backend. Uses the public anon key
+# (RLS returns an empty set, which is fine — the request itself is the point).
+
+on:
+  schedule:
+    - cron: '0 6 */3 * *' # every 3 days at 06:00 UTC
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            "$SUPABASE_URL/rest/v1/sites?select=id&limit=1")
+          echo "Supabase responded HTTP $code"
+          test "$code" = "200"
