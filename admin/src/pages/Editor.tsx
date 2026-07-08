@@ -240,7 +240,28 @@ export default function EditorPage({ user, membership }: Props) {
 
   const themeDirty = useMemo(() => !themesEqual(theme, loadedTheme), [theme, loadedTheme])
 
-  const hasUnsaved = changedCount > 0 || layoutDirty || themeDirty
+  // Snapshot of exactly what a save persists (content + theme + layout diff).
+  // Unsaved-ness is measured against the LAST SAVE, not against the raw HTML
+  // defaults — otherwise a page that merely has stored content reads as
+  // permanently "dirty" and the auto-save below fires every 5s forever.
+  const savedSnapshotRef = useRef<string | null>(null)
+  const currentSnapshot = useMemo(() => {
+    if (!structure || !layout) return null
+    const content: Record<string, string> = {}
+    for (const f of fields) if (f.value !== f.defaultValue) content[f.key] = f.value
+    return JSON.stringify({ content, theme, layout: diffLayoutState(structure, layout) })
+  }, [fields, theme, structure, layout])
+
+  const hasUnsaved =
+    currentSnapshot !== null && currentSnapshot !== savedSnapshotRef.current
+
+  // Establish the saved baseline whenever a (re)load settles, so a freshly
+  // loaded page is not considered dirty (and locale switches reset it).
+  useEffect(() => {
+    if (loading) return
+    savedSnapshotRef.current = currentSnapshot
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading])
 
   const setLocale = (next: Locale) => {
     if (next === locale) return
@@ -336,6 +357,11 @@ export default function EditorPage({ user, membership }: Props) {
       setStatus({ type: 'error', text: `Mentés sikertelen: ${error.message}` })
       return false
     }
+    // Rebase the saved baseline so the auto-save effect goes quiet until the
+    // next genuine edit (breaks the perpetual re-save loop). Same shape/order
+    // as currentSnapshot so the strings compare equal.
+    savedSnapshotRef.current = JSON.stringify({ content, theme, layout: layoutDiff })
+    setLoadedTheme(theme)
     setStatus({ type: 'success', text: `Mentve (${localeConfig.label}).` })
     setLastSavedAt(Date.now())
     return true
@@ -364,23 +390,19 @@ export default function EditorPage({ user, membership }: Props) {
     }
   }
 
-  // Auto-save: 5s idle after a change → save draft silently. Skip if already
-  // saving, publishing, or there's nothing changed.
+  // Auto-save: 5s after a genuine unsaved edit → save draft silently. Fires
+  // only when the current snapshot diverges from the last saved one, so a
+  // freshly loaded (unedited) page never triggers it.
   const saveRef = useRef(handleSave)
   saveRef.current = handleSave
   useEffect(() => {
     if (loading || saving || publishing) return
-    if (!structure || !layout) return
-    const dirty =
-      fields.some((f) => f.value !== f.defaultValue) ||
-      Object.keys(diffLayoutState(structure, layout)).length > 0 ||
-      !themesEqual(theme, loadedTheme)
-    if (!dirty) return
+    if (currentSnapshot === null || currentSnapshot === savedSnapshotRef.current) return
     const timer = setTimeout(() => {
       saveRef.current()
     }, 5000)
     return () => clearTimeout(timer)
-  }, [fields, theme, loadedTheme, layout, loading, saving, publishing, structure])
+  }, [currentSnapshot, loading, saving, publishing])
 
   // Keyboard shortcuts. Ctrl/Cmd+S = save, Ctrl/Cmd+Z = undo,
   // Ctrl/Cmd+Shift+Z (or Ctrl+Y) = redo. 1/2/3 = switch view mode (but

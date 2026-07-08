@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase, SITE_ID } from '../lib/supabase'
 
 interface Props {
   value: string
@@ -18,7 +18,9 @@ export default function ImageUploader({ value, onChange }: Props) {
     setError(null)
 
     const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '-')
-    const filename = `${Date.now()}-${safeName}`
+    // Tenant-scoped storage path ({site_id}/…) so uploads isolate per site and
+    // pass the membership-scoped assets RLS / show up in the per-tenant backup.
+    const filename = `${SITE_ID}/${Date.now()}-${safeName}`
 
     const { data, error: uploadError } = await supabase.storage
       .from('assets')
@@ -34,6 +36,7 @@ export default function ImageUploader({ value, onChange }: Props) {
     onChange(urlData.publicUrl)
 
     await supabase.from('assets').insert({
+      site_id: SITE_ID,
       url: urlData.publicUrl,
       filename: file.name,
       size: file.size,

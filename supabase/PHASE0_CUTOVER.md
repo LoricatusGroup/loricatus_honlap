@@ -62,9 +62,11 @@ drop policy if exists page_versions_select on public.page_versions;
 create policy page_versions_select on public.page_versions for select to authenticated
   using ((select private.is_member_of(site_id)));
 
--- assets: public read stays; writes membership-scoped. NOTE: the ImageUploader
--- must set assets.site_id and upload under the {site_id}/ storage prefix
--- (task #6) BEFORE this tightening, or uploads will fail the WITH CHECK.
+-- assets: public read stays; writes membership-scoped. ImageUploader already
+-- sets assets.site_id = SITE_ID and uploads under the {site_id}/ storage prefix,
+-- so table-level inserts pass this WITH CHECK. The storage.objects RLS policy
+-- for the {site_id}/ prefix is still task #6 — do that before relying on storage
+-- isolation, but this table policy is safe to apply now.
 drop policy if exists assets_insert on public.assets;
 create policy assets_insert on public.assets for insert to authenticated
   with check ((select private.is_member_of(site_id)));
@@ -97,10 +99,34 @@ create policy form_submissions_select on public.form_submissions for select to a
 
 ## Rollback
 
-Re-create the dropped policies with `current_user_allowed()` (the pre-cutover
-definitions are recorded in git history / migration 0001-era state), and
-redeploy the previous admin build. Because content rows are unchanged, rollback
-is policy-only. Keep the pre-cutover export as the data safety net.
+Policy-only (content rows are untouched), plus redeploy the previous admin build.
+Exact pre-cutover policies to restore:
+
+```sql
+drop policy if exists page_content_select on public.page_content;
+create policy page_content_select on public.page_content for select to authenticated
+  using (current_user_allowed());
+create policy page_content_insert on public.page_content for insert to authenticated
+  with check (current_user_allowed());
+create policy page_content_update on public.page_content for update to authenticated
+  using (current_user_allowed()) with check (current_user_allowed());
+
+drop policy if exists page_versions_select on public.page_versions;
+create policy page_versions_select on public.page_versions for select to authenticated
+  using (current_user_allowed());
+create policy page_versions_insert on public.page_versions for insert to authenticated
+  with check (current_user_allowed());
+
+drop policy if exists assets_insert on public.assets;
+create policy assets_insert on public.assets for insert to authenticated
+  with check (current_user_allowed());
+
+drop policy if exists form_submissions_select on public.form_submissions;
+create policy form_submissions_select on public.form_submissions for select to authenticated
+  using (current_user_allowed());
+```
+
+Keep the pre-cutover export as the data safety net.
 
 ## Step 6 — retire the legacy path (AFTER cutover has baked)
 
