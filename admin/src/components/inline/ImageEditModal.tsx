@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Modal from './Modal'
 import ImageUploader from '../ImageUploader'
+import MediaLibrary from '../MediaLibrary'
 
 interface Props {
   label: string
@@ -35,6 +36,9 @@ export default function ImageEditModal({ label, initialValue, onSave, onClose }:
       }
     >
       <ImageUploader value={value} onChange={setValue} />
+      <div className="mt-4 border-t border-white/10 pt-4">
+        <MediaLibrary value={value} onPick={setValue} />
+      </div>
     </Modal>
   )
 }

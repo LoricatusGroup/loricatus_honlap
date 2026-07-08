@@ -38,11 +38,37 @@ function readValue(el: Element, type: FieldType): string {
   return ''
 }
 
+// Hungarian words for the common field-key tokens, so a key like
+// "portfolio-4-image" reads as "Projektek · 4. kép" instead of "Portfolio 4 image".
+const WORD_HU: Record<string, string> = {
+  title: 'cím', subtitle: 'alcím', desc: 'leírás', description: 'leírás',
+  label: 'felirat', value: 'érték', name: 'név', body: 'kifejtés',
+  image: 'kép', img: 'kép', src: 'kép', icon: 'ikon', logo: 'logó',
+  href: 'link', link: 'link', url: 'link', target: 'cél',
+  cat: 'kategória', category: 'kategória', tag: 'címke',
+  num: 'szám', number: 'szám', suffix: 'utótag', prefix: 'előtag',
+  cta: 'gomb', button: 'gomb', badge: 'jelvény',
+  primary: 'elsődleges', secondary: 'másodlagos',
+  bg: 'háttér', background: 'háttér',
+  menu: 'menü', phone: 'telefon', email: 'e-mail', address: 'cím',
+  hours: 'nyitvatartás', meta: 'meta', stat: 'statisztika', hint: 'tipp',
+  // section words used inside nav-menu-* keys
+  services: 'Szolgáltatások', about: 'Rólunk', equipment: 'Eszközpark',
+  portfolio: 'Projektek', contact: 'Kapcsolat',
+  line1: '1. sor', line2: '2. sor', line3: '3. sor', line: 'sor',
+}
+
+function translatePart(p: string): string {
+  if (/^\d+$/.test(p)) return `${p}.`
+  return WORD_HU[p] ?? p
+}
+
+// Human-readable Hungarian field label: "<Section> · <translated rest>".
 function humanLabel(key: string): string {
   const parts = key.split('-')
-  return parts
-    .map((p, i) => (i === 0 ? p.charAt(0).toUpperCase() + p.slice(1) : p))
-    .join(' ')
+  const section = SECTION_LABELS[parts[0]] ?? parts[0].charAt(0).toUpperCase() + parts[0].slice(1)
+  const rest = parts.slice(1).map(translatePart).filter(Boolean)
+  return rest.length ? `${section} · ${rest.join(' ')}` : section
 }
 
 function sectionFromKey(key: string): string {
