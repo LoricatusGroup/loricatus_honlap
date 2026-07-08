@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import Modal from './Modal'
 
 interface Props {
   label: string
@@ -27,7 +28,8 @@ function cleanHtml(html: string): string {
   return tmp.innerHTML.trim()
 }
 
-const btnCls = 'px-2.5 py-1 rounded text-sm bg-gray-700 hover:bg-gray-600 text-white'
+const toolBtn =
+  'cms-btn-secondary !px-2.5 !py-1 !text-sm'
 
 export default function HtmlEditModal({ label, initialValue, onSave, onClose }: Props) {
   const editorRef = useRef<HTMLDivElement>(null)
@@ -55,55 +57,42 @@ export default function HtmlEditModal({ label, initialValue, onSave, onClose }: 
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl p-6"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h3 className="text-lg font-bold mb-1 text-white">{label}</h3>
-        <p className="text-xs text-gray-400 mb-3">
-          Formázott szöveg — jelöld ki a szöveget, majd használd a gombokat.
-        </p>
-
-        {/* Toolbar. onMouseDown + preventDefault keeps the text selection. */}
-        <div className="flex flex-wrap gap-1 mb-2">
-          <button type="button" title="Félkövér" className={`${btnCls} font-bold`}
-            onMouseDown={(e) => { e.preventDefault(); exec('bold') }}>B</button>
-          <button type="button" title="Dőlt" className={`${btnCls} italic`}
-            onMouseDown={(e) => { e.preventDefault(); exec('italic') }}>I</button>
-          <button type="button" title="Felsorolás" className={btnCls}
-            onMouseDown={(e) => { e.preventDefault(); exec('insertUnorderedList') }}>• Lista</button>
-          <button type="button" title="Link beszúrása" className={btnCls}
-            onMouseDown={(e) => { e.preventDefault(); addLink() }}>🔗 Link</button>
-          <button type="button" title="Formázás törlése" className={btnCls}
-            onMouseDown={(e) => { e.preventDefault(); exec('removeFormat'); exec('unlink') }}>⌫ Formázás</button>
-        </div>
-
-        <div
-          ref={editorRef}
-          contentEditable
-          suppressContentEditableWarning
-          className="w-full min-h-[160px] max-h-[50vh] overflow-y-auto px-3 py-2 bg-gray-700 rounded text-white text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-blue-300 [&_a]:underline"
-        />
-
-        <div className="flex justify-end gap-2 mt-4">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm"
-          >
+    <Modal
+      label={label}
+      maxWidth="max-w-2xl"
+      caption="Formázott szöveg — jelöld ki a szöveget, majd használd a gombokat."
+      onClose={onClose}
+      footer={
+        <>
+          <button onClick={onClose} className="cms-btn-ghost">
             Mégse
           </button>
-          <button
-            onClick={save}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium"
-          >
+          <button onClick={save} className="cms-btn-primary">
             Mentés
           </button>
-        </div>
+        </>
+      }
+    >
+      {/* Toolbar. onMouseDown + preventDefault keeps the text selection. */}
+      <div className="mb-2 flex flex-wrap gap-1.5">
+        <button type="button" title="Félkövér" className={`${toolBtn} font-bold`}
+          onMouseDown={(e) => { e.preventDefault(); exec('bold') }}>B</button>
+        <button type="button" title="Dőlt" className={`${toolBtn} italic`}
+          onMouseDown={(e) => { e.preventDefault(); exec('italic') }}>I</button>
+        <button type="button" title="Felsorolás" className={toolBtn}
+          onMouseDown={(e) => { e.preventDefault(); exec('insertUnorderedList') }}>• Lista</button>
+        <button type="button" title="Link beszúrása" className={toolBtn}
+          onMouseDown={(e) => { e.preventDefault(); addLink() }}>🔗 Link</button>
+        <button type="button" title="Formázás törlése" className={toolBtn}
+          onMouseDown={(e) => { e.preventDefault(); exec('removeFormat'); exec('unlink') }}>⌫ Formázás</button>
       </div>
-    </div>
+
+      <div
+        ref={editorRef}
+        contentEditable
+        suppressContentEditableWarning
+        className="cms-input min-h-[160px] max-h-[50vh] overflow-y-auto leading-relaxed [&_a]:text-blue-300 [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
+      />
+    </Modal>
   )
 }

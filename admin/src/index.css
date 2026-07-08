@@ -1,3 +1,110 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Premium glass modal system (components/inline/*) ───────────────────── */
+.cms-modal-backdrop {
+  background: rgba(8, 10, 15, 0.5);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
+  backdrop-filter: blur(6px) saturate(120%);
+  animation: cms-fade 0.18s ease-out;
+}
+.cms-modal-panel {
+  background: linear-gradient(180deg, rgba(38, 41, 51, 0.82), rgba(22, 24, 31, 0.86));
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  backdrop-filter: blur(28px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 20px;
+  box-shadow:
+    0 30px 70px -18px rgba(0, 0, 0, 0.65),
+    0 6px 20px -8px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
+  animation: cms-pop 0.22s cubic-bezier(0.2, 0.85, 0.25, 1);
+}
+
+.cms-input {
+  width: 100%;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+}
+.cms-input::placeholder { color: rgba(255, 255, 255, 0.35); }
+.cms-input:focus {
+  outline: none;
+  border-color: rgba(59, 130, 246, 0.7);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.cms-btn-primary {
+  border-radius: 12px;
+  padding: 9px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: #2563eb;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 20px -6px rgba(37, 99, 235, 0.6);
+  transition: background-color 0.15s;
+}
+.cms-btn-primary:hover { background: #3b82f6; }
+.cms-btn-primary:disabled { opacity: 0.55; cursor: default; box-shadow: none; }
+
+.cms-btn-ghost {
+  border-radius: 12px;
+  padding: 9px 16px;
+  font-size: 14px;
+  color: #d1d5db;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+.cms-btn-ghost:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+
+.cms-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 12px;
+  padding: 9px 16px;
+  font-size: 14px;
+  color: #e5e7eb;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+.cms-btn-secondary:hover { background: rgba(255, 255, 255, 0.09); color: #fff; }
+
+.cms-icon-btn {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+.cms-icon-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+
+@keyframes cms-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes cms-pop {
+  from { opacity: 0; transform: translateY(10px) scale(0.975); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cms-modal-backdrop,
+  .cms-modal-panel { animation: none; }
+}
