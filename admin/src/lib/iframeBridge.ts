@@ -105,6 +105,27 @@ export function markChangedElements(doc: Document, fields: EditableField[]): voi
   }
 }
 
+// Live-preview the theme colours in the iframe by writing the same
+// <style id="cms-theme"> block that scripts/inject-content.js bakes at publish
+// time: `:root { --<key>: <value> }` for each provided key. Passing an empty
+// theme clears the block (falls back to style.css defaults) — this also wipes
+// any stale block already baked into the loaded page.
+export function applyThemeToIframe(doc: Document, theme: Record<string, string>): void {
+  const keys = Object.keys(theme).filter((k) => theme[k])
+  let styleEl = doc.getElementById('cms-theme') as HTMLStyleElement | null
+  if (!keys.length) {
+    if (styleEl) styleEl.textContent = ''
+    return
+  }
+  if (!styleEl) {
+    styleEl = doc.createElement('style')
+    styleEl.id = 'cms-theme'
+    doc.head.appendChild(styleEl)
+  }
+  const rules = keys.map((k) => `  --${k}: ${theme[k]};`).join('\n')
+  styleEl.textContent = `:root {\n${rules}\n}`
+}
+
 export interface IframeClickInfo {
   attr: string
   key: string

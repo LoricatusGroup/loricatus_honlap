@@ -18,6 +18,7 @@ import type {
   ViewMode,
 } from '../lib/types'
 import { LOCALES, getLocale } from '../lib/types'
+import { sanitizeTheme, themesEqual } from '../lib/theme'
 import FieldEditor from '../components/FieldEditor'
 import ThemeEditor from '../components/ThemeEditor'
 import LivePreview, { type OverlayMode } from '../components/LivePreview'
@@ -59,6 +60,7 @@ export default function EditorPage({ user }: Props) {
   })
   const [fields, setFields] = useState<EditableField[]>([])
   const [theme, setTheme] = useState<Record<string, string>>({})
+  const [loadedTheme, setLoadedTheme] = useState<Record<string, string>>({})
   const [structure, setStructure] = useState<LayoutStructure | null>(null)
   const [layout, setLayout] = useState<LayoutState | null>(null)
   const [loading, setLoading] = useState(true)
@@ -73,6 +75,7 @@ export default function EditorPage({ user }: Props) {
   // the main header (clean iframe area, no overlap with the website content).
   const [overlayMode, setOverlayMode] = useState<OverlayMode>('edit')
   const [mobilePreview, setMobilePreview] = useState(false)
+  const [showTheme, setShowTheme] = useState(false)
   const [iframeKey, setIframeKey] = useState(0)
   const reloadIframe = () => setIframeKey((k) => k + 1)
   const layoutOverlayMode = overlayMode === 'layout'
@@ -131,7 +134,9 @@ export default function EditorPage({ user }: Props) {
         )
 
         setFields([...mergedFields, ...virtualFields])
-        setTheme(pageData?.theme ?? {})
+        const loadedThemeSan = sanitizeTheme(pageData?.theme)
+        setTheme(loadedThemeSan)
+        setLoadedTheme(loadedThemeSan)
         setStructure(layoutStructure)
         setLayout(merged)
         setLoading(false)
@@ -226,7 +231,9 @@ export default function EditorPage({ user }: Props) {
     return Object.keys(diffLayoutState(structure, layout)).length > 0
   }, [structure, layout])
 
-  const hasUnsaved = changedCount > 0 || layoutDirty
+  const themeDirty = useMemo(() => !themesEqual(theme, loadedTheme), [theme, loadedTheme])
+
+  const hasUnsaved = changedCount > 0 || layoutDirty || themeDirty
 
   const setLocale = (next: Locale) => {
     if (next === locale) return
@@ -363,13 +370,14 @@ export default function EditorPage({ user }: Props) {
     if (!structure || !layout) return
     const dirty =
       fields.some((f) => f.value !== f.defaultValue) ||
-      Object.keys(diffLayoutState(structure, layout)).length > 0
+      Object.keys(diffLayoutState(structure, layout)).length > 0 ||
+      !themesEqual(theme, loadedTheme)
     if (!dirty) return
     const timer = setTimeout(() => {
       saveRef.current()
     }, 5000)
     return () => clearTimeout(timer)
-  }, [fields, theme, layout, loading, saving, publishing, structure])
+  }, [fields, theme, loadedTheme, layout, loading, saving, publishing, structure])
 
   // Keyboard shortcuts. Ctrl/Cmd+S = save, Ctrl/Cmd+Z = undo,
   // Ctrl/Cmd+Shift+Z (or Ctrl+Y) = redo. 1/2/3 = switch view mode (but
@@ -445,10 +453,11 @@ export default function EditorPage({ user }: Props) {
               <h1 className="text-xl font-bold leading-tight">Loricatus Editor</h1>
               <p className="text-xs text-gray-400">
                 {user.email}
-                {(changedCount > 0 || layoutDirty) && (
+                {(changedCount > 0 || layoutDirty || themeDirty) && (
                   <span className="ml-2 text-yellow-400">
                     {changedCount > 0 && <>· {changedCount} módosított mező</>}
                     {layoutDirty && <> · elrendezés módosítva</>}
+                    {themeDirty && <> · színek módosítva</>}
                   </span>
                 )}
               </p>
@@ -506,6 +515,17 @@ export default function EditorPage({ user }: Props) {
 
             {viewMode === 'live' && (
               <div className="flex gap-1 items-center text-xs">
+                <button
+                  onClick={() => setShowTheme((s) => !s)}
+                  className={`px-2 py-1.5 rounded ${
+                    showTheme
+                      ? 'bg-pink-600 text-white'
+                      : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
+                  }`}
+                  title="Téma színek szerkesztése (élő előnézettel)"
+                >
+                  🎨 Színek
+                </button>
                 <button
                   onClick={() =>
                     setOverlayMode((m) => (m === 'layout' ? 'edit' : 'layout'))
@@ -633,6 +653,7 @@ export default function EditorPage({ user }: Props) {
         <LivePreview
           fields={fields}
           layout={layout}
+          theme={theme}
           iframeSrc={localeConfig.iframeSrc}
           overlayMode={overlayMode}
           mobilePreview={mobilePreview}
@@ -640,6 +661,38 @@ export default function EditorPage({ user }: Props) {
           onFieldChange={handleFieldChange}
           onLayoutChange={setLayout}
         />
+      )}
+
+      {viewMode === 'live' && showTheme && (
+        <div className="fixed top-[56px] right-0 bottom-0 w-full max-w-[360px] bg-gray-800 border-l border-gray-700 z-[1200] flex flex-col shadow-2xl">
+          <div className="flex items-center justify-between p-4 border-b border-gray-700">
+            <h2 className="font-bold">🎨 Színek</h2>
+            <button
+              onClick={() => setShowTheme(false)}
+              className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+              title="Bezárás"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="p-4 space-y-4 overflow-y-auto">
+            <p className="text-xs text-gray-400">
+              A színek azonnal frissülnek az előnézetben. A mentéshez / közzétételhez
+              használd a fenti Mentés / Publikálás gombot.
+            </p>
+            <ThemeEditor theme={theme} onChange={setTheme} />
+            {Object.keys(theme).length > 0 && (
+              <button
+                onClick={() => {
+                  if (window.confirm('Minden szín visszaáll az alap színekre?')) setTheme({})
+                }}
+                className="w-full px-3 py-2 bg-amber-700 hover:bg-amber-600 rounded text-sm"
+              >
+                ↺ Vissza az alap színekhez
+              </button>
+            )}
+          </div>
+        </div>
       )}
 
       {viewMode === 'layout' && (
