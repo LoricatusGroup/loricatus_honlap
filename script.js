@@ -90,8 +90,8 @@
   const SUPABASE_URL = 'https://rksqwamubvnxuthumphi.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrc3F3YW11YnZueHV0aHVtcGhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjcwNjIsImV4cCI6MjA5Mzg0MzA2Mn0.VuZYXK1-cQRcuPh4Q7YIVSg5XtLIT1h1NeqmvluOCmY';
   const SITE_ID = 'a7a65c78-972a-4d83-8983-bbce5e6c5a47';
-  // TODO: set to the Cloudflare Turnstile SITE key once the widget is created.
-  const TURNSTILE_SITE_KEY = '__TURNSTILE_SITE_KEY__';
+  // Cloudflare Turnstile SITE key (public; the matching SECRET lives in the edge fn).
+  const TURNSTILE_SITE_KEY = '0x4AAAAAADyYgSETLNJAc7SW';
   const SUBMIT_FORM_URL = SUPABASE_URL + '/functions/v1/submit-form';
   const pageLang = (document.documentElement.lang || 'hu').toLowerCase();
   const formMessages = pageLang.startsWith('en')
