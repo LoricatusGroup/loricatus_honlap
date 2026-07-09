@@ -83,7 +83,16 @@
   document.querySelectorAll('.stat-num[data-target]').forEach(el => counterObs.observe(el));
 
   /* ── CONTACT FORM ────────────────────────────── */
-  const WEB3FORMS_ACCESS_KEY = 'f2a2064b-f35f-4864-a1a3-a56dcf4644b4';
+  // Self-hosted submission via the Supabase submit-form edge function
+  // (Cloudflare Turnstile-verified) — replaces web3forms. All values here are
+  // public: the anon key is RLS-protected and the Turnstile SITE key is meant
+  // to be public. The matching Turnstile SECRET key lives in the edge function.
+  const SUPABASE_URL = 'https://rksqwamubvnxuthumphi.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrc3F3YW11YnZueHV0aHVtcGhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjcwNjIsImV4cCI6MjA5Mzg0MzA2Mn0.VuZYXK1-cQRcuPh4Q7YIVSg5XtLIT1h1NeqmvluOCmY';
+  const SITE_ID = 'a7a65c78-972a-4d83-8983-bbce5e6c5a47';
+  // Cloudflare Turnstile SITE key (public; the matching SECRET lives in the edge fn).
+  const TURNSTILE_SITE_KEY = '0x4AAAAAADyYgSETLNJAc7SW';
+  const SUBMIT_FORM_URL = SUPABASE_URL + '/functions/v1/submit-form';
   const pageLang = (document.documentElement.lang || 'hu').toLowerCase();
   const formMessages = pageLang.startsWith('en')
     ? {
@@ -131,6 +140,24 @@
     serviceInput.addEventListener('blur', () => validateField(serviceInput, 'serviceError', v => v !== ''));
     messageInput.addEventListener('blur', () => validateField(messageInput, 'messageError', v => v.length >= 10));
 
+    // Load the Turnstile API once and render the widget (explicit mode). Polls
+    // for the async-loaded API so there's no script-order race.
+    let turnstileWidgetId = null;
+    if (!document.querySelector('script[src*="challenges.cloudflare.com/turnstile"]')) {
+      const ts = document.createElement('script');
+      ts.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      ts.async = true; ts.defer = true;
+      document.head.appendChild(ts);
+    }
+    const turnstileEl = document.getElementById('cfTurnstile');
+    (function renderTurnstile() {
+      if (turnstileEl && window.turnstile && turnstileWidgetId === null) {
+        turnstileWidgetId = window.turnstile.render(turnstileEl, { sitekey: TURNSTILE_SITE_KEY });
+      } else if (turnstileWidgetId === null) {
+        setTimeout(renderTurnstile, 200);
+      }
+    })();
+
     form.addEventListener('submit', async e => {
       e.preventDefault();
       const v1 = validateField(nameInput, 'nameError', v => v.length >= 2);
@@ -146,13 +173,20 @@
       if (btnLoader) btnLoader.style.display = 'inline-block';
 
       try {
-        const res = await fetch('https://api.web3forms.com/submit', {
+        const token = (window.turnstile && turnstileWidgetId !== null)
+          ? window.turnstile.getResponse(turnstileWidgetId) : '';
+        if (!token) throw new Error('captcha');
+        const res = await fetch(SUBMIT_FORM_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: 'Bearer ' + SUPABASE_ANON_KEY
+          },
           body: JSON.stringify({
-            access_key: WEB3FORMS_ACCESS_KEY,
-            subject: formMessages.subject,
-            from_name: nameInput.value.trim(),
+            site_id: SITE_ID,
+            token: token,
+            website: (document.getElementById('website') || {}).value || '',
             name: nameInput.value.trim(),
             email: emailInput.value.trim(),
             company: document.getElementById('company').value.trim(),
@@ -161,8 +195,8 @@
             message: messageInput.value.trim()
           })
         });
-        const result = await res.json();
-        if (!res.ok || !result.success) throw new Error(result.message || 'Hiba');
+        const result = await res.json().catch(() => ({}));
+        if (!res.ok || !result.success) throw new Error(result.error || 'Hiba');
         submitBtn.style.display = 'none';
         formSuccess.style.display = 'flex';
         form.querySelectorAll('input,select,textarea').forEach(el => {
@@ -170,6 +204,7 @@
           el.style.opacity = '0.5';
         });
       } catch {
+        if (window.turnstile && turnstileWidgetId !== null) window.turnstile.reset(turnstileWidgetId);
         btnText.textContent = formMessages.errorRetry;
         if (btnArrow) btnArrow.style.display = 'inline';
         if (btnLoader) btnLoader.style.display = 'none';
