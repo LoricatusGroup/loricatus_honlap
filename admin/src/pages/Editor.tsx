@@ -646,9 +646,9 @@ export default function EditorPage({ user, membership }: Props) {
                           ? 'bg-purple-600 text-white'
                           : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
                       }`}
-                      title="Drag-and-drop az iframe-en a szekciók és kártyák átrendezésére"
+                      title="Húzd-rendezd a szekciókat és kártyákat közvetlenül az előnézeten. Új szekció beszúrása az Elrendezés fülön."
                     >
-                      📐 Elrendezés
+                      📐 Átrendezés
                     </button>
                     <button
                       onClick={() =>
