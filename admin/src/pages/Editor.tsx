@@ -553,33 +553,32 @@ export default function EditorPage({ user, membership }: Props) {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-20">
-        <div className="px-4 sm:px-6 py-3 flex flex-wrap gap-3 justify-between items-center">
-          <div className="flex items-center gap-4 flex-wrap">
-            <div>
-              <h1 className="text-xl font-bold leading-tight">Loricatus Editor</h1>
-              <p className="text-xs text-gray-400">
-                {user.email}
-                {(changedCount > 0 || layoutDirty || themeDirty) && (
-                  <span className="ml-2 text-yellow-400">
-                    {changedCount > 0 && <>· {changedCount} módosított mező</>}
-                    {layoutDirty && <> · elrendezés módosítva</>}
-                    {themeDirty && <> · színek módosítva</>}
-                  </span>
-                )}
-              </p>
+      <header className="cms-toolbar sticky top-0 z-20">
+        <div className="px-4 sm:px-6 py-2.5 flex flex-wrap gap-x-3 gap-y-2.5 justify-between items-center">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2.5">
+              <div className="cms-brand-mark" aria-hidden="true">L</div>
+              <div className="leading-tight">
+                <h1 className="text-[15px] font-semibold tracking-tight">Loricatus Editor</h1>
+                <p className="text-[11px] text-gray-400">
+                  {user.email}
+                  {(changedCount > 0 || layoutDirty || themeDirty) && (
+                    <span className="ml-1.5 text-amber-400">
+                      {changedCount > 0 && <>· {changedCount} módosított mező</>}
+                      {layoutDirty && <> · elrendezés módosítva</>}
+                      {themeDirty && <> · színek módosítva</>}
+                    </span>
+                  )}
+                </p>
+              </div>
             </div>
 
-            <div className="inline-flex rounded border border-gray-600 overflow-hidden text-xs">
+            <div className="cms-segment">
               {LOCALES.map((l) => (
                 <button
                   key={l.code}
                   onClick={() => setLocale(l.code)}
-                  className={`px-3 py-1.5 ${
-                    locale === l.code
-                      ? 'bg-amber-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  } ${l.code !== 'hu' ? 'border-l border-gray-600' : ''}`}
+                  className={`cms-seg-btn${locale === l.code ? ' is-active' : ''}`}
                   title={`Váltás: ${l.label}`}
                 >
                   {l.flag} {l.code.toUpperCase()}
@@ -587,52 +586,37 @@ export default function EditorPage({ user, membership }: Props) {
               ))}
             </div>
 
-            <div className="inline-flex rounded border border-gray-600 overflow-hidden text-xs">
+            <div className="cms-segment">
               <button
                 onClick={() => setViewMode('live')}
-                className={`px-3 py-1.5 ${
-                  viewMode === 'live'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
+                className={`cms-seg-btn${viewMode === 'live' ? ' is-active' : ''}`}
               >
                 Élő szerkesztés
               </button>
               {canEditAdvanced && (
                 <button
                   onClick={() => setViewMode('layout')}
-                  className={`px-3 py-1.5 border-l border-gray-600 ${
-                    viewMode === 'layout'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
+                  className={`cms-seg-btn${viewMode === 'layout' ? ' is-active' : ''}`}
                 >
                   Elrendezés
                 </button>
               )}
               <button
                 onClick={() => setViewMode('form')}
-                className={`px-3 py-1.5 border-l border-gray-600 ${
-                  viewMode === 'form'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
+                className={`cms-seg-btn${viewMode === 'form' ? ' is-active' : ''}`}
               >
                 Lista
               </button>
             </div>
 
             {viewMode === 'live' && (
-              <div className="flex gap-1 items-center text-xs">
+              <div className="flex gap-1.5 items-center">
                 {canEditAdvanced && (
                   <>
                     <button
                       onClick={() => setShowTheme((s) => !s)}
-                      className={`px-2 py-1.5 rounded ${
-                        showTheme
-                          ? 'bg-pink-600 text-white'
-                          : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
-                      }`}
+                      className={`cms-tool${showTheme ? ' is-active' : ''}`}
+                      style={{ '--acc': '#ec4899' } as React.CSSProperties}
                       title="Téma színek szerkesztése (élő előnézettel)"
                     >
                       🎨 Színek
@@ -641,11 +625,8 @@ export default function EditorPage({ user, membership }: Props) {
                       onClick={() =>
                         setOverlayMode((m) => (m === 'layout' ? 'edit' : 'layout'))
                       }
-                      className={`px-2 py-1.5 rounded ${
-                        layoutOverlayMode
-                          ? 'bg-purple-600 text-white'
-                          : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
-                      }`}
+                      className={`cms-tool${layoutOverlayMode ? ' is-active' : ''}`}
+                      style={{ '--acc': '#8b5cf6' } as React.CSSProperties}
                       title="Húzd-rendezd a szekciókat és kártyákat közvetlenül az előnézeten. Új szekció beszúrása az Elrendezés fülön."
                     >
                       📐 Átrendezés
@@ -654,11 +635,8 @@ export default function EditorPage({ user, membership }: Props) {
                       onClick={() =>
                         setOverlayMode((m) => (m === 'freeform' ? 'edit' : 'freeform'))
                       }
-                      className={`px-2 py-1.5 rounded ${
-                        freeformMode
-                          ? 'bg-green-600 text-white'
-                          : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
-                      }`}
+                      className={`cms-tool${freeformMode ? ' is-active' : ''}`}
+                      style={{ '--acc': '#0ea5e9' } as React.CSSProperties}
                       title="Pixel-szintű szabad pozícionálás (csak desktop nézet)"
                     >
                       🎯 Szabad pozíció
@@ -674,7 +652,7 @@ export default function EditorPage({ user, membership }: Props) {
                             setLayout({ ...layout, positions: {} })
                           }
                         }}
-                        className="px-2 py-1.5 bg-amber-700 hover:bg-amber-600 text-white rounded"
+                        className="cms-tool"
                         title="Minden pozíció törlése"
                       >
                         ↺ pozíciók
@@ -684,18 +662,15 @@ export default function EditorPage({ user, membership }: Props) {
                 )}
                 <button
                   onClick={() => setMobilePreview((m) => !m)}
-                  className={`px-2 py-1.5 rounded ${
-                    mobilePreview
-                      ? 'bg-orange-600 text-white'
-                      : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
-                  }`}
+                  className={`cms-tool${mobilePreview ? ' is-active' : ''}`}
+                  style={{ '--acc': '#f59e0b' } as React.CSSProperties}
                   title="375px szélességű iframe — mobil nézet előnézete"
                 >
                   📱 Mobil
                 </button>
                 <button
                   onClick={reloadIframe}
-                  className="px-2 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded"
+                  className="cms-icon-btn"
                   title="Iframe újratöltése"
                 >
                   ↻
@@ -719,11 +694,11 @@ export default function EditorPage({ user, membership }: Props) {
                 {status.text}
               </span>
             )}
-            <div className="inline-flex rounded border border-gray-600 overflow-hidden text-xs">
+            <div className="cms-segment">
               <button
                 onClick={handleUndo}
                 disabled={!canUndo}
-                className="px-2 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed text-white"
+                className="cms-seg-btn"
                 title="Visszavonás (Ctrl+Z)"
               >
                 ↶
@@ -731,7 +706,7 @@ export default function EditorPage({ user, membership }: Props) {
               <button
                 onClick={handleRedo}
                 disabled={!canRedo}
-                className="px-2 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed text-white border-l border-gray-600"
+                className="cms-seg-btn"
                 title="Újra (Ctrl+Shift+Z)"
               >
                 ↷
@@ -739,14 +714,17 @@ export default function EditorPage({ user, membership }: Props) {
             </div>
             <button
               onClick={() => supabase.auth.signOut()}
-              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-xs"
+              className="cms-seg-btn"
+              title="Kijelentkezés"
             >
               Kijelentkezés
             </button>
             <button
               onClick={handleSave}
               disabled={saving || publishing}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-900 disabled:cursor-not-allowed rounded text-xs font-medium"
+              className={`cms-btn-save${
+                changedCount > 0 || layoutDirty || themeDirty ? ' is-dirty' : ''
+              }`}
               title="Mentés piszkozatba (Ctrl+S)"
             >
               {saving ? 'Mentés…' : 'Mentés'}
@@ -754,7 +732,7 @@ export default function EditorPage({ user, membership }: Props) {
             <button
               onClick={handlePublish}
               disabled={saving || publishing}
-              className="px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-900 disabled:cursor-not-allowed rounded text-xs font-medium"
+              className="cms-btn-publish"
             >
               {publishing ? 'Publikálás…' : `Publikálás (${locale.toUpperCase()})`}
             </button>
@@ -778,19 +756,19 @@ export default function EditorPage({ user, membership }: Props) {
       )}
 
       {viewMode === 'live' && showTheme && canEditAdvanced && (
-        <div className="fixed top-[56px] right-0 bottom-0 w-full max-w-[360px] bg-gray-800 border-l border-gray-700 z-[1200] flex flex-col shadow-2xl">
-          <div className="flex items-center justify-between p-4 border-b border-gray-700">
-            <h2 className="font-bold">🎨 Színek</h2>
+        <div className="cms-sidesheet fixed top-[56px] right-0 bottom-0 w-full max-w-[360px] z-[1200] flex flex-col">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+            <h2 className="font-semibold text-[15px]">🎨 Színek</h2>
             <button
               onClick={() => setShowTheme(false)}
-              className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+              className="cms-icon-btn"
               title="Bezárás"
             >
               ✕
             </button>
           </div>
-          <div className="p-4 space-y-4 overflow-y-auto">
-            <p className="text-xs text-gray-400">
+          <div className="p-5 space-y-4 overflow-y-auto">
+            <p className="text-xs text-gray-400 leading-relaxed">
               A színek azonnal frissülnek az előnézetben. A mentéshez / közzétételhez
               használd a fenti Mentés / Publikálás gombot.
             </p>
@@ -800,7 +778,7 @@ export default function EditorPage({ user, membership }: Props) {
                 onClick={() => {
                   if (window.confirm('Minden szín visszaáll az alap színekre?')) setTheme({})
                 }}
-                className="w-full px-3 py-2 bg-amber-700 hover:bg-amber-600 rounded text-sm"
+                className="cms-btn-secondary w-full justify-center"
               >
                 ↺ Vissza az alap színekhez
               </button>
@@ -826,15 +804,15 @@ export default function EditorPage({ user, membership }: Props) {
       {viewMode === 'form' && (
         <main className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
           {canEditAdvanced && (
-            <section className="bg-gray-800 p-6 rounded-lg">
-              <h2 className="text-xl font-bold mb-4">Téma színek</h2>
+            <section className="cms-card p-6">
+              <h2 className="text-lg font-semibold mb-4">Téma színek</h2>
               <ThemeEditor theme={theme} onChange={setTheme} />
             </section>
           )}
 
           {grouped.map(([section, sectionFields]) => (
-            <section key={section} className="bg-gray-800 p-6 rounded-lg">
-              <h2 className="text-xl font-bold mb-4">{section}</h2>
+            <section key={section} className="cms-card p-6">
+              <h2 className="text-lg font-semibold mb-4">{section}</h2>
               <div className="space-y-4">
                 {sectionFields.map((field) => (
                   <FieldEditor
