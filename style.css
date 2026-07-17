@@ -200,6 +200,11 @@ input, textarea, [contenteditable="true"] { caret-color: var(--text); }
   gap: 14px;
 }
 .nav-logo { flex-shrink: 0; display: flex; align-items: center; }
+/* Crowded nav (more than 5 items, e.g. after pages are added): drop the width
+   cap so items use the full viewport width instead of overlapping. Still
+   collapses to the hamburger on narrow screens via the media query below. */
+.navbar.nav-wide .nav-container { max-width: none; gap: 12px; }
+.navbar.nav-wide .nav-links a { padding: 7px 8px; letter-spacing: 0.02em; }
 .logo-svg { height: 20px; width: auto; object-fit: contain; transition: filter 0.3s; }
 .navbar.scrolled .logo-svg { filter: brightness(0) saturate(100%); }
 .nav-links {
