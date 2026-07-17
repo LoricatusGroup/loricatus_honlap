@@ -110,19 +110,29 @@ Deno.serve(async (req) => {
     const rows = FIELDS.filter((f) => data[f])
       .map((f) => `<tr><td style="padding:4px 12px 4px 0"><b>${f}</b></td><td>${escapeHtml(data[f])}</td></tr>`)
       .join('')
+    // Default to Resend's shared test sender (works with no verified domain,
+    // but only delivers to the Resend account's own address). For production,
+    // verify a domain and set NOTIFY_FROM (e.g. "Loricatus <noreply@yourdomain>").
     const from =
-      Deno.env.get('NOTIFY_FROM') ?? `${site.name} <noreply@maydayprod.app>`
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from,
-        to: [site.notify_email],
-        reply_to: data.email,
-        subject: `Új ajánlatkérés — ${site.name}`,
-        html: `<h2>Új ajánlatkérés (${escapeHtml(site.name)})</h2><table>${rows}</table>`,
-      }),
-    }).catch(() => {})
+      Deno.env.get('NOTIFY_FROM') ?? `${site.name} <onboarding@resend.dev>`
+    try {
+      const mailRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from,
+          to: [site.notify_email],
+          reply_to: data.email,
+          subject: `Új ajánlatkérés — ${site.name}`,
+          html: `<h2>Új ajánlatkérés (${escapeHtml(site.name)})</h2><table>${rows}</table>`,
+        }),
+      })
+      const mailBody = await mailRes.text()
+      if (!mailRes.ok) console.error('Resend send failed', mailRes.status, mailBody)
+      else console.log('Resend send ok', mailBody)
+    } catch (e) {
+      console.error('Resend send threw', String(e))
+    }
   }
 
   return json({ success: true }, 200)
