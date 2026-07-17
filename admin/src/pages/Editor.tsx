@@ -20,6 +20,12 @@ import type {
 } from '../lib/types'
 import { LOCALES, getLocale } from '../lib/types'
 import {
+  loadPagesManifest,
+  resolvePageConfig,
+  pageNavLabel,
+  type PagesManifest,
+} from '../lib/pages'
+import {
   loadCatalog,
   loadPartial,
   parsePartialFields,
@@ -71,6 +77,9 @@ export default function EditorPage({ user, membership }: Props) {
     if (saved === 'en' || saved === 'it') return saved
     return 'hu'
   })
+  // Multi-page: the page manifest (pages.json) + the currently edited page id.
+  const [pagesManifest, setPagesManifest] = useState<PagesManifest | null>(null)
+  const [page, setPage] = useState<string>('home')
   const [fields, setFields] = useState<EditableField[]>([])
   const [theme, setTheme] = useState<Record<string, string>>({})
   const [loadedTheme, setLoadedTheme] = useState<Record<string, string>>({})
@@ -112,7 +121,31 @@ export default function EditorPage({ user, membership }: Props) {
   const MAX_HISTORY = 40
   const SNAPSHOT_DEBOUNCE_MS = 400
 
-  const localeConfig = getLocale(locale)
+  // Load the page manifest once. Until it arrives, the editor behaves exactly
+  // like the single-page version (home).
+  useEffect(() => {
+    loadPagesManifest().then((m) => {
+      if (m) setPagesManifest(m)
+    })
+  }, [])
+
+  // Page-aware config. Resolves (page, locale) from the manifest; falls back to
+  // the locale's home page while the manifest is still loading. Keeps the same
+  // shape/name as before so the rest of the component is unchanged.
+  const localeConfig = useMemo(() => {
+    const lc = getLocale(locale)
+    if (pagesManifest) {
+      const rc = resolvePageConfig(pagesManifest, page, locale)
+      if (rc) return { ...rc, label: lc.label }
+    }
+    return {
+      pageSlug: lc.pageSlug,
+      htmlUrl: lc.htmlUrl,
+      iframeSrc: lc.iframeSrc,
+      filePath: lc.filePath,
+      label: lc.label,
+    }
+  }, [pagesManifest, page, locale])
 
   // (Re)load everything whenever locale changes.
   useEffect(() => {
@@ -192,11 +225,11 @@ export default function EditorPage({ user, membership }: Props) {
     load()
     return () => {
       cancelled = true
-      // Reset undo history when changing locale (each locale gets its own context)
+      // Reset undo history when changing page/locale (each gets its own context)
       historyRef.current = []
       historyIdxRef.current = -1
     }
-  }, [locale, localeConfig.htmlUrl, localeConfig.pageSlug])
+  }, [locale, page, localeConfig.htmlUrl, localeConfig.pageSlug])
 
   // Snapshot fields/theme/layout for undo history, debounced so mid-typing
   // edits don't fragment the history into per-keystroke entries.
@@ -458,7 +491,7 @@ export default function EditorPage({ user, membership }: Props) {
     }
 
     const { error } = await supabase.functions.invoke('publish-site', {
-      body: { locale },
+      body: { locale, page },
     })
     setPublishing(false)
 
@@ -585,6 +618,21 @@ export default function EditorPage({ user, membership }: Props) {
                 </button>
               ))}
             </div>
+
+            {pagesManifest && pagesManifest.pages.length > 1 && (
+              <div className="cms-segment" title="Oldal kiválasztása">
+                {pagesManifest.pages.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => setPage(p.id)}
+                    className={`cms-seg-btn${page === p.id ? ' is-active' : ''}`}
+                    title={`Oldal: ${pageNavLabel(p, locale)}`}
+                  >
+                    {pageNavLabel(p, locale)}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className="cms-segment">
               <button
