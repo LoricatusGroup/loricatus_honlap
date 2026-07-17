@@ -84,4 +84,62 @@ function check(name, cond) {
   check('unknown template: skipped without inserting', n === 0 && !doc.querySelector('[data-section="asec-z"]'))
 }
 
+// 6. Manifest loads + resolveTarget maps (page, locale) -> file/slug/url
+{
+  const manifest = inj.loadManifest()
+  check('manifest: has pages array', Array.isArray(manifest.pages) && manifest.pages.length >= 2)
+  const home = inj.resolveTarget(manifest, 'home', 'hu')
+  check('resolve: home/hu -> index.html', home && home.filePath === 'index.html' && home.pageSlug === 'index')
+  const ref = inj.resolveTarget(manifest, 'referenciak', 'en')
+  check(
+    'resolve: referenciak/en -> en/referenciak/index.html',
+    ref && ref.filePath === 'en/referenciak/index.html' && ref.pageSlug === 'referenciak-en' && ref.url === '/en/referenciak/',
+  )
+  check('resolve: unknown page -> null', inj.resolveTarget(manifest, 'nope', 'hu') === null)
+  check('resolve: unknown locale -> null', inj.resolveTarget(manifest, 'home', 'de') === null)
+}
+
+// 7. Sitemap includes every page x locale url + extraUrls
+{
+  const manifest = inj.loadManifest()
+  const xml = inj.buildSitemapXml(manifest)
+  const locs = (xml.match(/<loc>/g) || []).length
+  check('sitemap: 6 pages + 3 extras = 9 urls', locs === 9)
+  check('sitemap: contains referenciak hu', xml.includes('<loc>https://loricatus.hu/referenciak/</loc>'))
+  check('sitemap: contains referenciak it', xml.includes('<loc>https://loricatus.hu/it/referenciak/</loc>'))
+  check('sitemap: contains extra /tudastar/', xml.includes('<loc>https://loricatus.hu/tudastar/</loc>'))
+}
+
+// 8. applySeo regenerates canonical + hreflang cluster from the manifest
+{
+  const manifest = inj.loadManifest()
+  const page = manifest.pages.find((p) => p.id === 'referenciak')
+  const doc = new JSDOM('<!DOCTYPE html><html><head><link rel="canonical" href="http://old"><link rel="alternate" hreflang="hu" href="http://old"></head><body></body></html>').window.document
+  inj.applySeo(doc, manifest, page, 'en')
+  check('seo: canonical points to en referenciak', doc.querySelector('link[rel="canonical"]').getAttribute('href') === 'https://loricatus.hu/en/referenciak/')
+  const alts = Array.from(doc.querySelectorAll('link[rel="alternate"][hreflang]'))
+  check('seo: 4 alternates (hu/en/it/x-default)', alts.length === 4)
+  check('seo: it alternate correct', alts.some((a) => a.getAttribute('hreflang') === 'it' && a.getAttribute('href') === 'https://loricatus.hu/it/referenciak/'))
+  check('seo: x-default -> hu url', alts.some((a) => a.getAttribute('hreflang') === 'x-default' && a.getAttribute('href') === 'https://loricatus.hu/referenciak/'))
+  check('seo: no leftover stale hreflang', !alts.some((a) => a.getAttribute('href') === 'http://old'))
+}
+
+// 9. Real referenciak page: adding a case-study clones the template card + rewrites keys
+{
+  const fs = require('fs')
+  const path = require('path')
+  const html = fs.readFileSync(path.join(__dirname, '..', 'referenciak', 'index.html'), 'utf-8')
+  const doc = new JSDOM(html).window.document
+  check('page: references list present', !!doc.querySelector('[data-list="references"]'))
+  check('page: 3 authored cards', doc.querySelectorAll('[data-list-item^="ref-"]').length === 3)
+  const layout = { list_order: { references: ['ref-1', 'ref-2', 'ref-3', 'ref-4'] } }
+  const cloned = inj.materializeAddedItems(doc, layout)
+  check('page: one new card cloned', cloned === 1)
+  check('page: ref-4 card exists', !!doc.querySelector('[data-list-item="ref-4"]'))
+  check('page: ref-4 title key rewritten', !!doc.querySelector('[data-edit="ref-4-title"]'))
+  check('page: ref-4 benefit (html) key rewritten', !!doc.querySelector('[data-edit-html="ref-4-benefit"]'))
+  const { applied } = inj.applyContent(doc, { 'ref-4-title': 'Új esettanulmány', 'ref-4-category': 'Teszt' })
+  check('page: applyContent fills new card', applied === 2 && doc.querySelector('[data-edit="ref-4-title"]').textContent === 'Új esettanulmány')
+}
+
 console.log(`\n${passed} checks passed`)

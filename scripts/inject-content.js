@@ -9,14 +9,35 @@ const { JSDOM } = require('jsdom')
 const SUPABASE_URL = process.env.SUPABASE_URL
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY
 const LOCALE = process.env.LOCALE || 'hu'
+// Which page to publish. Defaults to 'home' so a payload without `page` behaves
+// exactly like the original single-page (index) pipeline.
+const PAGE = process.env.PAGE || 'home'
 
-const LOCALE_CONFIG = {
-  hu: { pageSlug: 'index', filePath: 'index.html' },
-  en: { pageSlug: 'index-en', filePath: 'en/index.html' },
-  it: { pageSlug: 'index-it', filePath: 'it/index.html' },
+// The site's page manifest (pages.json) is the source of truth for which pages
+// exist, their per-locale file/slug/url, and the canonical/hreflang/sitemap data.
+function loadManifest() {
+  const p = path.join(__dirname, '..', 'pages.json')
+  return JSON.parse(fs.readFileSync(p, 'utf-8'))
 }
 
-const config = LOCALE_CONFIG[LOCALE]
+// Resolve (pageId, locale) -> { page, pageSlug, filePath, url } from the manifest.
+function resolveTarget(manifest, pageId, locale) {
+  const page = (manifest.pages || []).find((p) => p.id === pageId)
+  if (!page) return null
+  const loc = page.locales && page.locales[locale]
+  if (!loc) return null
+  return { page, pageSlug: loc.slug, filePath: loc.file, url: loc.url }
+}
+
+let manifest = null
+let config = null
+try {
+  manifest = loadManifest()
+  config = resolveTarget(manifest, PAGE, LOCALE)
+} catch (err) {
+  // Deferred to main() so `require()` (tests) never crashes on a missing file.
+  manifest = null
+}
 
 async function fetchPageContent() {
   // Use select=* so this still works before the `layout` column migration runs.
@@ -387,16 +408,93 @@ function applyTheme(doc, theme) {
   return true
 }
 
+// Rewrite <link rel="canonical"> and the hreflang alternates for this page from
+// the manifest, so every page (incl. newly added ones) gets a consistent, correct
+// language cluster. A single wrong hreflang can void the whole cluster, so this is
+// generated, never hand-maintained.
+function applySeo(doc, manifest, page, locale) {
+  if (!manifest || !page || !page.locales) return false
+  const base = String(manifest.baseUrl || '').replace(/\/$/, '')
+  const thisLoc = page.locales[locale]
+  if (!base || !thisLoc) return false
+  const head = doc.head
+  if (!head) return false
+
+  // Canonical
+  let canonical = head.querySelector('link[rel="canonical"]')
+  if (!canonical) {
+    canonical = doc.createElement('link')
+    canonical.setAttribute('rel', 'canonical')
+    head.appendChild(canonical)
+  }
+  canonical.setAttribute('href', base + thisLoc.url)
+
+  // hreflang alternates — clear existing, regenerate from the manifest
+  head.querySelectorAll('link[rel="alternate"][hreflang]').forEach((el) => el.remove())
+  const locales = Array.isArray(manifest.locales) ? manifest.locales : Object.keys(page.locales)
+  for (const lc of locales) {
+    const loc = page.locales[lc]
+    if (!loc) continue
+    const link = doc.createElement('link')
+    link.setAttribute('rel', 'alternate')
+    link.setAttribute('hreflang', lc)
+    link.setAttribute('href', base + loc.url)
+    head.appendChild(link)
+  }
+  const dl = manifest.defaultLocale || 'hu'
+  const dloc = page.locales[dl]
+  if (dloc) {
+    const link = doc.createElement('link')
+    link.setAttribute('rel', 'alternate')
+    link.setAttribute('hreflang', 'x-default')
+    link.setAttribute('href', base + dloc.url)
+    head.appendChild(link)
+  }
+  return true
+}
+
+// Build a sitemap.xml string from the manifest (all page x locale urls + any
+// extraUrls). Pure — the caller writes it to disk.
+function buildSitemapXml(manifest) {
+  const base = String((manifest && manifest.baseUrl) || '').replace(/\/$/, '')
+  if (!base) return null
+  const urls = []
+  for (const page of (manifest.pages || [])) {
+    for (const lc of Object.keys(page.locales || {})) {
+      const loc = page.locales[lc]
+      if (loc && loc.url) urls.push(base + loc.url)
+    }
+  }
+  for (const extra of (manifest.extraUrls || [])) {
+    if (extra) urls.push(base + extra)
+  }
+  const body = urls.map((u) => `  <url><loc>${u}</loc></url>`).join('\n')
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`
+}
+
+function writeSitemap(manifest) {
+  const xml = buildSitemapXml(manifest)
+  if (!xml) return 0
+  fs.writeFileSync(path.join(__dirname, '..', 'sitemap.xml'), xml)
+  const count = (xml.match(/<loc>/g) || []).length
+  console.log(`Wrote sitemap.xml (${count} url(s))`)
+  return count
+}
+
 async function main() {
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_KEY')
     process.exit(1)
   }
-  if (!config) {
-    console.error(`Unknown LOCALE: ${LOCALE} (expected hu, en, or it)`)
+  if (!manifest) {
+    console.error('Could not load pages.json manifest')
     process.exit(1)
   }
-  console.log(`Publishing locale=${LOCALE} (slug=${config.pageSlug}, file=${config.filePath})`)
+  if (!config) {
+    console.error(`Unknown page/locale: page=${PAGE} locale=${LOCALE} (not in pages.json)`)
+    process.exit(1)
+  }
+  console.log(`Publishing page=${PAGE} locale=${LOCALE} (slug=${config.pageSlug}, file=${config.filePath})`)
 
   const pageData = await fetchPageContent()
   const content = pageData.content || {}
@@ -434,8 +532,16 @@ async function main() {
     console.log(`Applied theme: ${Object.keys(theme).join(', ')}`)
   }
 
+  // Regenerate canonical + hreflang for this page from the manifest.
+  if (applySeo(doc, manifest, config.page, LOCALE)) {
+    console.log('Applied canonical + hreflang from manifest')
+  }
+
   fs.writeFileSync(htmlPath, dom.serialize())
   console.log(`Wrote ${htmlPath}`)
+
+  // Sitemap is manifest-derived, so regenerate it on every publish.
+  writeSitemap(manifest)
 }
 
 // Run only when invoked directly (CI). When required as a module (tests), the
@@ -456,4 +562,8 @@ module.exports = {
   removeStraySections,
   buildAddedSection,
   applyTheme,
+  loadManifest,
+  resolveTarget,
+  applySeo,
+  buildSitemapXml,
 }
