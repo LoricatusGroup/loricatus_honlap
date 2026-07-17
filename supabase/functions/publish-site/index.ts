@@ -24,23 +24,30 @@ function json(body: unknown, status: number): Response {
 }
 
 const VALID_LOCALES = new Set(['hu', 'en', 'it'])
+// A page id from pages.json. Constrained to a safe slug so it can be forwarded
+// verbatim into the workflow payload. Defaults to 'home' (the original index page).
+const PAGE_RE = /^[a-z0-9][a-z0-9-]{0,48}$/
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: CORS_HEADERS })
   }
 
-  // Optional body { locale: "hu" | "en" | "it" } — defaults to "hu".
+  // Optional body { locale: "hu"|"en"|"it", page: "home"|"referenciak"|... }.
   let locale = 'hu'
+  let page = 'home'
   try {
     if (req.headers.get('content-type')?.includes('application/json')) {
       const body = await req.json()
       if (body && typeof body.locale === 'string' && VALID_LOCALES.has(body.locale)) {
         locale = body.locale
       }
+      if (body && typeof body.page === 'string' && PAGE_RE.test(body.page)) {
+        page = body.page
+      }
     }
   } catch {
-    // Body is optional; ignore parse errors and stick with default
+    // Body is optional; ignore parse errors and stick with defaults
   }
 
   const authHeader = req.headers.get('Authorization')
@@ -92,7 +99,7 @@ Deno.serve(async (req) => {
     },
     body: JSON.stringify({
       event_type: 'publish-site',
-      client_payload: { triggered_by: user.email, locale },
+      client_payload: { triggered_by: user.email, locale, page },
     }),
   })
 
@@ -101,5 +108,5 @@ Deno.serve(async (req) => {
     return json({ error: `GitHub API error (${ghRes.status}): ${text}` }, 502)
   }
 
-  return json({ success: true, triggered_by: user.email, locale }, 200)
+  return json({ success: true, triggered_by: user.email, locale, page }, 200)
 })

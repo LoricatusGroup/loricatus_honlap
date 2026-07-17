@@ -1,0 +1,30 @@
+{
+  "baseUrl": "https://loricatus.hu",
+  "locales": ["hu", "en", "it"],
+  "defaultLocale": "hu",
+  "pages": [
+    {
+      "id": "home",
+      "nav": { "hu": "Főoldal", "en": "Home", "it": "Home" },
+      "inNav": false,
+      "order": 0,
+      "locales": {
+        "hu": { "slug": "index", "file": "index.html", "url": "/" },
+        "en": { "slug": "index-en", "file": "en/index.html", "url": "/en/" },
+        "it": { "slug": "index-it", "file": "it/index.html", "url": "/it/" }
+      }
+    },
+    {
+      "id": "referenciak",
+      "nav": { "hu": "Referenciák", "en": "Case studies", "it": "Referenze" },
+      "inNav": true,
+      "order": 45,
+      "locales": {
+        "hu": { "slug": "referenciak", "file": "referenciak/index.html", "url": "/referenciak/" },
+        "en": { "slug": "referenciak-en", "file": "en/referenciak/index.html", "url": "/en/referenciak/" },
+        "it": { "slug": "referenciak-it", "file": "it/referenciak/index.html", "url": "/it/referenciak/" }
+      }
+    }
+  ],
+  "extraUrls": ["/tudastar/", "/adatvedelem/", "/cookie-szabalyzat/"]
+}

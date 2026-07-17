@@ -37,19 +37,22 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           LOCALE: ${{ github.event.client_payload.locale || 'hu' }}
+          PAGE: ${{ github.event.client_payload.page || 'home' }}
         run: node scripts/inject-content.js
 
       - name: Commit and push if changed
         run: |
           git config user.name "Loricatus CMS"
           git config user.email "noreply@loricatus.hu"
-          # Stage every locale's index.html; only the one we just modified will diff
-          git add index.html en/index.html it/index.html
+          # Stage everything inject-content may have touched: the page HTML for
+          # any page/locale (incl. subpages) plus the regenerated sitemap.xml.
+          git add -A
           if git diff --staged --quiet; then
             echo "No content changes to publish"
           else
             TRIGGERED_BY="${{ github.event.client_payload.triggered_by }}"
             LOCALE="${{ github.event.client_payload.locale || 'hu' }}"
-            git commit -m "CMS: update ${LOCALE} content (by ${TRIGGERED_BY:-manual})"
+            PAGE="${{ github.event.client_payload.page || 'home' }}"
+            git commit -m "CMS: update ${PAGE}/${LOCALE} content (by ${TRIGGERED_BY:-manual})"
             git push
           fi
