@@ -142,4 +142,120 @@ function check(name, cond) {
   check('page: applyContent fills new card', applied === 2 && doc.querySelector('[data-edit="ref-4-title"]').textContent === 'Új esettanulmány')
 }
 
+// 10. mergeManifest folds dynamic (site_pages) rows into the page list
+{
+  const base = inj.loadManifest()
+  const merged = inj.mergeManifest(base, [
+    { page_id: 'szolgaltatasok', template: 'text', nav: { hu: 'Szolgáltatásaink', en: 'Services', it: 'Servizi' }, in_nav: true, sort_order: 50 },
+  ])
+  const dyn = merged.pages.find((p) => p.id === 'szolgaltatasok')
+  check('merge: dynamic page added', !!dyn && dyn._dynamic === true)
+  check('merge: dynamic hu url computed', dyn.locales.hu.url === '/szolgaltatasok/')
+  check('merge: dynamic en slug computed', dyn.locales.en.slug === 'szolgaltatasok-en')
+  check('merge: base pages retained', merged.pages.some((p) => p.id === 'home') && merged.pages.some((p) => p.id === 'referenciak'))
+}
+
+// 11. syncNav — additive on a hand-authored nav; strict no-op with no dynamic pages
+{
+  const base = inj.loadManifest()
+  const navHtml =
+    '<nav><ul class="nav-links">' +
+    '<li data-list-item="nav-1"><a href="#services">Szolg</a></li>' +
+    '<li data-list-item="nav-6"><a href="/referenciak/">Ref</a></li>' +
+    '<li data-list-item="nav-5"><a href="#contact" class="nav-cta-link">Ajánlat</a></li>' +
+    '</ul></nav>'
+
+  // No dynamic pages → nav untouched
+  const doc0 = makeDoc(navHtml)
+  inj.syncNav(doc0, base, '/', 'hu')
+  check('syncNav: strict no-op when no dynamic pages', doc0.querySelectorAll('li[data-navpage]').length === 0)
+
+  // One dynamic page → its link injected before the CTA, base pages untouched
+  const merged = inj.mergeManifest(base, [
+    { page_id: 'szolgaltatasok', nav: { hu: 'Szolgáltatásaink' }, in_nav: true, sort_order: 50 },
+  ])
+  const doc1 = makeDoc(navHtml)
+  inj.syncNav(doc1, merged, '/', 'hu')
+  const injected = doc1.querySelector('li[data-navpage="szolgaltatasok"]')
+  check('syncNav: dynamic link injected', !!injected)
+  check('syncNav: referenciak (base) NOT duplicated', !doc1.querySelector('li[data-navpage="referenciak"]'))
+  check(
+    'syncNav: injected before the CTA item',
+    injected && injected.nextElementSibling && injected.nextElementSibling.querySelector('.nav-cta-link'),
+  )
+  check('syncNav: label from manifest nav', injected.querySelector('a').textContent === 'Szolgáltatásaink')
+
+  // Idempotent: running again does not duplicate
+  inj.syncNav(doc1, merged, '/', 'hu')
+  check('syncNav: idempotent', doc1.querySelectorAll('li[data-navpage="szolgaltatasok"]').length === 1)
+}
+
+// 12. syncNav — data-navauto builds the whole page-level menu with active state
+{
+  const base = inj.loadManifest()
+  const merged = inj.mergeManifest(base, [
+    { page_id: 'szolgaltatasok', nav: { hu: 'Szolgáltatásaink' }, in_nav: true, sort_order: 50 },
+  ])
+  const doc = makeDoc('<nav><ul class="nav-links" data-navauto></ul></nav>')
+  inj.syncNav(doc, merged, '/szolgaltatasok/', 'hu')
+  const links = Array.from(doc.querySelectorAll('ul.nav-links li[data-navpage]'))
+  check('navauto: home + referenciak + dynamic present', links.length === 3)
+  check('navauto: home link first', links[0].getAttribute('data-navpage') === 'home')
+  const active = doc.querySelector('ul.nav-links a.active')
+  check('navauto: current page marked active', active && active.getAttribute('href') === '/szolgaltatasok/')
+}
+
+// 13. syncLangSwitcher fills a data-langauto container for the page's locales
+{
+  const merged = inj.mergeManifest(inj.loadManifest(), [
+    { page_id: 'szolgaltatasok', nav: { hu: 'X' }, in_nav: true },
+  ])
+  const page = merged.pages.find((p) => p.id === 'szolgaltatasok')
+  const doc = makeDoc('<div class="lang-switcher" data-langauto></div>')
+  inj.syncLangSwitcher(doc, page, 'en')
+  const langs = Array.from(doc.querySelectorAll('.lang-switcher a'))
+  check('lang: 3 links', langs.length === 3)
+  check('lang: en active + correct href', langs.some((a) => a.classList.contains('is-active') && a.getAttribute('href') === '/en/szolgaltatasok/'))
+}
+
+// 14. scaffoldPageFile builds a page file from the base shell + body template
+{
+  const fs = require('fs')
+  const path = require('path')
+  const merged = inj.mergeManifest(inj.loadManifest(), [
+    { page_id: 'tesztoldal', template: 'text', nav: { hu: 'Teszt oldal' }, in_nav: true },
+  ])
+  const page = merged.pages.find((p) => p.id === 'tesztoldal')
+  const out = path.join(require('os').tmpdir(), `scaffold-${Date.now()}`, 'index.html')
+  inj.scaffoldPageFile(out, page, 'hu', merged)
+  const html = fs.readFileSync(out, 'utf-8')
+  check('scaffold: file written', html.length > 200)
+  check('scaffold: lang set', html.includes('<html lang="hu">'))
+  check('scaffold: title has label', html.includes('Teszt oldal – Loricatus'))
+  check('scaffold: nav auto marker present', html.includes('data-navauto'))
+  check('scaffold: body template inserted (pg-hero)', html.includes('pg-hero'))
+  check('scaffold: no leftover __BODY__ marker', !html.includes('__BODY__'))
+  fs.rmSync(path.dirname(out), { recursive: true, force: true })
+}
+
+// 15. applyNavWidth flags a crowded nav (>5 visible items) as nav-wide
+{
+  const li = (h) => `<li>${h}</li>`
+  const navHtml = (n) => {
+    let items = ''
+    for (let i = 0; i < n; i++) items += li(`<a href="#s${i}">Item ${i}</a>`)
+    items += li('<a href="#contact" class="nav-cta-link">CTA</a>') // hidden on desktop
+    return `<nav id="navbar" class="navbar"><ul class="nav-links">${items}</ul></nav>`
+  }
+  const d5 = makeDoc(navHtml(5))
+  inj.applyNavWidth(d5)
+  check('navwidth: 5 items -> not wide', !d5.querySelector('#navbar').classList.contains('nav-wide'))
+  const d6 = makeDoc(navHtml(6))
+  inj.applyNavWidth(d6)
+  check('navwidth: 6 items -> nav-wide', d6.querySelector('#navbar').classList.contains('nav-wide'))
+  // Removing back under threshold clears the class
+  inj.applyNavWidth(d5)
+  check('navwidth: cta-link not counted', !d5.querySelector('#navbar').classList.contains('nav-wide'))
+}
+
 console.log(`\n${passed} checks passed`)

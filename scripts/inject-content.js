@@ -39,10 +39,10 @@ try {
   manifest = null
 }
 
-async function fetchPageContent() {
+async function fetchPageContent(pageSlug) {
   // Use select=* so this still works before the `layout` column migration runs.
   const url = `${SUPABASE_URL}/rest/v1/page_content?page_slug=eq.${encodeURIComponent(
-    config.pageSlug,
+    pageSlug,
   )}&select=*`
   const res = await fetch(url, {
     headers: {
@@ -55,9 +55,8 @@ async function fetchPageContent() {
   }
   const rows = await res.json()
   if (!rows.length) {
-    // No row for this locale yet — nothing to inject, but not an error.
-    // Return a no-op shape so main() exits cleanly.
-    console.log(`No row for page_slug=${config.pageSlug} — nothing to inject`)
+    // No row for this page/locale yet — nothing to inject, but not an error.
+    console.log(`No row for page_slug=${pageSlug} — nothing to inject`)
     return { content: {}, theme: {}, layout: {} }
   }
   return rows[0]
@@ -481,6 +480,176 @@ function writeSitemap(manifest) {
   return count
 }
 
+// ── Editor-created pages (M2) ───────────────────────────────────────────────
+
+function navLabel(page, locale) {
+  return (page.nav && (page.nav[locale] || page.nav.hu)) || page.id
+}
+
+function escapeHtmlText(s) {
+  return String(s).replace(/[&<>"]/g, (c) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]
+  ))
+}
+
+// Compute the per-locale slug/file/url for a dynamic page id, mirroring the
+// base-page convention (id, id-en, id-it → /, /en/, /it/).
+function dynamicLocales(pageId) {
+  return {
+    hu: { slug: pageId, file: `${pageId}/index.html`, url: `/${pageId}/` },
+    en: { slug: `${pageId}-en`, file: `en/${pageId}/index.html`, url: `/en/${pageId}/` },
+    it: { slug: `${pageId}-it`, file: `it/${pageId}/index.html`, url: `/it/${pageId}/` },
+  }
+}
+
+function dynamicToPageEntry(row) {
+  return {
+    id: row.page_id,
+    nav: row.nav || {},
+    inNav: row.in_nav !== false,
+    order: typeof row.sort_order === 'number' ? row.sort_order : 100,
+    template: row.template || 'text',
+    locales: dynamicLocales(row.page_id),
+    _dynamic: true,
+  }
+}
+
+// Fetch the site's editor-created pages. Defensive: any failure (table missing,
+// network) yields an empty list so the base pipeline is unaffected.
+async function loadDynamicPages() {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return []
+  try {
+    let url = `${SUPABASE_URL}/rest/v1/site_pages?select=page_id,template,nav,in_nav,sort_order`
+    const siteId = process.env.SITE_ID
+    if (siteId) url += `&site_id=eq.${encodeURIComponent(siteId)}`
+    const res = await fetch(url, {
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+    })
+    if (!res.ok) return []
+    const rows = await res.json()
+    return Array.isArray(rows) ? rows : []
+  } catch {
+    return []
+  }
+}
+
+// Base manifest (pages.json) + dynamic pages (site_pages) as one page list.
+function mergeManifest(manifest, dynamicRows) {
+  const dyn = (dynamicRows || []).map(dynamicToPageEntry)
+  return { ...manifest, pages: (manifest.pages || []).concat(dyn) }
+}
+
+// Create a page's HTML file from the base shell + body template. Nav/lang are
+// filled by syncNav/syncLangSwitcher; content is baked by applyContent.
+function scaffoldPageFile(htmlPath, page, locale, manifest) {
+  const baseHtml = fs.readFileSync(
+    path.join(__dirname, '..', 'page-templates', '_base.html'),
+    'utf-8',
+  )
+  const template = page.template || 'text'
+  let body
+  try {
+    body = fs.readFileSync(path.join(__dirname, '..', 'page-templates', `${template}.html`), 'utf-8')
+  } catch {
+    body = fs.readFileSync(path.join(__dirname, '..', 'page-templates', 'text.html'), 'utf-8')
+  }
+  const home = (manifest.pages || []).find((p) => p.id === 'home')
+  const homeUrl = (home && home.locales[locale] && home.locales[locale].url) || '/'
+  const label = navLabel(page, locale)
+  const cta = { hu: 'Ajánlatkérés', en: 'Get a quote', it: 'Richiedi preventivo' }[locale] || 'Ajánlatkérés'
+  const html = baseHtml
+    .replace(/__LANG__/g, locale)
+    .replace(/__TITLE__/g, `${escapeHtmlText(label)} – Loricatus`)
+    .replace(/__DESC__/g, escapeHtmlText(label))
+    .replace(/__HOME__/g, homeUrl)
+    .replace(/__CTA__/g, escapeHtmlText(cta))
+    .replace('__BODY__', body)
+  fs.mkdirSync(path.dirname(htmlPath), { recursive: true })
+  fs.writeFileSync(htmlPath, html)
+  console.log(`Scaffolded new page file: ${htmlPath}`)
+}
+
+// Keep navigation in sync with the page list. On scaffolded pages (ul[data-navauto])
+// it builds the full page-level menu; on hand-authored pages it only injects the
+// dynamic-page links (li[data-navpage]) — a strict no-op when none exist.
+function syncNav(doc, manifest, currentUrl, locale) {
+  const home = (manifest.pages || []).find((p) => p.id === 'home')
+  const homeLink = home && home.locales[locale]
+    ? { id: 'home', url: home.locales[locale].url, label: navLabel(home, locale) }
+    : null
+  const inNav = (manifest.pages || [])
+    .filter((p) => p.inNav && p.locales && p.locales[locale])
+    .sort((a, b) => (a.order ?? 100) - (b.order ?? 100))
+    .map((p) => ({ id: p.id, url: p.locales[locale].url, label: navLabel(p, locale), dynamic: !!p._dynamic }))
+
+  const mkLi = (link) => {
+    const li = doc.createElement('li')
+    li.setAttribute('data-navpage', link.id)
+    const a = doc.createElement('a')
+    a.setAttribute('href', link.url)
+    a.textContent = link.label
+    if (link.url === currentUrl) {
+      a.setAttribute('class', 'active')
+      a.setAttribute('aria-current', 'page')
+    }
+    li.appendChild(a)
+    return li
+  }
+
+  doc.querySelectorAll('ul.nav-links').forEach((ul) => {
+    if (ul.hasAttribute('data-navauto')) {
+      // Scaffolded page: build the whole page-level menu.
+      ul.innerHTML = ''
+      const links = homeLink ? [homeLink, ...inNav] : inNav
+      links.forEach((l) => ul.appendChild(mkLi(l)))
+    } else {
+      // Hand-authored nav: refresh only the dynamic-page links.
+      ul.querySelectorAll('li[data-navpage]').forEach((el) => el.remove())
+      const dynamic = inNav.filter((l) => l.dynamic)
+      if (!dynamic.length) return
+      const cta = ul.querySelector('.nav-cta-link')
+      const anchor = cta ? cta.closest('li') : null
+      dynamic.forEach((l) => {
+        const li = mkLi(l)
+        if (anchor) ul.insertBefore(li, anchor)
+        else ul.appendChild(li)
+      })
+    }
+  })
+}
+
+// A horizontal nav can't grow unbounded. When it carries more than 5 visible
+// items (e.g. after pages are added), mark the navbar `nav-wide` so CSS drops
+// the container width cap (full-width nav) — it still collapses to the hamburger
+// on narrow screens. No-op / removed when back under the threshold.
+function applyNavWidth(doc) {
+  const navbar = doc.querySelector('#navbar') || doc.querySelector('nav.navbar')
+  if (!navbar) return
+  const ul = doc.querySelector('ul.nav-links')
+  if (!ul) return
+  const visible = Array.from(ul.querySelectorAll('li')).filter(
+    (li) => !li.querySelector('.nav-cta-link') && !li.hasAttribute('hidden'),
+  )
+  if (visible.length > 5) navbar.classList.add('nav-wide')
+  else navbar.classList.remove('nav-wide')
+}
+
+function syncLangSwitcher(doc, page, locale) {
+  const el = doc.querySelector('[data-langauto]')
+  if (!el || !page.locales) return
+  el.innerHTML = ''
+  for (const lc of ['hu', 'en', 'it']) {
+    const loc = page.locales[lc]
+    if (!loc) continue
+    const a = doc.createElement('a')
+    a.setAttribute('href', loc.url)
+    a.setAttribute('class', 'lang-link' + (lc === locale ? ' is-active' : ''))
+    if (lc === locale) a.setAttribute('aria-current', 'page')
+    a.textContent = lc.toUpperCase()
+    el.appendChild(a)
+  }
+}
+
 async function main() {
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_KEY')
@@ -490,18 +659,32 @@ async function main() {
     console.error('Could not load pages.json manifest')
     process.exit(1)
   }
-  if (!config) {
-    console.error(`Unknown page/locale: page=${PAGE} locale=${LOCALE} (not in pages.json)`)
+  // Base pages (pages.json) + editor-created pages (site_pages) as one list.
+  const dynamicRows = await loadDynamicPages()
+  const merged = mergeManifest(manifest, dynamicRows)
+  const target = resolveTarget(merged, PAGE, LOCALE)
+  if (!target) {
+    console.error(`Unknown page/locale: page=${PAGE} locale=${LOCALE}`)
     process.exit(1)
   }
-  console.log(`Publishing page=${PAGE} locale=${LOCALE} (slug=${config.pageSlug}, file=${config.filePath})`)
+  console.log(`Publishing page=${PAGE} locale=${LOCALE} (slug=${target.pageSlug}, file=${target.filePath})`)
 
-  const pageData = await fetchPageContent()
+  const pageData = await fetchPageContent(target.pageSlug)
   const content = pageData.content || {}
   const theme = pageData.theme || {}
   const layout = pageData.layout || {}
 
-  const htmlPath = path.join(__dirname, '..', config.filePath)
+  const htmlPath = path.join(__dirname, '..', target.filePath)
+  // A dynamic page's file won't exist on its first publish — scaffold it from
+  // the base shell + its body template.
+  if (!fs.existsSync(htmlPath)) {
+    if (target.page && target.page.template) {
+      scaffoldPageFile(htmlPath, target.page, LOCALE, merged)
+    } else {
+      console.error(`Page file missing and not scaffoldable: ${htmlPath}`)
+      process.exit(1)
+    }
+  }
   const html = fs.readFileSync(htmlPath, 'utf-8')
   const dom = new JSDOM(html)
   const doc = dom.window.document
@@ -533,15 +716,20 @@ async function main() {
   }
 
   // Regenerate canonical + hreflang for this page from the manifest.
-  if (applySeo(doc, manifest, config.page, LOCALE)) {
+  if (applySeo(doc, merged, target.page, LOCALE)) {
     console.log('Applied canonical + hreflang from manifest')
   }
+
+  // Keep navigation + language switcher in sync with the page list.
+  syncNav(doc, merged, target.url, LOCALE)
+  syncLangSwitcher(doc, target.page, LOCALE)
+  applyNavWidth(doc)
 
   fs.writeFileSync(htmlPath, dom.serialize())
   console.log(`Wrote ${htmlPath}`)
 
-  // Sitemap is manifest-derived, so regenerate it on every publish.
-  writeSitemap(manifest)
+  // Sitemap is manifest-derived (base + dynamic), so regenerate it every publish.
+  writeSitemap(merged)
 }
 
 // Run only when invoked directly (CI). When required as a module (tests), the
@@ -566,4 +754,10 @@ module.exports = {
   resolveTarget,
   applySeo,
   buildSitemapXml,
+  mergeManifest,
+  dynamicToPageEntry,
+  scaffoldPageFile,
+  syncNav,
+  syncLangSwitcher,
+  applyNavWidth,
 }
