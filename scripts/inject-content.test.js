@@ -258,4 +258,15 @@ function check(name, cond) {
   check('navwidth: cta-link not counted', !d5.querySelector('#navbar').classList.contains('nav-wide'))
 }
 
+// 16. removeDynamicPageFiles refuses reserved/invalid ids (path-safety)
+{
+  // Reserved / base ids must never be deletable.
+  check('remove: refuses referenciak', inj.removeDynamicPageFiles('referenciak') === 0)
+  check('remove: refuses assets', inj.removeDynamicPageFiles('assets') === 0)
+  check('remove: refuses empty', inj.removeDynamicPageFiles('') === 0)
+  check('remove: refuses traversal', inj.removeDynamicPageFiles('../secrets') === 0)
+  // A non-existent (but validly-named) page is a clean no-op (0 dirs removed).
+  check('remove: unknown valid id -> 0', inj.removeDynamicPageFiles('nincs-ilyen-oldal-xyz') === 0)
+}
+
 console.log(`\n${passed} checks passed`)
