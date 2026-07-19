@@ -20,11 +20,12 @@ import type {
 } from '../lib/types'
 import { LOCALES, getLocale } from '../lib/types'
 import {
-  loadPagesManifest,
+  loadFullManifest,
   resolvePageConfig,
   pageNavLabel,
   type PagesManifest,
 } from '../lib/pages'
+import PageManager from '../components/PageManager'
 import {
   loadCatalog,
   loadPartial,
@@ -121,13 +122,18 @@ export default function EditorPage({ user, membership }: Props) {
   const MAX_HISTORY = 40
   const SNAPSHOT_DEBOUNCE_MS = 400
 
-  // Load the page manifest once. Until it arrives, the editor behaves exactly
-  // like the single-page version (home).
-  useEffect(() => {
-    loadPagesManifest().then((m) => {
+  // Load the page manifest (base pages.json + editor-created pages). Until it
+  // arrives, the editor behaves exactly like the single-page version (home).
+  const refreshManifest = () =>
+    loadFullManifest().then((m) => {
       if (m) setPagesManifest(m)
+      return m
     })
+  useEffect(() => {
+    refreshManifest()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+  const [showPages, setShowPages] = useState(false)
 
   // Page-aware config. Resolves (page, locale) from the manifest; falls back to
   // the locale's home page while the manifest is still loading. Keeps the same
@@ -634,6 +640,17 @@ export default function EditorPage({ user, membership }: Props) {
               </div>
             )}
 
+            {canEditAdvanced && pagesManifest && (
+              <button
+                onClick={() => setShowPages(true)}
+                className="cms-tool"
+                style={{ '--acc': '#14b8a6' } as React.CSSProperties}
+                title="Oldalak kezelése — új aloldal létrehozása vagy törlése"
+              >
+                📄 Oldalak
+              </button>
+            )}
+
             <div className="cms-segment">
               <button
                 onClick={() => setViewMode('live')}
@@ -787,6 +804,18 @@ export default function EditorPage({ user, membership }: Props) {
           </div>
         </div>
       </header>
+
+      {showPages && pagesManifest && canEditAdvanced && (
+        <PageManager
+          manifest={pagesManifest}
+          locale={locale}
+          onClose={() => setShowPages(false)}
+          onChanged={(info) => {
+            refreshManifest()
+            if (info) setStatus({ type: 'success', text: info })
+          }}
+        />
+      )}
 
       {viewMode === 'live' && (
         <LivePreview

@@ -10,6 +10,7 @@ export type PageEntry = {
   inNav?: boolean
   order?: number
   locales: Record<string, PageLocaleCfg>
+  _dynamic?: boolean // true for editor-created pages (site_pages), not pages.json
 }
 
 export type PagesManifest = {
@@ -63,4 +64,86 @@ export function resolvePageConfig(
 
 export function pageNavLabel(page: PageEntry, locale: string): string {
   return (page.nav && (page.nav[locale] || page.nav.hu)) || page.id
+}
+
+// ── Editor-created pages (M2) ───────────────────────────────────────────────
+
+import { supabase, SITE_ID } from './supabase'
+
+// Per-locale slug/file/url for a dynamic page id — mirrors inject-content.js.
+function dynamicLocales(pageId: string): Record<string, PageLocaleCfg> {
+  return {
+    hu: { slug: pageId, file: `${pageId}/index.html`, url: `/${pageId}/` },
+    en: { slug: `${pageId}-en`, file: `en/${pageId}/index.html`, url: `/en/${pageId}/` },
+    it: { slug: `${pageId}-it`, file: `it/${pageId}/index.html`, url: `/it/${pageId}/` },
+  }
+}
+
+export type SitePageRow = {
+  page_id: string
+  template: string
+  nav: Record<string, string> | null
+  in_nav: boolean
+  sort_order: number
+}
+
+export function sitePageToEntry(row: SitePageRow): PageEntry {
+  return {
+    id: row.page_id,
+    nav: row.nav || {},
+    inNav: row.in_nav !== false,
+    order: typeof row.sort_order === 'number' ? row.sort_order : 100,
+    locales: dynamicLocales(row.page_id),
+    _dynamic: true,
+  }
+}
+
+export async function loadDynamicPages(): Promise<PageEntry[]> {
+  const { data, error } = await supabase
+    .from('site_pages')
+    .select('page_id, template, nav, in_nav, sort_order')
+    .eq('site_id', SITE_ID)
+    .order('sort_order', { ascending: true })
+  if (error || !data) return []
+  return (data as SitePageRow[]).map(sitePageToEntry)
+}
+
+// Base manifest (pages.json) + dynamic pages (site_pages) as one manifest.
+export function mergeManifest(base: PagesManifest, dynamic: PageEntry[]): PagesManifest {
+  return { ...base, pages: [...base.pages, ...dynamic] }
+}
+
+// Load the full page list (base + dynamic) the editor should show.
+export async function loadFullManifest(): Promise<PagesManifest | null> {
+  const base = await loadPagesManifest()
+  if (!base) return null
+  const dynamic = await loadDynamicPages()
+  return mergeManifest(base, dynamic)
+}
+
+// name → url-safe page id (strip Hungarian accents, spaces → hyphen).
+export function slugify(name: string): string {
+  const map: Record<string, string> = {
+    á: 'a', é: 'e', í: 'i', ó: 'o', ö: 'o', ő: 'o', ú: 'u', ü: 'u', ű: 'u',
+  }
+  return name
+    .toLowerCase()
+    .replace(/[áéíóöőúüű]/g, (c) => map[c] || c)
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48)
+}
+
+export async function createPage(pageId: string, template: string, nav: Record<string, string>) {
+  return supabase.rpc('create_page', { p_site: SITE_ID, p_id: pageId, p_template: template, p_nav: nav })
+}
+
+export async function deletePage(pageId: string) {
+  return supabase.rpc('delete_page', { p_site: SITE_ID, p_id: pageId })
+}
+
+export async function reorderPages(pageIds: string[]) {
+  return supabase.rpc('reorder_pages', { p_site: SITE_ID, p_ids: pageIds })
 }
