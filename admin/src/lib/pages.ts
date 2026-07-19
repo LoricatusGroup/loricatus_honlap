@@ -144,6 +144,10 @@ export async function deletePage(pageId: string) {
   return supabase.rpc('delete_page', { p_site: SITE_ID, p_id: pageId })
 }
 
+export async function renamePage(pageId: string, nav: Record<string, string>) {
+  return supabase.rpc('rename_page', { p_site: SITE_ID, p_id: pageId, p_nav: nav })
+}
+
 export async function reorderPages(pageIds: string[]) {
   return supabase.rpc('reorder_pages', { p_site: SITE_ID, p_ids: pageIds })
 }

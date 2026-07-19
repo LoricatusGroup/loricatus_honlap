@@ -627,12 +627,24 @@ function syncNav(doc, manifest, currentUrl, locale) {
     return li
   }
 
+  const ctaLabel = { hu: 'Ajánlatkérés', en: 'Get a quote', it: 'Richiedi preventivo' }[locale] || 'Ajánlatkérés'
+  const homeUrl = homeLink ? homeLink.url : '/'
+
   doc.querySelectorAll('ul.nav-links').forEach((ul) => {
     if (ul.hasAttribute('data-navauto')) {
-      // Scaffolded page: build the whole page-level menu.
+      // Auto-nav page (scaffolded or referenciak): build the whole page-level menu.
       ul.innerHTML = ''
       const links = homeLink ? [homeLink, ...inNav] : inNav
       links.forEach((l) => ul.appendChild(mkLi(l)))
+      // Keep the CTA as the last item (shown in the mobile menu).
+      const cli = doc.createElement('li')
+      cli.setAttribute('data-navpage', 'cta')
+      const ca = doc.createElement('a')
+      ca.setAttribute('href', homeUrl + '#contact')
+      ca.setAttribute('class', 'nav-cta-link')
+      ca.textContent = ctaLabel
+      cli.appendChild(ca)
+      ul.appendChild(cli)
     } else {
       // Hand-authored nav: refresh only the dynamic-page links.
       ul.querySelectorAll('li[data-navpage]').forEach((el) => el.remove())
