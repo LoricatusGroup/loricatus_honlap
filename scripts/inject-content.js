@@ -533,6 +533,37 @@ async function loadDynamicPages() {
   }
 }
 
+// Reserved ids whose directories must never be deleted by a page removal.
+const RESERVED_PAGE_IDS = new Set([
+  'home', 'index', 'en', 'it', 'admin', 'admin-app', 'assets', 'sections',
+  'scripts', 'supabase', 'page-templates', 'tudastar', 'adatvedelem',
+  'cookie-szabalyzat', 'referenciak', 'epiteskovetes-hu-mentes', 'node_modules',
+])
+
+// Delete a deleted page's HTML files (all three locales). Guarded by the same
+// slug shape + reserved-id list as create_page, so it can only ever touch a
+// dynamic-page directory.
+function removeDynamicPageFiles(pageId) {
+  if (!/^[a-z0-9][a-z0-9-]{0,48}$/.test(pageId) || RESERVED_PAGE_IDS.has(pageId)) {
+    console.warn(`Refusing to remove reserved/invalid page id: ${pageId}`)
+    return 0
+  }
+  let removed = 0
+  for (const rel of [pageId, path.join('en', pageId), path.join('it', pageId)]) {
+    const full = path.join(__dirname, '..', rel)
+    try {
+      if (fs.existsSync(full)) {
+        fs.rmSync(full, { recursive: true, force: true })
+        removed++
+        console.log(`Removed page directory: ${rel}`)
+      }
+    } catch (e) {
+      console.warn(`Could not remove ${rel}: ${e}`)
+    }
+  }
+  return removed
+}
+
 // Base manifest (pages.json) + dynamic pages (site_pages) as one page list.
 function mergeManifest(manifest, dynamicRows) {
   const dyn = (dynamicRows || []).map(dynamicToPageEntry)
@@ -659,6 +690,14 @@ async function main() {
     console.error('Could not load pages.json manifest')
     process.exit(1)
   }
+  // A page was deleted in the editor — remove its files, then continue with the
+  // (home) publish so the nav + sitemap refresh without it.
+  const REMOVE_PAGE = process.env.REMOVE_PAGE
+  if (REMOVE_PAGE) {
+    const n = removeDynamicPageFiles(REMOVE_PAGE)
+    console.log(`Page removal '${REMOVE_PAGE}': ${n} director(ies) removed`)
+  }
+
   // Base pages (pages.json) + editor-created pages (site_pages) as one list.
   const dynamicRows = await loadDynamicPages()
   const merged = mergeManifest(manifest, dynamicRows)
@@ -760,4 +799,5 @@ module.exports = {
   syncNav,
   syncLangSwitcher,
   applyNavWidth,
+  removeDynamicPageFiles,
 }

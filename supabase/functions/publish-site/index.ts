@@ -33,9 +33,11 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: CORS_HEADERS })
   }
 
-  // Optional body { locale: "hu"|"en"|"it", page: "home"|"referenciak"|... }.
+  // Optional body { locale, page, removePage }. removePage triggers a cleanup
+  // publish that deletes a removed page's files (see inject-content.js).
   let locale = 'hu'
   let page = 'home'
+  let removePage = ''
   try {
     if (req.headers.get('content-type')?.includes('application/json')) {
       const body = await req.json()
@@ -44,6 +46,9 @@ Deno.serve(async (req) => {
       }
       if (body && typeof body.page === 'string' && PAGE_RE.test(body.page)) {
         page = body.page
+      }
+      if (body && typeof body.removePage === 'string' && PAGE_RE.test(body.removePage)) {
+        removePage = body.removePage
       }
     }
   } catch {
@@ -99,7 +104,7 @@ Deno.serve(async (req) => {
     },
     body: JSON.stringify({
       event_type: 'publish-site',
-      client_payload: { triggered_by: user.email, locale, page },
+      client_payload: { triggered_by: user.email, locale, page, remove_page: removePage },
     }),
   })
 
@@ -108,5 +113,5 @@ Deno.serve(async (req) => {
     return json({ error: `GitHub API error (${ghRes.status}): ${text}` }, 502)
   }
 
-  return json({ success: true, triggered_by: user.email, locale, page }, 200)
+  return json({ success: true, triggered_by: user.email, locale, page, removePage }, 200)
 })

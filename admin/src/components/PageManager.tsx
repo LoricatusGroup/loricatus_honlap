@@ -27,6 +27,9 @@ const TEMPLATES = [
 export default function PageManager({ manifest, locale, onClose, onChanged }: Props) {
   const dynamic = manifest.pages.filter((p) => p._dynamic)
   const [name, setName] = useState('')
+  const [labelEn, setLabelEn] = useState('')
+  const [labelIt, setLabelIt] = useState('')
+  const [showLangLabels, setShowLangLabels] = useState(false)
   const [template, setTemplate] = useState('text')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -46,7 +49,11 @@ export default function PageManager({ manifest, locale, onClose, onChanged }: Pr
     setBusy(true)
     setError(null)
     const label = name.trim()
-    const nav = { hu: label, en: label, it: label }
+    const nav = {
+      hu: label,
+      en: labelEn.trim() || label,
+      it: labelIt.trim() || label,
+    }
     const { error: err } = await createPage(slug, template, nav)
     if (err) {
       setError(err.message)
@@ -69,12 +76,18 @@ export default function PageManager({ manifest, locale, onClose, onChanged }: Pr
     setBusy(true)
     setError(null)
     const { error: err } = await deletePage(id)
-    setBusy(false)
     if (err) {
+      setBusy(false)
       setError(err.message)
       return
     }
-    onChanged(`„${label}" oldal törölve. A menüből ~1 perc múlva tűnik el (a főoldal újrapublikálásával).`)
+    // Publish home with removePage so the page's files are deleted and the nav +
+    // sitemap refresh without it.
+    await supabase.functions
+      .invoke('publish-site', { body: { page: 'home', removePage: id } })
+      .catch(() => {})
+    setBusy(false)
+    onChanged(`„${label}" oldal törölve. ~1 perc múlva tűnik el a menüből és a szerverről is.`)
   }
 
   return (
@@ -150,6 +163,32 @@ export default function PageManager({ manifest, locale, onClose, onChanged }: Pr
                 URL: <span className="text-gray-300">/{slug}/</span>
                 {clash && <span className="ml-2 text-red-300">— foglalt név</span>}
               </p>
+            )}
+            {!showLangLabels ? (
+              <button
+                type="button"
+                onClick={() => setShowLangLabels(true)}
+                className="mt-2 text-[11px] text-blue-300 hover:text-blue-200"
+              >
+                + Eltérő felirat EN / IT nyelven
+              </button>
+            ) : (
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <input
+                  className="cms-input"
+                  value={labelEn}
+                  onChange={(e) => setLabelEn(e.target.value)}
+                  placeholder={`EN: ${name.trim() || '…'}`}
+                  maxLength={48}
+                />
+                <input
+                  className="cms-input"
+                  value={labelIt}
+                  onChange={(e) => setLabelIt(e.target.value)}
+                  placeholder={`IT: ${name.trim() || '…'}`}
+                  maxLength={48}
+                />
+              </div>
             )}
           </div>
           <div>

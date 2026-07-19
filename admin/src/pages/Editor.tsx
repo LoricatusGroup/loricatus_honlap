@@ -88,6 +88,9 @@ export default function EditorPage({ user, membership }: Props) {
   const [layout, setLayout] = useState<LayoutState | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
+  // A just-created page whose HTML isn't published yet (404) — show a friendly
+  // "still building" state instead of a raw fetch error.
+  const [pageBuilding, setPageBuilding] = useState(false)
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [status, setStatus] = useState<Status>(null)
@@ -158,9 +161,11 @@ export default function EditorPage({ user, membership }: Props) {
     let cancelled = false
     setLoading(true)
     setLoadError(null)
+    setPageBuilding(false)
     setFields([])
     setStructure(null)
     setLayout(null)
+    const isDynamicPage = !!pagesManifest?.pages.find((p) => p.id === page)?._dynamic
 
     const load = async () => {
       try {
@@ -223,7 +228,13 @@ export default function EditorPage({ user, membership }: Props) {
         setLoading(false)
       } catch (err) {
         if (cancelled) return
-        setLoadError(err instanceof Error ? err.message : String(err))
+        const msg = err instanceof Error ? err.message : String(err)
+        // A dynamic page that 404s just hasn't finished its first publish yet.
+        if (isDynamicPage && /Failed to fetch|:\s*404/.test(msg)) {
+          setPageBuilding(true)
+        } else {
+          setLoadError(msg)
+        }
         setLoading(false)
       }
     }
@@ -570,6 +581,30 @@ export default function EditorPage({ user, membership }: Props) {
     )
   }
 
+  if (pageBuilding) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-6">
+        <div className="cms-modal-panel max-w-md p-7 text-center">
+          <div className="text-3xl">🛠️</div>
+          <h2 className="mt-3 text-lg font-semibold">Az oldal még épül</h2>
+          <p className="mt-2 text-sm leading-relaxed text-gray-300">
+            Ez az újonnan létrehozott oldal most készül el (a publikálás összerakja a
+            vázát). Ez általában <strong>1–2 percet</strong> vesz igénybe. Kérlek,
+            próbáld újra kicsit később.
+          </p>
+          <div className="mt-5 flex justify-center gap-2">
+            <button onClick={() => setPage('home')} className="cms-btn-ghost">
+              ← Vissza a Főoldalra
+            </button>
+            <button onClick={() => window.location.reload()} className="cms-btn-primary">
+              Frissítés
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (loadError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-6">
@@ -811,7 +846,10 @@ export default function EditorPage({ user, membership }: Props) {
           locale={locale}
           onClose={() => setShowPages(false)}
           onChanged={(info) => {
-            refreshManifest()
+            refreshManifest().then((m) => {
+              // If the page we're viewing was just deleted, fall back to home.
+              if (m && !m.pages.find((p) => p.id === page)) setPage('home')
+            })
             if (info) setStatus({ type: 'success', text: info })
           }}
         />

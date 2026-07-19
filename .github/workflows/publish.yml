@@ -38,6 +38,7 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           LOCALE: ${{ github.event.client_payload.locale || 'hu' }}
           PAGE: ${{ github.event.client_payload.page || 'home' }}
+          REMOVE_PAGE: ${{ github.event.client_payload.remove_page || '' }}
         run: node scripts/inject-content.js
 
       - name: Commit and push if changed
