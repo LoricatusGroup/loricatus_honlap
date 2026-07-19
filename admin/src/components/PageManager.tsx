@@ -23,6 +23,7 @@ interface Props {
 const TEMPLATES = [
   { value: 'text', label: 'Szöveges oldal', desc: 'Cím + bevezető + szövegblokkok' },
   { value: 'cards', label: 'Kártyás oldal', desc: 'Cím + kártyalista (mint a Referenciák)' },
+  { value: 'blank', label: 'Üres oldal', desc: 'Csak cím — szekciókból építed fel a könyvtárból' },
 ]
 
 // The "Oldalak" panel: create / delete editor-made pages. Creating a page also

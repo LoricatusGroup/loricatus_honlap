@@ -272,4 +272,26 @@ function check(name, cond) {
   check('remove: unknown valid id -> 0', inj.removeDynamicPageFiles('nincs-ilyen-oldal-xyz') === 0)
 }
 
+// 17. M4: a scaffolded page composes with catalog sections (added_sections)
+{
+  const fs = require('fs')
+  const path = require('path')
+  const os = require('os')
+  const merged = inj.mergeManifest(inj.loadManifest(), [
+    { page_id: 'komponalt', template: 'blank', nav: { hu: 'Komponált' }, in_nav: true },
+  ])
+  const page = merged.pages.find((p) => p.id === 'komponalt')
+  const out = path.join(os.tmpdir(), `compose-${Date.now()}`, 'index.html')
+  inj.scaffoldPageFile(out, page, 'hu', merged)
+  const doc = new JSDOM(fs.readFileSync(out, 'utf-8')).window.document
+  check('m4: blank template scaffolded (has footer)', !!doc.querySelector('footer'))
+  // Compose: add a catalog CTA section to the scaffolded page.
+  const n = inj.materializeAddedSections(doc, { added_sections: [{ id: 'asec-c1', template: 'cta' }] })
+  check('m4: catalog section inserted into scaffolded page', n === 1)
+  const sec = doc.querySelector('[data-section="asec-c1"]')
+  check('m4: section present + before footer', sec && sec.nextElementSibling && sec.nextElementSibling.tagName === 'FOOTER')
+  check('m4: section keys rewritten to instance', !!doc.querySelector('[data-edit="asec-c1-title"]'))
+  fs.rmSync(path.dirname(out), { recursive: true, force: true })
+}
+
 console.log(`\n${passed} checks passed`)

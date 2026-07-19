@@ -11,7 +11,7 @@ import {
 } from '../lib/iframeBridge'
 import HtmlEditModal from './inline/HtmlEditModal'
 import ImageEditModal from './inline/ImageEditModal'
-import HrefEditModal from './inline/HrefEditModal'
+import HrefEditModal, { type PageLink } from './inline/HrefEditModal'
 import NumberEditModal from './inline/NumberEditModal'
 import ContentEditModal from './inline/ContentEditModal'
 import LiveLayoutOverlay from './LiveLayoutOverlay'
@@ -28,6 +28,7 @@ interface Props {
   mobilePreview: boolean
   iframeKey: number
   sectionPartials: Record<string, string>
+  pageLinks: PageLink[]
   onFieldChange: (key: string, value: string) => void
   onLayoutChange: (next: LayoutState) => void
 }
@@ -49,6 +50,7 @@ export default function LivePreview({
   mobilePreview,
   iframeKey,
   sectionPartials,
+  pageLinks,
   onFieldChange,
   onLayoutChange,
 }: Props) {
@@ -309,6 +311,7 @@ export default function LivePreview({
         <HrefEditModal
           label={modal.field.label}
           initialValue={modal.field.value}
+          pageLinks={pageLinks}
           onSave={(v) => onChangeRef.current(modal.field.key, v)}
           onClose={closeModal}
         />

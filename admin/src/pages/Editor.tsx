@@ -158,6 +158,22 @@ export default function EditorPage({ user, membership }: Props) {
     }
   }, [pagesManifest, page, locale])
 
+  // Internal link targets for the href editor: every page (current locale) +
+  // the contact form. Lets the owner point a button at a page without typing a URL.
+  const pageLinks = useMemo(() => {
+    if (!pagesManifest) return []
+    const home = pagesManifest.pages.find((p) => p.id === 'home')
+    const homeUrl = home?.locales[locale]?.url || '/'
+    const links = pagesManifest.pages
+      .map((p) => {
+        const loc = p.locales[locale]
+        return loc ? { label: pageNavLabel(p, locale), url: loc.url } : null
+      })
+      .filter((x): x is { label: string; url: string } => x !== null)
+    links.push({ label: 'Kapcsolat / űrlap', url: homeUrl + '#contact' })
+    return links
+  }, [pagesManifest, locale])
+
   // (Re)load everything whenever locale changes.
   useEffect(() => {
     let cancelled = false
@@ -885,6 +901,7 @@ export default function EditorPage({ user, membership }: Props) {
           mobilePreview={mobilePreview}
           iframeKey={iframeKey}
           sectionPartials={sectionPartials}
+          pageLinks={pageLinks}
           onFieldChange={handleFieldChange}
           onLayoutChange={setLayout}
         />
