@@ -89,8 +89,10 @@ export default function EditorPage({ user, membership }: Props) {
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   // A just-created page whose HTML isn't published yet (404) — show a friendly
-  // "still building" state instead of a raw fetch error.
+  // "still building" state instead of a raw fetch error. `retryTick` re-runs the
+  // load so the building screen auto-opens the editor once the page is live.
   const [pageBuilding, setPageBuilding] = useState(false)
+  const [retryTick, setRetryTick] = useState(0)
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [status, setStatus] = useState<Status>(null)
@@ -246,7 +248,15 @@ export default function EditorPage({ user, membership }: Props) {
       historyRef.current = []
       historyIdxRef.current = -1
     }
-  }, [locale, page, localeConfig.htmlUrl, localeConfig.pageSlug])
+  }, [locale, page, localeConfig.htmlUrl, localeConfig.pageSlug, retryTick])
+
+  // While a page is still building, retry the load automatically every 12s so
+  // the editor opens by itself once the first publish finishes.
+  useEffect(() => {
+    if (!pageBuilding) return
+    const id = setInterval(() => setRetryTick((t) => t + 1), 12000)
+    return () => clearInterval(id)
+  }, [pageBuilding])
 
   // Snapshot fields/theme/layout for undo history, debounced so mid-typing
   // edits don't fragment the history into per-keystroke entries.
@@ -586,18 +596,22 @@ export default function EditorPage({ user, membership }: Props) {
       <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-6">
         <div className="cms-modal-panel max-w-md p-7 text-center">
           <div className="text-3xl">🛠️</div>
-          <h2 className="mt-3 text-lg font-semibold">Az oldal még épül</h2>
+          <h2 className="mt-3 text-lg font-semibold">Az oldal még épül…</h2>
           <p className="mt-2 text-sm leading-relaxed text-gray-300">
             Ez az újonnan létrehozott oldal most készül el (a publikálás összerakja a
-            vázát). Ez általában <strong>1–2 percet</strong> vesz igénybe. Kérlek,
-            próbáld újra kicsit később.
+            vázát) — általában <strong>1–2 perc</strong>. Nem kell semmit tenned:
+            a szerkesztő <strong>magától megnyílik</strong>, amint kész.
           </p>
+          <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400">
+            <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-white/25 border-t-white/80" />
+            Ellenőrzés folyamatban…
+          </div>
           <div className="mt-5 flex justify-center gap-2">
             <button onClick={() => setPage('home')} className="cms-btn-ghost">
               ← Vissza a Főoldalra
             </button>
-            <button onClick={() => window.location.reload()} className="cms-btn-primary">
-              Frissítés
+            <button onClick={() => setRetryTick((t) => t + 1)} className="cms-btn-primary">
+              Ellenőrzés most
             </button>
           </div>
         </div>
@@ -851,6 +865,12 @@ export default function EditorPage({ user, membership }: Props) {
               if (m && !m.pages.find((p) => p.id === page)) setPage('home')
             })
             if (info) setStatus({ type: 'success', text: info })
+          }}
+          onCreatedPage={(id) => {
+            // Jump straight to the new page; the "building" screen auto-opens the
+            // editor once its first publish finishes.
+            setViewMode('form')
+            setPage(id)
           }}
         />
       )}

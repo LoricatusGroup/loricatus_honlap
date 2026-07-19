@@ -199,8 +199,11 @@ function check(name, cond) {
   const doc = makeDoc('<nav><ul class="nav-links" data-navauto></ul></nav>')
   inj.syncNav(doc, merged, '/szolgaltatasok/', 'hu')
   const links = Array.from(doc.querySelectorAll('ul.nav-links li[data-navpage]'))
-  check('navauto: home + referenciak + dynamic present', links.length === 3)
+  // home + referenciak + dynamic + cta
+  check('navauto: 4 items incl. cta', links.length === 4)
   check('navauto: home link first', links[0].getAttribute('data-navpage') === 'home')
+  check('navauto: last is cta (mobile)', links[links.length - 1].getAttribute('data-navpage') === 'cta')
+  check('navauto: cta points to home #contact', doc.querySelector('[data-navpage="cta"] a').getAttribute('href') === '/#contact')
   const active = doc.querySelector('ul.nav-links a.active')
   check('navauto: current page marked active', active && active.getAttribute('href') === '/szolgaltatasok/')
 }
