@@ -26,6 +26,7 @@ import {
   type PagesManifest,
 } from '../lib/pages'
 import PageManager from '../components/PageManager'
+import Tour, { type TourStep } from '../components/Tour'
 import {
   loadCatalog,
   loadPartial,
@@ -139,6 +140,22 @@ export default function EditorPage({ user, membership }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   const [showPages, setShowPages] = useState(false)
+
+  // Guided tour: auto-open once, the first time the editor finishes loading.
+  const [showTour, setShowTour] = useState(false)
+  const tourAutoRef = useRef(false)
+  const closeTour = () => {
+    setShowTour(false)
+    localStorage.setItem('loricatus-cms-tour-seen', '1')
+  }
+  useEffect(() => {
+    if (loading || tourAutoRef.current) return
+    tourAutoRef.current = true
+    if (!localStorage.getItem('loricatus-cms-tour-seen')) {
+      const t = setTimeout(() => setShowTour(true), 500)
+      return () => clearTimeout(t)
+    }
+  }, [loading])
 
   // Page-aware config. Resolves (page, locale) from the manifest; falls back to
   // the locale's home page while the manifest is still loading. Keeps the same
@@ -677,7 +694,7 @@ export default function EditorPage({ user, membership }: Props) {
               </div>
             </div>
 
-            <div className="cms-segment">
+            <div className="cms-segment" data-tour="locale">
               {LOCALES.map((l) => (
                 <button
                   key={l.code}
@@ -691,7 +708,7 @@ export default function EditorPage({ user, membership }: Props) {
             </div>
 
             {pagesManifest && pagesManifest.pages.length > 1 && (
-              <div className="cms-segment" title="Oldal kiválasztása">
+              <div className="cms-segment" title="Oldal kiválasztása" data-tour="pages">
                 {pagesManifest.pages.map((p) => (
                   <button
                     key={p.id}
@@ -711,12 +728,13 @@ export default function EditorPage({ user, membership }: Props) {
                 className="cms-tool"
                 style={{ '--acc': '#14b8a6' } as React.CSSProperties}
                 title="Oldalak kezelése — új aloldal létrehozása vagy törlése"
+                data-tour="pages-manage"
               >
                 📄 Oldalak
               </button>
             )}
 
-            <div className="cms-segment">
+            <div className="cms-segment" data-tour="viewmodes">
               <button
                 onClick={() => setViewMode('live')}
                 className={`cms-seg-btn${viewMode === 'live' ? ' is-active' : ''}`}
@@ -843,6 +861,14 @@ export default function EditorPage({ user, membership }: Props) {
               </button>
             </div>
             <button
+              onClick={() => setShowTour(true)}
+              className="cms-icon-btn"
+              title="Bemutató / súgó — hogyan használd a szerkesztőt"
+              aria-label="Bemutató"
+            >
+              ?
+            </button>
+            <button
               onClick={() => supabase.auth.signOut()}
               className="cms-seg-btn"
               title="Kijelentkezés"
@@ -856,6 +882,7 @@ export default function EditorPage({ user, membership }: Props) {
                 changedCount > 0 || layoutDirty || themeDirty ? ' is-dirty' : ''
               }`}
               title="Mentés piszkozatba (Ctrl+S)"
+              data-tour="save"
             >
               {saving ? 'Mentés…' : 'Mentés'}
             </button>
@@ -863,6 +890,7 @@ export default function EditorPage({ user, membership }: Props) {
               onClick={handlePublish}
               disabled={saving || publishing}
               className="cms-btn-publish"
+              data-tour="publish"
             >
               {publishing ? 'Publikálás…' : `Publikálás (${locale.toUpperCase()})`}
             </button>
@@ -888,6 +916,60 @@ export default function EditorPage({ user, membership }: Props) {
             setViewMode('form')
             setPage(id)
           }}
+        />
+      )}
+
+      {showTour && (
+        <Tour
+          onClose={closeTour}
+          steps={
+            [
+              {
+                title: 'Üdv a szerkesztőben! 👋',
+                body: 'Egy perc alatt megmutatom a lényeget. A jobb felső ? gombbal bármikor újraindíthatod ezt.',
+              },
+              {
+                title: 'Élő szerkesztés',
+                body: 'Kattints bármelyik szövegre vagy képre az előnézetben, és írd át. Ennyi az egész — nem kell semmilyen technikai tudás.',
+              },
+              {
+                target: 'locale',
+                title: 'Nyelvek',
+                body: 'Válts a nyelvek között (HU / EN / IT). Minden nyelvet külön szerkeszthetsz és publikálhatsz.',
+              },
+              {
+                target: 'pages',
+                title: 'Oldalak közti váltás',
+                body: 'Itt választhatod ki, melyik oldalt szerkeszted éppen.',
+                show: !!(pagesManifest && pagesManifest.pages.length > 1),
+              },
+              {
+                target: 'pages-manage',
+                title: 'Új oldal létrehozása',
+                body: 'Új aloldal (pl. „Szolgáltatásaink"), átnevezés, sorrendezés vagy törlés. A menü magától frissül.',
+                show: canEditAdvanced,
+              },
+              {
+                target: 'viewmodes',
+                title: 'Nézetek',
+                body: 'Élő szerkesztés · Elrendezés (szekciók sorrendje, új szekció beszúrása) · Lista (minden mező egy helyen).',
+              },
+              {
+                target: 'save',
+                title: 'Mentés',
+                body: 'Piszkozatba ment — a látogatók még nem látják. Bátran ments gyakran, nem tudsz elrontani semmit.',
+              },
+              {
+                target: 'publish',
+                title: 'Publikálás',
+                body: 'Közzététel: a változás ~1 perc múlva megjelenik az élő weboldalon.',
+              },
+              {
+                title: 'Kész! ✓',
+                body: 'Próbáld ki nyugodtan. A ? gombbal (jobb fent) bármikor újra elindíthatod ezt a bemutatót.',
+              },
+            ] as TourStep[]
+          }
         />
       )}
 
