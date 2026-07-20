@@ -4,6 +4,19 @@ on:
   repository_dispatch:
     types: [publish-site]
   workflow_dispatch:
+    inputs:
+      page:
+        description: 'Page id (e.g. home, teszt)'
+        required: false
+        default: 'home'
+      locale:
+        description: "Locale (hu, en, it) or 'all'"
+        required: false
+        default: 'hu'
+      remove_page:
+        description: 'Page id to remove (optional)'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -19,6 +32,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          # Full history so a rejected push can rebase onto the latest main.
+          fetch-depth: 0
           # Use a PAT so the resulting push triggers deploy.yml
           # (pushes made with GITHUB_TOKEN do NOT trigger further workflows).
           token: ${{ secrets.PUBLISH_PAT }}
@@ -36,12 +51,32 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-          LOCALE: ${{ github.event.client_payload.locale || 'hu' }}
-          PAGE: ${{ github.event.client_payload.page || 'home' }}
-          REMOVE_PAGE: ${{ github.event.client_payload.remove_page || '' }}
-        run: node scripts/inject-content.js
+          LOCALE_IN: ${{ github.event.client_payload.locale || github.event.inputs.locale || 'hu' }}
+          PAGE: ${{ github.event.client_payload.page || github.event.inputs.page || 'home' }}
+          REMOVE_PAGE: ${{ github.event.client_payload.remove_page || github.event.inputs.remove_page || '' }}
+        run: |
+          set -e
+          # A structural change (new page, rename, delete, reorder) affects every
+          # locale's nav/sitemap. To avoid firing one racing workflow per locale
+          # (which collided on git push and lost pages), the client asks for
+          # LOCALE_IN='all' and we build every configured locale in this single
+          # run — one commit, one push.
+          if [ "$LOCALE_IN" = "all" ]; then
+            LOCALES=$(node -e "console.log((require('./pages.json').locales || ['hu']).join(' '))")
+          else
+            LOCALES="$LOCALE_IN"
+          fi
+          echo "Publishing page='$PAGE' locales='$LOCALES' remove_page='$REMOVE_PAGE'"
+          for LC in $LOCALES; do
+            echo "--- inject locale=$LC ---"
+            LOCALE="$LC" PAGE="$PAGE" REMOVE_PAGE="$REMOVE_PAGE" node scripts/inject-content.js
+          done
 
       - name: Commit and push if changed
+        env:
+          LOCALE_IN: ${{ github.event.client_payload.locale || github.event.inputs.locale || 'hu' }}
+          PAGE: ${{ github.event.client_payload.page || github.event.inputs.page || 'home' }}
+          TRIGGERED_BY: ${{ github.event.client_payload.triggered_by }}
         run: |
           git config user.name "Loricatus CMS"
           git config user.email "noreply@loricatus.hu"
@@ -50,10 +85,19 @@ jobs:
           git add -A
           if git diff --staged --quiet; then
             echo "No content changes to publish"
-          else
-            TRIGGERED_BY="${{ github.event.client_payload.triggered_by }}"
-            LOCALE="${{ github.event.client_payload.locale || 'hu' }}"
-            PAGE="${{ github.event.client_payload.page || 'home' }}"
-            git commit -m "CMS: update ${PAGE}/${LOCALE} content (by ${TRIGGERED_BY:-manual})"
-            git push
+            exit 0
           fi
+          git commit -m "CMS: update ${PAGE}/${LOCALE_IN} content (by ${TRIGGERED_BY:-manual})"
+          # Race-safe push: concurrent publishes (or a deploy landing meanwhile)
+          # can advance main, so rebase onto the latest and retry rather than
+          # failing on a rejected non-fast-forward push.
+          for attempt in 1 2 3 4 5 6; do
+            if git push origin HEAD:main; then
+              echo "Pushed on attempt ${attempt}"
+              exit 0
+            fi
+            echo "Push rejected (attempt ${attempt}); rebasing onto latest main…"
+            git pull --rebase origin main || { echo "Rebase failed"; exit 1; }
+          done
+          echo "Push still failing after ${attempt} attempts"
+          exit 1

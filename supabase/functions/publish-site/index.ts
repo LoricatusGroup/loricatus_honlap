@@ -23,7 +23,10 @@ function json(body: unknown, status: number): Response {
   })
 }
 
-const VALID_LOCALES = new Set(['hu', 'en', 'it'])
+// 'all' is a sentinel: the publish workflow expands it to every configured
+// locale and builds them in one run (used for structural changes: new page,
+// rename, delete, reorder — which touch every locale's nav + sitemap).
+const VALID_LOCALES = new Set(['hu', 'en', 'it', 'all'])
 // A page id from pages.json. Constrained to a safe slug so it can be forwarded
 // verbatim into the workflow payload. Defaults to 'home' (the original index page).
 const PAGE_RE = /^[a-z0-9][a-z0-9-]{0,48}$/
