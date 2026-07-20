@@ -40,6 +40,11 @@
     "description": "Kép az egyik, formázható szöveg és gomb a másik hasábban."
   },
   {
+    "template": "video",
+    "label": "Videó (YouTube / Vimeo)",
+    "description": "Beágyazott videó — csak illeszd be a YouTube vagy Vimeo linket."
+  },
+  {
     "template": "text",
     "label": "Szöveges szekció",
     "description": "Cím + szabadon formázható szövegtörzs bármilyen tartalomhoz."

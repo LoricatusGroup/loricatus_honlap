@@ -8,6 +8,7 @@ const ATTR_TYPE_MAP: Record<string, FieldType> = {
   'data-edit-color': 'color',
   'data-edit-target': 'target',
   'data-edit-content': 'content',
+  'data-edit-video': 'video',
 }
 
 const SECTION_LABELS: Record<string, string> = {
@@ -36,6 +37,10 @@ function readValue(el: Element, type: FieldType): string {
   if (type === 'color') return el.getAttribute('style') || ''
   if (type === 'target') return el.getAttribute('data-target') || ''
   if (type === 'content') return el.getAttribute('content') || ''
+  if (type === 'video') {
+    const f = el.tagName === 'IFRAME' ? el : el.querySelector('iframe')
+    return f?.getAttribute('src') || ''
+  }
   return ''
 }
 

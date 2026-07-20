@@ -14,6 +14,7 @@ import ImageEditModal from './inline/ImageEditModal'
 import HrefEditModal, { type PageLink } from './inline/HrefEditModal'
 import NumberEditModal from './inline/NumberEditModal'
 import ContentEditModal from './inline/ContentEditModal'
+import VideoEditModal from './inline/VideoEditModal'
 import LiveLayoutOverlay from './LiveLayoutOverlay'
 import LiveFreeformOverlay from './LiveFreeformOverlay'
 
@@ -39,6 +40,7 @@ type ModalState =
   | { kind: 'href'; field: EditableField }
   | { kind: 'number'; field: EditableField }
   | { kind: 'content'; field: EditableField }
+  | { kind: 'video'; field: EditableField }
   | null
 
 export default function LivePreview({
@@ -170,6 +172,8 @@ export default function LivePreview({
         setModal({ kind: 'number', field })
       } else if (type === 'content') {
         setModal({ kind: 'content', field })
+      } else if (type === 'video') {
+        setModal({ kind: 'video', field })
       }
     })
 
@@ -199,6 +203,8 @@ export default function LivePreview({
         setModal({ kind: 'number', field })
       } else if (type === 'content') {
         setModal({ kind: 'content', field })
+      } else if (type === 'video') {
+        setModal({ kind: 'video', field })
       }
     })
   }, [overlayMode, iframeReady, startInlineTextEdit])
@@ -328,6 +334,15 @@ export default function LivePreview({
 
       {modal?.kind === 'content' && (
         <ContentEditModal
+          label={modal.field.label}
+          initialValue={modal.field.value}
+          onSave={(v) => onChangeRef.current(modal.field.key, v)}
+          onClose={closeModal}
+        />
+      )}
+
+      {modal?.kind === 'video' && (
+        <VideoEditModal
           label={modal.field.label}
           initialValue={modal.field.value}
           onSave={(v) => onChangeRef.current(modal.field.key, v)}
