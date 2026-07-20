@@ -50,8 +50,34 @@ export function generateSectionId(): string {
 const SUFFIX_HU: Record<string, string> = {
   tag: 'címke', title: 'cím', subtitle: 'alcím', desc: 'leírás', body: 'szöveg',
   button: 'gomb', 'button-href': 'gomb linkje',
+  button2: '2. gomb', 'button2-href': '2. gomb linkje',
   q1: '1. kérdés', q2: '2. kérdés', q3: '3. kérdés', q4: '4. kérdés',
   a1: '1. válasz', a2: '2. válasz', a3: '3. válasz', a4: '4. válasz',
+  // features / cards cards
+  'c1-icon': '1. kártya – ikon', 'c1-title': '1. kártya – cím', 'c1-desc': '1. kártya – leírás',
+  'c1-link': '1. kártya – link', 'c1-linklabel': '1. kártya – link szövege',
+  'c2-icon': '2. kártya – ikon', 'c2-title': '2. kártya – cím', 'c2-desc': '2. kártya – leírás',
+  'c2-link': '2. kártya – link', 'c2-linklabel': '2. kártya – link szövege',
+  'c3-icon': '3. kártya – ikon', 'c3-title': '3. kártya – cím', 'c3-desc': '3. kártya – leírás',
+  'c3-link': '3. kártya – link', 'c3-linklabel': '3. kártya – link szövege',
+  // steps
+  's1-title': '1. lépés – cím', 's1-desc': '1. lépés – leírás',
+  's2-title': '2. lépés – cím', 's2-desc': '2. lépés – leírás',
+  's3-title': '3. lépés – cím', 's3-desc': '3. lépés – leírás',
+  // stats
+  'n1-num': '1. adat – szám', 'n1-label': '1. adat – felirat',
+  'n2-num': '2. adat – szám', 'n2-label': '2. adat – felirat',
+  'n3-num': '3. adat – szám', 'n3-label': '3. adat – felirat',
+  // checklist
+  'i1-title': '1. pont – cím', 'i1-desc': '1. pont – leírás',
+  'i2-title': '2. pont – cím', 'i2-desc': '2. pont – leírás',
+  'i3-title': '3. pont – cím', 'i3-desc': '3. pont – leírás',
+  'i4-title': '4. pont – cím', 'i4-desc': '4. pont – leírás',
+  // testimonial
+  quote: 'idézet', author: 'név / cég', role: 'beosztás',
+  // media + contact
+  image: 'kép', email: 'e-mail', 'email-href': 'e-mail link',
+  phone: 'telefon', 'phone-href': 'telefon link',
 }
 
 function readValue(el: Element, type: FieldType): string {

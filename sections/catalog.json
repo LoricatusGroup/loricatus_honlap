@@ -1,17 +1,62 @@
 [
   {
-    "template": "cta",
-    "label": "Ajánlatkérő sáv",
-    "description": "Rövid felhívás egy gombbal — a látogatót a kapcsolat felé tereli."
+    "template": "hero",
+    "label": "Kiemelt fejléc",
+    "description": "Nagy cím + alcím + két gomb — tökéletes egy oldal tetejére."
   },
   {
-    "template": "faq",
-    "label": "GYIK",
-    "description": "Gyakran ismételt kérdések, lenyíló válaszokkal."
+    "template": "features",
+    "label": "Jellemzők (3 kártya)",
+    "description": "Három kártya ikonnal, címmel és leírással — szolgáltatások, előnyök."
+  },
+  {
+    "template": "cards",
+    "label": "Kártyarács linkkel",
+    "description": "Három kártya címmel, leírással és „Tovább” hivatkozással."
+  },
+  {
+    "template": "steps",
+    "label": "Folyamat (3 lépés)",
+    "description": "Számozott lépések — „Így dolgozunk” típusú bemutatás."
+  },
+  {
+    "template": "stats",
+    "label": "Számok / eredmények",
+    "description": "Nagy számok felirattal — projektek, elégedettség, tapasztalat."
+  },
+  {
+    "template": "checklist",
+    "label": "Előnyök (pipás lista)",
+    "description": "Pipás felsorolás címmel és rövid leírással — miért minket."
+  },
+  {
+    "template": "testimonial",
+    "label": "Ügyfélvélemény",
+    "description": "Kiemelt idézet a névvel és beosztással — bizalomépítés."
+  },
+  {
+    "template": "mediatext",
+    "label": "Kép + szöveg",
+    "description": "Kép az egyik, formázható szöveg és gomb a másik hasábban."
   },
   {
     "template": "text",
     "label": "Szöveges szekció",
     "description": "Cím + szabadon formázható szövegtörzs bármilyen tartalomhoz."
+  },
+  {
+    "template": "cta",
+    "label": "Ajánlatkérő sáv",
+    "description": "Rövid felhívás egy gombbal — a látogatót a kapcsolat felé tereli."
+  },
+  {
+    "template": "contact",
+    "label": "Kapcsolati blokk",
+    "description": "Cím + rövid szöveg + e-mail, telefon és gomb."
+  },
+  {
+    "template": "faq",
+    "label": "GYIK",
+    "description": "Gyakran ismételt kérdések, lenyíló válaszokkal."
   }
 ]
