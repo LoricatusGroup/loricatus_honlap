@@ -478,7 +478,15 @@ export default function EditorPage({ user, membership }: Props) {
             }
           : prev,
       )
-      setStatus({ type: 'success', text: `„${label}" szekció beszúrva — rendezd át és mentsd el.` })
+      // Jump to the live view so the new section is immediately visible and
+      // editable — no Save needed. (The preview materializes it from the
+      // in-memory layout + partial.)
+      setViewMode('live')
+      setOverlayMode('edit')
+      setStatus({
+        type: 'success',
+        text: `„${label}" szekció beszúrva — már látod és szerkesztheted itt lent. A weboldalra a Publikálással kerül ki.`,
+      })
     } catch (err) {
       setStatus({
         type: 'error',
