@@ -741,6 +741,17 @@ function formatPostDate(iso, locale) {
   return `${months[m]} ${day}, ${y}`
 }
 
+// Third-party auto-blog (Soro). When a locale has a Soro embed id configured
+// (manifest.soroBlog[locale]), the blog index renders Soro's feed in place of
+// the built-in post list / "coming soon" state — Soro then owns that blog. The
+// built-in engine (blog_posts) stays available but dormant for that locale.
+function soroEmbedHtml(soroId) {
+  return (
+    `<div id="soro-blog" style="grid-column:1/-1"></div>\n` +
+    `<script src="https://app.trysoro.com/api/embed/${escapeAttr(soroId)}" defer></script>`
+  )
+}
+
 // Blog url + filesystem-dir helpers (hu at root, en/it under their prefix).
 function blogIndexUrl(locale) { return locale === 'hu' ? '/blog/' : `/${locale}/blog/` }
 function blogPostUrl(locale, slug) { return blogIndexUrl(locale) + slug + '/' }
@@ -907,8 +918,12 @@ async function generateBlog(locale, manifest) {
     return
   }
 
-  // 1. Index page (post list + editable header from page_content).
-  const cards = posts.length
+  // 1. Index page (editable header from page_content + the feed). A configured
+  // Soro locale renders its embed and takes precedence over the built-in posts.
+  const soroId = (manifest.soroBlog || {})[locale]
+  const cards = soroId
+    ? soroEmbedHtml(soroId)
+    : posts.length
     ? posts.map((p) => buildPostCard(p, locale)).join('\n')
     : `<p class="blog-empty">${escapeHtmlText(BLOG_STR.empty[locale] || BLOG_STR.empty.hu)}</p>`
   let indexBody = fs.readFileSync(path.join(__dirname, '..', 'page-templates', 'blog-index.html'), 'utf-8')
@@ -1071,6 +1086,7 @@ if (require.main === module) {
 module.exports = {
   applyContent,
   toEmbedUrl,
+  soroEmbedHtml,
   generateBlog,
   formatPostDate,
   blogPostUrl,

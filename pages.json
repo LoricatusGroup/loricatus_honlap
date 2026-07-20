@@ -2,6 +2,7 @@
   "baseUrl": "https://loricatus.hu",
   "locales": ["hu", "en", "it"],
   "defaultLocale": "hu",
+  "soroBlog": { "hu": "3c63aa50-934c-4cb5-b0ab-a1c29610f337" },
   "pages": [
     {
       "id": "home",

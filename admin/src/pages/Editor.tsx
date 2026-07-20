@@ -27,6 +27,8 @@ import {
 } from '../lib/pages'
 import PageManager from '../components/PageManager'
 import BlogManager from '../components/BlogManager'
+import VersionHistory from '../components/VersionHistory'
+import { snapshotVersion } from '../lib/versions'
 import { Menu, MenuItem, MenuSep } from '../components/ui/Menu'
 import Tour, { type TourStep } from '../components/Tour'
 import {
@@ -101,6 +103,14 @@ export default function EditorPage({ user, membership }: Props) {
   const [status, setStatus] = useState<Status>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('live')
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null)
+
+  // Optimistic concurrency. `revRef` holds the rev we loaded; save_page rejects
+  // a write whose expected rev has moved on (someone else saved meanwhile). On
+  // conflict we surface a banner + a refresh button and suspend auto-save so we
+  // never clobber the other editor's work.
+  const revRef = useRef<number>(0)
+  const [conflict, setConflict] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
 
   // Section catalog (curated block library). `sectionPartials` caches fetched
   // partial HTML per template so the preview can materialize added sections.
@@ -200,6 +210,7 @@ export default function EditorPage({ user, membership }: Props) {
     setLoading(true)
     setLoadError(null)
     setPageBuilding(false)
+    setConflict(false)
     setFields([])
     setStructure(null)
     setLayout(null)
@@ -221,6 +232,9 @@ export default function EditorPage({ user, membership }: Props) {
 
         if (cancelled) return
 
+        // Remember the rev we loaded — save_page compares against it to detect a
+        // concurrent save. A brand-new page (no row) starts at 0.
+        revRef.current = (pageData?.rev as number | undefined) ?? 0
         const savedContent = (pageData?.content ?? {}) as Record<string, string>
         const mergedFields = htmlFields.map((f) => ({
           ...f,
@@ -525,24 +539,40 @@ export default function EditorPage({ user, membership }: Props) {
 
   const handleSave = async (): Promise<boolean> => {
     if (!structure || !layout) return false
+    // A pending conflict blocks saving until the user refreshes — otherwise we'd
+    // clobber the concurrent edit we just warned them about.
+    if (conflict) return false
     setSaving(true)
     setStatus(null)
     const content = buildContent()
     const layoutDiff = diffLayoutState(structure, layout)
-    // Write through the save_page RPC: it enforces membership and, for
-    // text-only members, discards any theme/layout change server-side.
-    const { error } = await supabase.rpc('save_page', {
+    // Write through the save_page RPC: it enforces membership, discards any
+    // theme/layout change from text-only members, and rejects the write if the
+    // stored rev moved on (a concurrent save) so we never overwrite it.
+    const { data, error } = await supabase.rpc('save_page', {
       p_site: SITE_ID,
       p_slug: localeConfig.pageSlug,
       p_content: content,
       p_theme: theme,
       p_layout: layoutDiff,
+      p_expected_rev: revRef.current,
     })
     setSaving(false)
     if (error) {
+      // Optimistic-lock conflict (SQLSTATE 40001 / 'conflict:' message).
+      if (error.code === '40001' || /conflict:/i.test(error.message || '')) {
+        setConflict(true)
+        setStatus({
+          type: 'error',
+          text: 'Valaki más módosította ezt az oldalt — mentés leállítva.',
+        })
+        return false
+      }
       setStatus({ type: 'error', text: `Mentés sikertelen: ${error.message}` })
       return false
     }
+    // save_page returns the new rev; track it so the next save compares correctly.
+    if (typeof data === 'number') revRef.current = data
     // Rebase the saved baseline so the auto-save effect goes quiet until the
     // next genuine edit (breaks the perpetual re-save loop). Same shape/order
     // as currentSnapshot so the strings compare equal.
@@ -569,11 +599,22 @@ export default function EditorPage({ user, membership }: Props) {
     if (error) {
       setStatus({ type: 'error', text: `Publikálás sikertelen: ${error.message}` })
     } else {
+      // Record this publish in the page's version history (audit log + restore
+      // point). Best-effort: a failure here must never fail the publish itself.
+      snapshotVersion(localeConfig.pageSlug).catch(() => {})
       setStatus({
         type: 'success',
         text: `Publikálás elindítva (${localeConfig.label}). A weboldal ~1 perc múlva frissül.`,
       })
     }
+  }
+
+  // Discard local edits and reload the latest saved content from the server.
+  // The conflict banner's "Frissítés" button uses this to pull in the other
+  // editor's changes; retryTick re-runs the load effect (which clears conflict).
+  const refreshFromServer = () => {
+    setStatus(null)
+    setRetryTick((t) => t + 1)
   }
 
   // Auto-save: 5s after a genuine unsaved edit → save draft silently. Fires
@@ -582,13 +623,13 @@ export default function EditorPage({ user, membership }: Props) {
   const saveRef = useRef(handleSave)
   saveRef.current = handleSave
   useEffect(() => {
-    if (loading || saving || publishing) return
+    if (loading || saving || publishing || conflict) return
     if (currentSnapshot === null || currentSnapshot === savedSnapshotRef.current) return
     const timer = setTimeout(() => {
       saveRef.current()
     }, 5000)
     return () => clearTimeout(timer)
-  }, [currentSnapshot, loading, saving, publishing])
+  }, [currentSnapshot, loading, saving, publishing, conflict])
 
   // Keyboard shortcuts. Ctrl/Cmd+S = save, Ctrl/Cmd+Z = undo,
   // Ctrl/Cmd+Shift+Z (or Ctrl+Y) = redo. 1/2/3 = switch view mode (but
@@ -754,6 +795,16 @@ export default function EditorPage({ user, membership }: Props) {
                       hint="Cikkek írása / szerkesztése"
                       onClick={() => {
                         setShowBlog(true)
+                        close()
+                      }}
+                    />
+                    <MenuSep />
+                    <MenuItem
+                      icon="🕘"
+                      label="Verziók / visszaállítás"
+                      hint="Korábbi publikálások — ki, mikor, visszaállítás"
+                      onClick={() => {
+                        setShowHistory(true)
                         close()
                       }}
                     />
@@ -965,6 +1016,50 @@ export default function EditorPage({ user, membership }: Props) {
         </div>
       </header>
 
+      {conflict && (
+        <div className="sticky top-[56px] z-[15] border-b border-amber-400/30 bg-amber-500/15 backdrop-blur">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
+            <div className="flex items-start gap-2.5 text-sm text-amber-100">
+              <span className="text-base leading-none">⚠️</span>
+              <span className="leading-relaxed">
+                <strong>Valaki más is szerkesztette ezt az oldalt</strong>, és időközben
+                mentett. Hogy ne írd felül a munkáját, a mentést leállítottuk. Kattints a
+                <strong> Frissítés</strong> gombra a legfrissebb változat betöltéséhez —
+                a nem mentett módosításaid ekkor elvesznek.
+              </span>
+            </div>
+            <button
+              onClick={refreshFromServer}
+              className="cms-btn-primary shrink-0 !py-1.5"
+              title="A legfrissebb mentett változat betöltése"
+            >
+              ↻ Frissítés
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showHistory && (
+        <VersionHistory
+          pageSlug={localeConfig.pageSlug}
+          pageLabel={
+            pagesManifest ? pageNavLabel(
+              pagesManifest.pages.find((p) => p.id === page) ?? pagesManifest.pages[0],
+              locale,
+            ) : 'Oldal'
+          }
+          localeLabel={localeConfig.label}
+          onClose={() => setShowHistory(false)}
+          onRestored={(info) => {
+            setShowHistory(false)
+            setStatus({ type: 'success', text: info })
+            // Reload so the restored content lands in the editor (and picks up
+            // the new rev), replacing any local edits.
+            refreshFromServer()
+          }}
+        />
+      )}
+
       {showPages && pagesManifest && canEditAdvanced && (
         <PageManager
           manifest={pagesManifest}
@@ -1020,8 +1115,8 @@ export default function EditorPage({ user, membership }: Props) {
               },
               {
                 target: 'content',
-                title: 'Tartalom: oldalak és blog',
-                body: 'A „📄 Tartalom" menüből hozol létre új aloldalt (pl. „Szolgáltatásaink"), és itt írod/szerkeszted a blogcikkeket is.',
+                title: 'Tartalom: oldalak, blog, verziók',
+                body: 'A „📄 Tartalom" menüből hozol létre új aloldalt (pl. „Szolgáltatásaink"), itt írod/szerkeszted a blogcikkeket, és innen éred el a korábbi publikálásokat is — bármelyikre egy kattintással visszaállhatsz, ha valami félresikerült.',
                 show: true,
               },
               {
