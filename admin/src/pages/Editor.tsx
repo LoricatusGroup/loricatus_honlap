@@ -26,6 +26,7 @@ import {
   type PagesManifest,
 } from '../lib/pages'
 import PageManager from '../components/PageManager'
+import BlogManager from '../components/BlogManager'
 import Tour, { type TourStep } from '../components/Tour'
 import {
   loadCatalog,
@@ -140,6 +141,7 @@ export default function EditorPage({ user, membership }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   const [showPages, setShowPages] = useState(false)
+  const [showBlog, setShowBlog] = useState(false)
 
   // Guided tour: auto-open once, the first time the editor finishes loading.
   const [showTour, setShowTour] = useState(false)
@@ -742,6 +744,16 @@ export default function EditorPage({ user, membership }: Props) {
               </button>
             )}
 
+            <button
+              onClick={() => setShowBlog(true)}
+              className="cms-tool"
+              style={{ '--acc': '#f59e0b' } as React.CSSProperties}
+              title="Blog / cikkek kezelése"
+              data-tour="blog"
+            >
+              📰 Blog
+            </button>
+
             <div className="cms-segment" data-tour="viewmodes">
               <button
                 onClick={() => setViewMode('live')}
@@ -924,6 +936,14 @@ export default function EditorPage({ user, membership }: Props) {
             setViewMode('form')
             setPage(id)
           }}
+        />
+      )}
+
+      {showBlog && (
+        <BlogManager
+          locale={locale}
+          onClose={() => setShowBlog(false)}
+          onChanged={(info) => info && setStatus({ type: 'success', text: info })}
         />
       )}
 
