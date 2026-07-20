@@ -312,6 +312,31 @@ function check(name, cond) {
   const { applied } = inj.applyContent(doc, { 'asec-vid-embed': 'https://youtu.be/dQw4w9WgXcQ' })
   const iframe = wrap.querySelector('iframe')
   check('video: applyContent set inner iframe src to embed url', applied === 1 && iframe.getAttribute('src') === 'https://www.youtube.com/embed/dQw4w9WgXcQ')
+
+  // Uploaded file → renders in <video>, clears the iframe.
+  check('video: isVideoFile detects mp4 (case + query)', inj.isVideoFile('https://x/clip.MP4?token=1') === true)
+  check('video: isVideoFile rejects youtube', inj.isVideoFile('https://youtu.be/abc') === false)
+  const mp4 = 'https://x.supabase.co/storage/v1/object/public/assets/site/clip.mp4'
+  inj.applyContent(doc, { 'asec-vid-embed': mp4 })
+  const vid = wrap.querySelector('video')
+  check('video: mp4 -> <video> src set', !!vid && vid.getAttribute('src') === mp4)
+  check('video: mp4 -> iframe src cleared', (wrap.querySelector('iframe').getAttribute('src') || '') === '')
+  // Switch back to an embed → the <video> is cleared/hidden again.
+  inj.applyContent(doc, { 'asec-vid-embed': 'https://youtu.be/dQw4w9WgXcQ' })
+  check('video: switch back to embed clears <video>', (wrap.querySelector('video').getAttribute('src') || '') === '')
+  check('video: switch back to embed restores iframe', wrap.querySelector('iframe').getAttribute('src') === 'https://www.youtube.com/embed/dQw4w9WgXcQ')
+}
+
+// Case-study block: partial materializes with rewritten keys + editable content
+{
+  const doc = makeDoc('<footer>foot</footer>')
+  inj.materializeAddedSections(doc, { added_sections: [{ id: 'cs1', template: 'casestudy' }] })
+  check('casestudy: section materialized', !!doc.querySelector('[data-section="cs1"]'))
+  check('casestudy: title key rewritten to instance id', !!doc.querySelector('[data-edit="cs1-title"]'))
+  check('casestudy: has editable image', !!doc.querySelector('[data-edit-src="cs1-image"]'))
+  const { applied } = inj.applyContent(doc, { 'cs1-title': 'Budai Vár felmérés', 'cs1-n1-num': '-42%' })
+  check('casestudy: content applied', applied === 2 &&
+    doc.querySelector('[data-edit="cs1-title"]').textContent === 'Budai Vár felmérés')
 }
 
 // Blog engine (M5): url/date helpers, card, post-page generation, cleanup

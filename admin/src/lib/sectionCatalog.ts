@@ -79,8 +79,13 @@ const SUFFIX_HU: Record<string, string> = {
   // media + contact
   image: 'kép', email: 'e-mail', 'email-href': 'e-mail link',
   phone: 'telefon', 'phone-href': 'telefon link',
+  // case study
+  client: 'ügyfél · helyszín',
+  'challenge-title': 'kihívás – felirat', challenge: 'kihívás – szöveg',
+  'solution-title': 'megoldás – felirat', solution: 'megoldás – szöveg',
+  'result-title': 'eredmény – felirat', result: 'eredmény – szöveg',
   // video
-  embed: 'videó linkje (YouTube / Vimeo)',
+  embed: 'videó linkje vagy feltöltött fájl',
 }
 
 function readValue(el: Element, type: FieldType): string {
@@ -89,7 +94,8 @@ function readValue(el: Element, type: FieldType): string {
   if (type === 'image') return el.getAttribute('src') || ''
   if (type === 'video') {
     const f = el.tagName === 'IFRAME' ? el : el.querySelector('iframe')
-    return f?.getAttribute('src') || ''
+    const v = el.querySelector('video')
+    return f?.getAttribute('src') || v?.getAttribute('src') || ''
   }
   if (type === 'href') return el.getAttribute('href') || ''
   if (type === 'color') return el.getAttribute('style') || ''

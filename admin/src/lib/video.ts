@@ -19,3 +19,51 @@ export function toEmbedUrl(url: string): string {
 export function isEmbeddableVideo(url: string): boolean {
   return toEmbedUrl(url) !== ''
 }
+
+// True when the value points at a direct video file (an uploaded .mp4/.webm/…)
+// rather than a YouTube/Vimeo page — those render in a <video>, not an <iframe>.
+export function isVideoFile(url: string): boolean {
+  const u = (url || '').trim().split(/[?#]/)[0].toLowerCase()
+  return /\.(mp4|webm|ogv|ogg|mov|m4v)$/.test(u)
+}
+
+export type VideoKind = 'embed' | 'file' | 'none'
+
+// Classify a stored video value: a trusted embed URL, a direct file, or neither.
+export function classifyVideo(url: string): VideoKind {
+  if (toEmbedUrl(url)) return 'embed'
+  if (isVideoFile(url)) return 'file'
+  return 'none'
+}
+
+// Render a stored video value into a [data-edit-video] wrapper: embeds populate
+// the template <iframe>; uploaded files render in a <video> (created if the
+// wrapper predates file support); empty clears both so the placeholder shows.
+// Mirrored in the publish pipeline (scripts/inject-content.js applyVideoEl).
+export function applyVideoTo(el: Element, value: string): void {
+  const doc = el.ownerDocument
+  const kind = classifyVideo(value)
+  const iframe = el.querySelector('iframe')
+  let video = el.querySelector('video') as HTMLVideoElement | null
+
+  if (iframe) iframe.setAttribute('src', kind === 'embed' ? toEmbedUrl(value) : '')
+
+  if (kind === 'file') {
+    if (!video) {
+      video = doc.createElement('video')
+      video.setAttribute('controls', '')
+      video.setAttribute('playsinline', '')
+      video.setAttribute('preload', 'metadata')
+      video.setAttribute(
+        'style',
+        'position:absolute;inset:0;width:100%;height:100%;border:0;background:#000;object-fit:contain',
+      )
+      el.appendChild(video)
+    }
+    video.setAttribute('src', value)
+    video.style.display = ''
+  } else if (video) {
+    video.removeAttribute('src')
+    video.style.display = 'none'
+  }
+}
