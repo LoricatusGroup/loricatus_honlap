@@ -104,10 +104,14 @@ function check(name, cond) {
   const manifest = inj.loadManifest()
   const xml = inj.buildSitemapXml(manifest)
   const locs = (xml.match(/<loc>/g) || []).length
-  check('sitemap: 6 pages + 3 extras = 9 urls', locs === 9)
+  check('sitemap: 9 pages (home+ref+blog x3) + 3 extras = 12 urls', locs === 12)
   check('sitemap: contains referenciak hu', xml.includes('<loc>https://loricatus.hu/referenciak/</loc>'))
   check('sitemap: contains referenciak it', xml.includes('<loc>https://loricatus.hu/it/referenciak/</loc>'))
+  check('sitemap: contains blog index', xml.includes('<loc>https://loricatus.hu/blog/</loc>'))
   check('sitemap: contains extra /tudastar/', xml.includes('<loc>https://loricatus.hu/tudastar/</loc>'))
+  // Blog post urls passed as extra are appended.
+  const xml2 = inj.buildSitemapXml(manifest, ['https://loricatus.hu/blog/elso-cikk/'])
+  check('sitemap: blog post url appended', xml2.includes('<loc>https://loricatus.hu/blog/elso-cikk/</loc>'))
 }
 
 // 8. applySeo regenerates canonical + hreflang cluster from the manifest
@@ -199,8 +203,8 @@ function check(name, cond) {
   const doc = makeDoc('<nav><ul class="nav-links" data-navauto></ul></nav>')
   inj.syncNav(doc, merged, '/szolgaltatasok/', 'hu')
   const links = Array.from(doc.querySelectorAll('ul.nav-links li[data-navpage]'))
-  // home + referenciak + dynamic + cta
-  check('navauto: 4 items incl. cta', links.length === 4)
+  // home + referenciak + dynamic(szolgaltatasok) + blog + cta
+  check('navauto: 5 items incl. blog + cta', links.length === 5)
   check('navauto: home link first', links[0].getAttribute('data-navpage') === 'home')
   check('navauto: last is cta (mobile)', links[links.length - 1].getAttribute('data-navpage') === 'cta')
   check('navauto: cta points to home #contact', doc.querySelector('[data-navpage="cta"] a').getAttribute('href') === '/#contact')
@@ -308,6 +312,61 @@ function check(name, cond) {
   const { applied } = inj.applyContent(doc, { 'asec-vid-embed': 'https://youtu.be/dQw4w9WgXcQ' })
   const iframe = wrap.querySelector('iframe')
   check('video: applyContent set inner iframe src to embed url', applied === 1 && iframe.getAttribute('src') === 'https://www.youtube.com/embed/dQw4w9WgXcQ')
+}
+
+// Blog engine (M5): url/date helpers, card, post-page generation, cleanup
+{
+  const fs2 = require('fs')
+  const path2 = require('path')
+  const post = {
+    slug: 'elso-cikk', title: 'Első cikk', excerpt: 'Rövid összefoglaló.',
+    body: '<p>Ez a törzs.</p>', cover_url: 'https://cdn.example/c.jpg',
+    tags: ['drón', 'hír'], published_at: '2026-03-15T10:00:00Z', author: 'Teszt',
+  }
+  check('blog: hu post url', inj.blogPostUrl('hu', 'elso-cikk') === '/blog/elso-cikk/')
+  check('blog: en post url', inj.blogPostUrl('en', 'elso-cikk') === '/en/blog/elso-cikk/')
+  check('blog: hu date', inj.formatPostDate('2026-03-15T10:00:00Z', 'hu') === '2026. március 15.')
+  check('blog: en date', inj.formatPostDate('2026-03-15T10:00:00Z', 'en') === 'March 15, 2026')
+
+  const card = inj.buildPostCard(post, 'hu')
+  check('blog: card has title', card.includes('Első cikk'))
+  check('blog: card links to post', card.includes('href="/blog/elso-cikk/"'))
+  check('blog: card has cover', card.includes('c.jpg'))
+  check('blog: card has tag', card.includes('>drón<'))
+
+  const manifest = inj.loadManifest()
+  const blogPage = manifest.pages.find((p) => p.id === 'blog')
+  check('blog: manifest has blog page', !!blogPage)
+
+  // Post page round-trip (writes under repo blog/<slug>, cleaned up after).
+  const blogRoot = path2.join(__dirname, '..', 'blog')
+  const testSlug = 'zzz-teszt-cikk'
+  inj.generateBlogPost({ ...post, slug: testSlug }, 'hu', manifest, blogPage)
+  const f = path2.join(blogRoot, testSlug, 'index.html')
+  const html = fs2.readFileSync(f, 'utf-8')
+  check('blog: post page has title', html.includes('Első cikk'))
+  check('blog: post canonical', html.includes(`rel="canonical" href="https://loricatus.hu/blog/${testSlug}/"`))
+  check('blog: post og:type article', html.includes('content="article"'))
+  check('blog: post body injected', html.includes('<p>Ez a törzs.</p>'))
+  check('blog: post nav present', html.includes('data-navauto'))
+  fs2.rmSync(path2.join(blogRoot, testSlug), { recursive: true, force: true })
+
+  // Stale cleanup: keep all pre-existing dirs, drop a throwaway one.
+  const existing = fs2.existsSync(blogRoot)
+    ? fs2.readdirSync(blogRoot, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name)
+    : []
+  fs2.mkdirSync(path2.join(blogRoot, 'zzz-drop'), { recursive: true })
+  const removed = inj.removeStaleBlogPosts('hu', new Set(existing))
+  check('blog: stale post dir removed', removed === 1 && !fs2.existsSync(path2.join(blogRoot, 'zzz-drop')))
+
+  // RSS round-trip.
+  inj.writeBlogRss('hu', manifest, [post])
+  const rss = fs2.readFileSync(path2.join(blogRoot, 'rss.xml'), 'utf-8')
+  check('blog: rss has item title', rss.includes('<title>Első cikk</title>'))
+  check('blog: rss has post link', rss.includes('<link>https://loricatus.hu/blog/elso-cikk/</link>'))
+  fs2.rmSync(path2.join(blogRoot, 'rss.xml'), { force: true })
+  // Leave blog/ empty (git won't track it); remove if empty.
+  try { fs2.rmdirSync(blogRoot) } catch { /* not empty or gone — fine */ }
 }
 
 console.log(`\n${passed} checks passed`)

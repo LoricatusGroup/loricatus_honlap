@@ -475,7 +475,7 @@ function applySeo(doc, manifest, page, locale) {
 
 // Build a sitemap.xml string from the manifest (all page x locale urls + any
 // extraUrls). Pure — the caller writes it to disk.
-function buildSitemapXml(manifest) {
+function buildSitemapXml(manifest, extraUrls = []) {
   const base = String((manifest && manifest.baseUrl) || '').replace(/\/$/, '')
   if (!base) return null
   const urls = []
@@ -488,12 +488,15 @@ function buildSitemapXml(manifest) {
   for (const extra of (manifest.extraUrls || [])) {
     if (extra) urls.push(base + extra)
   }
+  for (const extra of (extraUrls || [])) {
+    if (extra) urls.push(extra)
+  }
   const body = urls.map((u) => `  <url><loc>${u}</loc></url>`).join('\n')
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`
 }
 
-function writeSitemap(manifest) {
-  const xml = buildSitemapXml(manifest)
+function writeSitemap(manifest, extraUrls = []) {
+  const xml = buildSitemapXml(manifest, extraUrls)
   if (!xml) return 0
   fs.writeFileSync(path.join(__dirname, '..', 'sitemap.xml'), xml)
   const count = (xml.match(/<loc>/g) || []).length
@@ -714,6 +717,243 @@ function syncLangSwitcher(doc, page, locale) {
   }
 }
 
+// ── Blog engine (M5) ─────────────────────────────────────────────────────────
+
+const BLOG_STR = {
+  back: { hu: 'Vissza a bloghoz', en: 'Back to the blog', it: 'Torna al blog' },
+  more: { hu: 'Tovább olvasom →', en: 'Read more →', it: 'Continua →' },
+  empty: { hu: 'Hamarosan érkeznek az első cikkek.', en: 'Posts are coming soon.', it: 'Presto i primi articoli.' },
+  months: {
+    hu: ['január', 'február', 'március', 'április', 'május', 'június', 'július', 'augusztus', 'szeptember', 'október', 'november', 'december'],
+    en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+    it: ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'],
+  },
+}
+
+function formatPostDate(iso, locale) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return ''
+  const y = d.getUTCFullYear(), m = d.getUTCMonth(), day = d.getUTCDate()
+  const months = BLOG_STR.months[locale] || BLOG_STR.months.hu
+  if (locale === 'hu') return `${y}. ${months[m]} ${day}.`
+  if (locale === 'it') return `${day} ${months[m]} ${y}`
+  return `${months[m]} ${day}, ${y}`
+}
+
+// Blog url + filesystem-dir helpers (hu at root, en/it under their prefix).
+function blogIndexUrl(locale) { return locale === 'hu' ? '/blog/' : `/${locale}/blog/` }
+function blogPostUrl(locale, slug) { return blogIndexUrl(locale) + slug + '/' }
+function blogDir(locale) { return locale === 'hu' ? 'blog' : `${locale}/blog` }
+
+// Fetch published posts for one locale (newest first). Returns null on error so
+// the caller can skip cleanup rather than wipe the blog on a transient failure.
+async function fetchBlogPosts(locale) {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return []
+  try {
+    let url = `${SUPABASE_URL}/rest/v1/blog_posts?status=eq.published&locale=eq.${encodeURIComponent(locale)}&select=*&order=published_at.desc`
+    const siteId = process.env.SITE_ID
+    if (siteId) url += `&site_id=eq.${encodeURIComponent(siteId)}`
+    const res = await fetch(url, { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } })
+    if (!res.ok) {
+      console.warn(`blog fetch failed (${locale}): ${res.status}`)
+      return null
+    }
+    return await res.json()
+  } catch (e) {
+    console.warn(`blog fetch error (${locale}): ${e.message}`)
+    return null
+  }
+}
+
+function readBaseShell(locale, manifest, label, desc, bodyHtml) {
+  const base = fs.readFileSync(path.join(__dirname, '..', 'page-templates', '_base.html'), 'utf-8')
+  const home = (manifest.pages || []).find((p) => p.id === 'home')
+  const homeUrl = (home && home.locales[locale] && home.locales[locale].url) || '/'
+  const cta = { hu: 'Ajánlatkérés', en: 'Get a quote', it: 'Richiedi preventivo' }[locale] || 'Ajánlatkérés'
+  return base
+    .replace(/__LANG__/g, locale)
+    .replace(/__TITLE__/g, `${escapeHtmlText(label)} – Loricatus`)
+    .replace(/__DESC__/g, escapeHtmlText(desc || label))
+    .replace(/__HOME__/g, homeUrl)
+    .replace(/__CTA__/g, escapeHtmlText(cta))
+    .replace('__BODY__', bodyHtml)
+}
+
+function buildPostCard(post, locale) {
+  const url = blogPostUrl(locale, post.slug)
+  const date = formatPostDate(post.published_at, locale)
+  const cover = post.cover_url
+    ? `<img class="blog-card-cover" src="${escapeAttr(post.cover_url)}" alt="${escapeHtmlText(post.title)}" loading="lazy">`
+    : ''
+  const tags = Array.isArray(post.tags) && post.tags.length
+    ? `<div class="blog-tags">${post.tags.map((t) => `<span class="blog-tag">${escapeHtmlText(t)}</span>`).join('')}</div>`
+    : ''
+  const more = BLOG_STR.more[locale] || BLOG_STR.more.hu
+  return (
+    `<article class="blog-card"><a class="blog-card-link" href="${url}">` +
+    cover +
+    `<div class="blog-card-body">` +
+    (date ? `<div class="blog-card-date">${escapeHtmlText(date)}</div>` : '') +
+    `<h2 class="blog-card-title">${escapeHtmlText(post.title)}</h2>` +
+    (post.excerpt ? `<p class="blog-card-excerpt">${escapeHtmlText(post.excerpt)}</p>` : '') +
+    tags +
+    `<span class="blog-card-more">${escapeHtmlText(more)}</span>` +
+    `</div></a></article>`
+  )
+}
+
+function setPostSeo(doc, absUrl, post) {
+  const head = doc.head
+  if (!head) return
+  let c = head.querySelector('link[rel="canonical"]')
+  if (!c) { c = doc.createElement('link'); c.setAttribute('rel', 'canonical'); head.appendChild(c) }
+  c.setAttribute('href', absUrl)
+  const ogType = head.querySelector('meta[property="og:type"]')
+  if (ogType) ogType.setAttribute('content', 'article')
+  if (post.cover_url) {
+    let img = head.querySelector('meta[property="og:image"]')
+    if (!img) { img = doc.createElement('meta'); img.setAttribute('property', 'og:image'); head.appendChild(img) }
+    img.setAttribute('content', post.cover_url)
+  }
+  if (post.published_at) {
+    let pt = head.querySelector('meta[property="article:published_time"]')
+    if (!pt) { pt = doc.createElement('meta'); pt.setAttribute('property', 'article:published_time'); head.appendChild(pt) }
+    pt.setAttribute('content', post.published_at)
+  }
+}
+
+function generateBlogPost(post, locale, manifest, blogPage) {
+  const indexUrl = blogPage.locales[locale].url
+  const back = BLOG_STR.back[locale] || BLOG_STR.back.hu
+  const date = formatPostDate(post.published_at, locale)
+  const cover = post.cover_url
+    ? `<img class="blog-post-cover" src="${escapeAttr(post.cover_url)}" alt="${escapeHtmlText(post.title)}">`
+    : ''
+  const tags = Array.isArray(post.tags) && post.tags.length
+    ? `<div class="blog-tags">${post.tags.map((t) => `<span class="blog-tag">${escapeHtmlText(t)}</span>`).join('')}</div>`
+    : ''
+  let body = fs.readFileSync(path.join(__dirname, '..', 'page-templates', 'blog-post.html'), 'utf-8')
+  body = body
+    .replace('__BLOG_INDEX__', indexUrl)
+    .replace('__BLOG_BACK__', escapeHtmlText(back))
+    .replace('__POST_DATE__', escapeHtmlText(date))
+    .replace('__POST_TITLE__', escapeHtmlText(post.title))
+    .replace('__POST_COVER__', cover)
+    .replace('__POST_BODY__', post.body || '') // trusted rich HTML from the editor
+    .replace('__POST_TAGS__', tags)
+  const html = readBaseShell(locale, manifest, post.title, post.excerpt || post.title, body)
+  const dom = new JSDOM(html)
+  const doc = dom.window.document
+  const absUrl = String(manifest.baseUrl || '').replace(/\/$/, '') + blogPostUrl(locale, post.slug)
+  setPostSeo(doc, absUrl, post)
+  syncNav(doc, manifest, indexUrl, locale) // marks Blog active in the nav
+  syncLangSwitcher(doc, blogPage, locale) // lang links point to each locale's blog index
+  applyNavWidth(doc)
+  const dir = path.join(__dirname, '..', blogDir(locale), post.slug)
+  fs.mkdirSync(dir, { recursive: true })
+  fs.writeFileSync(path.join(dir, 'index.html'), dom.serialize())
+}
+
+// Remove /blog/<slug>/ dirs whose slug is no longer published (deleted/unpublished).
+function removeStaleBlogPosts(locale, keepSlugs) {
+  const dir = path.join(__dirname, '..', blogDir(locale))
+  if (!fs.existsSync(dir)) return 0
+  let removed = 0
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue
+    if (!/^[a-z0-9][a-z0-9-]{0,80}$/.test(entry.name)) continue // never touch anything odd
+    if (!keepSlugs.has(entry.name)) {
+      fs.rmSync(path.join(dir, entry.name), { recursive: true, force: true })
+      removed++
+      console.log(`Removed stale blog post: ${blogDir(locale)}/${entry.name}`)
+    }
+  }
+  return removed
+}
+
+function writeBlogRss(locale, manifest, posts) {
+  const base = String(manifest.baseUrl || '').replace(/\/$/, '')
+  const title = 'Loricatus Blog'
+  const items = posts
+    .map((p) => {
+      const link = base + blogPostUrl(locale, p.slug)
+      const pub = p.published_at && !isNaN(new Date(p.published_at).getTime())
+        ? new Date(p.published_at).toUTCString() : ''
+      return (
+        `    <item>\n      <title>${escapeHtmlText(p.title)}</title>\n` +
+        `      <link>${link}</link>\n      <guid isPermaLink="true">${link}</guid>\n` +
+        (pub ? `      <pubDate>${pub}</pubDate>\n` : '') +
+        `      <description>${escapeHtmlText(p.excerpt || '')}</description>\n    </item>`
+      )
+    })
+    .join('\n')
+  const xml =
+    `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0">\n  <channel>\n` +
+    `    <title>${escapeHtmlText(title)}</title>\n    <link>${base + blogIndexUrl(locale)}</link>\n` +
+    `    <description>${escapeHtmlText(title)}</description>\n${items}\n  </channel>\n</rss>\n`
+  const rssPath = path.join(__dirname, '..', blogDir(locale), 'rss.xml')
+  fs.mkdirSync(path.dirname(rssPath), { recursive: true })
+  fs.writeFileSync(rssPath, xml)
+}
+
+// Generate the whole blog for one locale: index + post pages + RSS + cleanup.
+async function generateBlog(locale, manifest) {
+  const blogPage = (manifest.pages || []).find((p) => p.id === 'blog')
+  if (!blogPage || !blogPage.locales[locale]) return
+  const posts = await fetchBlogPosts(locale)
+  if (posts === null) {
+    console.warn(`Blog generation for ${locale} skipped (fetch failed) — files left intact`)
+    return
+  }
+
+  // 1. Index page (post list + editable header from page_content).
+  const cards = posts.length
+    ? posts.map((p) => buildPostCard(p, locale)).join('\n')
+    : `<p class="blog-empty">${escapeHtmlText(BLOG_STR.empty[locale] || BLOG_STR.empty.hu)}</p>`
+  let indexBody = fs.readFileSync(path.join(__dirname, '..', 'page-templates', 'blog-index.html'), 'utf-8')
+  indexBody = indexBody.replace('__BLOG_CARDS__', cards)
+  const label = navLabel(blogPage, locale)
+  const indexHtml = readBaseShell(locale, manifest, label, label, indexBody)
+  const dom = new JSDOM(indexHtml)
+  const doc = dom.window.document
+  let header = { content: {} }
+  try {
+    header = await fetchPageContent(blogPage.locales[locale].slug)
+  } catch (e) {
+    console.warn(`Blog header content fetch failed (${locale}): ${e.message}`)
+  }
+  applyContent(doc, header.content || {})
+  applySeo(doc, manifest, blogPage, locale)
+  syncNav(doc, manifest, blogPage.locales[locale].url, locale)
+  syncLangSwitcher(doc, blogPage, locale)
+  applyNavWidth(doc)
+  const indexPath = path.join(__dirname, '..', blogPage.locales[locale].file)
+  fs.mkdirSync(path.dirname(indexPath), { recursive: true })
+  fs.writeFileSync(indexPath, dom.serialize())
+  console.log(`Blog index (${locale}): ${posts.length} post(s) -> ${blogPage.locales[locale].file}`)
+
+  // 2. Post pages.
+  for (const post of posts) generateBlogPost(post, locale, manifest, blogPage)
+
+  // 3. Cleanup + RSS.
+  removeStaleBlogPosts(locale, new Set(posts.map((p) => p.slug)))
+  writeBlogRss(locale, manifest, posts)
+}
+
+// Absolute URLs of every published post across all locales — for the sitemap.
+async function fetchAllBlogPostUrls(manifest) {
+  const base = String(manifest.baseUrl || '').replace(/\/$/, '')
+  const locales = Array.isArray(manifest.locales) ? manifest.locales : ['hu']
+  const urls = []
+  for (const lc of locales) {
+    const posts = await fetchBlogPosts(lc)
+    if (!posts) continue
+    for (const p of posts) urls.push(base + blogPostUrl(lc, p.slug))
+  }
+  return urls
+}
+
 async function main() {
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_KEY')
@@ -734,6 +974,16 @@ async function main() {
   // Base pages (pages.json) + editor-created pages (site_pages) as one list.
   const dynamicRows = await loadDynamicPages()
   const merged = mergeManifest(manifest, dynamicRows)
+
+  // Blog engine: PAGE='blog' regenerates the whole blog for this locale
+  // (index + post pages + RSS) from published posts, then refreshes the sitemap.
+  if (PAGE === 'blog') {
+    await generateBlog(LOCALE, merged)
+    writeSitemap(merged, await fetchAllBlogPostUrls(merged))
+    console.log('Blog publish complete')
+    return
+  }
+
   const target = resolveTarget(merged, PAGE, LOCALE)
   if (!target) {
     console.error(`Unknown page/locale: page=${PAGE} locale=${LOCALE}`)
@@ -800,8 +1050,13 @@ async function main() {
   fs.writeFileSync(htmlPath, dom.serialize())
   console.log(`Wrote ${htmlPath}`)
 
-  // Sitemap is manifest-derived (base + dynamic), so regenerate it every publish.
-  writeSitemap(merged)
+  // Keep the blog in sync on every publish so its nav link (added by syncNav
+  // above, since Blog is an in-nav page) never points at a missing /blog/.
+  await generateBlog(LOCALE, merged)
+
+  // Sitemap is manifest-derived (base + dynamic) plus published blog posts, so
+  // regenerate it every publish (blog posts stay listed on any page publish).
+  writeSitemap(merged, await fetchAllBlogPostUrls(merged))
 }
 
 // Run only when invoked directly (CI). When required as a module (tests), the
@@ -816,6 +1071,13 @@ if (require.main === module) {
 module.exports = {
   applyContent,
   toEmbedUrl,
+  formatPostDate,
+  blogPostUrl,
+  blogIndexUrl,
+  buildPostCard,
+  generateBlogPost,
+  writeBlogRss,
+  removeStaleBlogPosts,
   applyLayout,
   materializeAddedItems,
   removeStrayItems,

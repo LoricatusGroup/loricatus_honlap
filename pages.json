@@ -24,6 +24,18 @@
         "en": { "slug": "referenciak-en", "file": "en/referenciak/index.html", "url": "/en/referenciak/" },
         "it": { "slug": "referenciak-it", "file": "it/referenciak/index.html", "url": "/it/referenciak/" }
       }
+    },
+    {
+      "id": "blog",
+      "nav": { "hu": "Blog", "en": "Blog", "it": "Blog" },
+      "inNav": true,
+      "order": 60,
+      "generated": true,
+      "locales": {
+        "hu": { "slug": "blog", "file": "blog/index.html", "url": "/blog/" },
+        "en": { "slug": "blog-en", "file": "en/blog/index.html", "url": "/en/blog/" },
+        "it": { "slug": "blog-it", "file": "it/blog/index.html", "url": "/it/blog/" }
+      }
     }
   ],
   "extraUrls": ["/tudastar/", "/adatvedelem/", "/cookie-szabalyzat/"]
