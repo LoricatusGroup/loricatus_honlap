@@ -1005,7 +1005,7 @@ export default function EditorPage({ user, membership }: Props) {
               },
               {
                 title: 'Élő szerkesztés',
-                body: 'Kattints bármelyik szövegre vagy képre az előnézetben, és írd át. Ennyi az egész — nem kell semmilyen technikai tudás.',
+                body: 'Kattints bármelyik szövegre vagy képre az előnézetben, és írd át — a változást rögtön látod.',
               },
               {
                 target: 'locale',
