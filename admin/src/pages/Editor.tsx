@@ -786,6 +786,7 @@ export default function EditorPage({ user, membership }: Props) {
             </div>
 
             {viewMode === 'live' && (
+              <span data-tour="tools">
               <Menu
                 label="Eszközök"
                 icon="⚙"
@@ -866,6 +867,7 @@ export default function EditorPage({ user, membership }: Props) {
                   </>
                 )}
               </Menu>
+              </span>
             )}
           </div>
 
@@ -910,6 +912,7 @@ export default function EditorPage({ user, membership }: Props) {
                   className={`cms-icon-btn${open ? ' is-active' : ''}`}
                   title="Fiók / súgó"
                   aria-label="Fiók"
+                  data-tour="account"
                 >
                   {(user.email?.[0] || '?').toUpperCase()}
                 </button>
@@ -998,7 +1001,7 @@ export default function EditorPage({ user, membership }: Props) {
             [
               {
                 title: 'Üdv a szerkesztőben! 👋',
-                body: 'Egy perc alatt megmutatom a lényeget. A jobb felső ? gombbal bármikor újraindíthatod ezt.',
+                body: 'Egy perc alatt megmutatom a lényeget. Bármikor félbehagyhatod (Esc), és később újraindíthatod.',
               },
               {
                 title: 'Élő szerkesztés',
@@ -1018,13 +1021,19 @@ export default function EditorPage({ user, membership }: Props) {
               {
                 target: 'content',
                 title: 'Tartalom: oldalak és blog',
-                body: 'A „Tartalom" menüből hozol létre új aloldalt (pl. „Szolgáltatásaink"), és itt írod/szerkeszted a blogcikkeket is.',
+                body: 'A „📄 Tartalom" menüből hozol létre új aloldalt (pl. „Szolgáltatásaink"), és itt írod/szerkeszted a blogcikkeket is.',
                 show: true,
               },
               {
                 target: 'viewmodes',
                 title: 'Nézetek',
                 body: 'Élő szerkesztés · Elrendezés (szekciók sorrendje, új szekció beszúrása) · Lista (minden mező egy helyen).',
+              },
+              {
+                target: 'tools',
+                title: 'Eszközök',
+                body: 'A „⚙ Eszközök" menüben: színek, szekció-átrendezés, mobil előnézet és az előnézet frissítése. Ami épp aktív, pipát kap.',
+                show: viewMode === 'live',
               },
               {
                 target: 'save',
@@ -1037,8 +1046,13 @@ export default function EditorPage({ user, membership }: Props) {
                 body: 'Közzététel: a változás ~1 perc múlva megjelenik az élő weboldalon.',
               },
               {
+                target: 'account',
+                title: 'Fiók és súgó',
+                body: 'A jobb felső kezdőbetűs gomb alatt van a kijelentkezés — és innen indíthatod újra bármikor ezt a bemutatót (Bemutató / súgó).',
+              },
+              {
                 title: 'Kész! ✓',
-                body: 'Próbáld ki nyugodtan. A ? gombbal (jobb fent) bármikor újra elindíthatod ezt a bemutatót.',
+                body: 'Próbáld ki nyugodtan. A bemutatót a jobb felső fiók-menüből bármikor újraindíthatod.',
               },
             ] as TourStep[]
           }
