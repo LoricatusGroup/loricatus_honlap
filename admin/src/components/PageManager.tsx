@@ -67,21 +67,21 @@ export default function PageManager({ manifest, locale, onClose, onChanged, onCr
       setBusy(false)
       return
     }
-    // Scaffold all three locale files by publishing the new page in each.
-    await Promise.all(
-      ['hu', 'en', 'it'].map((lc) =>
-        supabase.functions.invoke('publish-site', { body: { locale: lc, page: slug } }),
-      ),
-    ).catch(() => {})
+    // Scaffold every locale file in ONE publish run (locale:'all'). Firing one
+    // publish per locale used to race on git push and silently drop locales.
+    await supabase.functions
+      .invoke('publish-site', { body: { locale: 'all', page: slug } })
+      .catch(() => {})
     setBusy(false)
     onChanged(`„${label}" oldal létrehozva — épül (~1 perc). A szerkesztő magától megnyílik, amint kész.`)
     onCreatedPage(slug)
     onClose()
   }
 
-  // Republish home so the nav/labels/order refresh after a rename or reorder.
+  // Republish home (every locale) so the nav/labels/order refresh after a
+  // rename or reorder. locale:'all' rebuilds hu/en/it in one run.
   const republishHome = () =>
-    supabase.functions.invoke('publish-site', { body: { page: 'home' } }).catch(() => {})
+    supabase.functions.invoke('publish-site', { body: { locale: 'all', page: 'home' } }).catch(() => {})
 
   const startEdit = (p: PageEntry) => {
     setEditId(p.id)
@@ -112,12 +112,11 @@ export default function PageManager({ manifest, locale, onClose, onChanged, onCr
       setError(err.message)
       return
     }
-    // Republish home + the page so the new label shows in the nav + titles.
+    // Republish home + the page (every locale, one run each) so the new label
+    // shows in the nav + titles across all languages.
     await Promise.all([
       republishHome(),
-      ...['hu', 'en', 'it'].map((lc) =>
-        supabase.functions.invoke('publish-site', { body: { locale: lc, page: editId } }),
-      ),
+      supabase.functions.invoke('publish-site', { body: { locale: 'all', page: editId } }),
     ]).catch(() => {})
     setBusy(false)
     setEditId(null)
@@ -153,10 +152,10 @@ export default function PageManager({ manifest, locale, onClose, onChanged, onCr
       setError(err.message)
       return
     }
-    // Publish home with removePage so the page's files are deleted and the nav +
-    // sitemap refresh without it.
+    // Publish home (every locale) with removePage so the page's files are
+    // deleted and the nav + sitemap refresh without it in all languages.
     await supabase.functions
-      .invoke('publish-site', { body: { page: 'home', removePage: id } })
+      .invoke('publish-site', { body: { locale: 'all', page: 'home', removePage: id } })
       .catch(() => {})
     setBusy(false)
     onChanged(`„${label}" oldal törölve. ~1 perc múlva tűnik el a menüből és a szerverről is.`)
