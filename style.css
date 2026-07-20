@@ -1561,7 +1561,7 @@ html[lang="it"] .nav-cta {
 .blog-card-more { margin-top: auto; font-size: 13px; font-weight: 600; }
 .blog-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
 .blog-tag { font-size: 11px; padding: 3px 10px; border-radius: 999px; background: rgba(0,0,0,0.05); color: var(--muted); }
-.blog-empty { color: var(--muted); padding: 40px 0; text-align: center; }
+.blog-empty { grid-column: 1 / -1; color: var(--muted); padding: 64px 0; text-align: center; font-size: 16px; }
 .blog-post .blog-back { display: inline-block; margin-bottom: 20px; font-size: 13px; color: var(--muted); text-decoration: none; }
 .blog-post .blog-back:hover { color: var(--text); }
 .blog-post-cover { width: 100%; border-radius: 16px; border: 1px solid var(--border); margin: 8px 0 24px; display: block; }
