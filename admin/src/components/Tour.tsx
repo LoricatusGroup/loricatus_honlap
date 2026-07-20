@@ -15,7 +15,10 @@ export default function Tour({ steps, onClose }: { steps: TourStep[]; onClose: (
   const active = steps.filter((s) => s.show !== false)
   const [i, setI] = useState(0)
   const [rect, setRect] = useState<Rect | null>(null)
-  const step = active[i]
+  // Clamp so the tour never indexes past the end if the visible-step set
+  // shrinks mid-tour (a `show` condition flipping); avoids reading undefined.
+  const idx = Math.min(i, Math.max(0, active.length - 1))
+  const step = active[idx]
 
   const measure = () => {
     if (!step?.target) {
@@ -31,7 +34,17 @@ export default function Tour({ steps, onClose }: { steps: TourStep[]; onClose: (
     setRect({ top: r.top, left: r.left, width: r.width, height: r.height })
   }
 
-  useLayoutEffect(measure, [i]) // eslint-disable-line react-hooks/exhaustive-deps
+  const next = () => {
+    if (idx >= active.length - 1) onClose()
+    else setI(idx + 1)
+  }
+
+  // If there is nothing to show, close on the next tick (never setState during render).
+  useEffect(() => {
+    if (active.length === 0) onClose()
+  }, [active.length]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useLayoutEffect(measure, [idx]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     const onResize = () => measure()
     window.addEventListener('resize', onResize)
@@ -46,21 +59,13 @@ export default function Tour({ steps, onClose }: { steps: TourStep[]; onClose: (
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
       else if (e.key === 'ArrowRight') next()
-      else if (e.key === 'ArrowLeft') setI((n) => Math.max(0, n - 1))
+      else if (e.key === 'ArrowLeft') setI(Math.max(0, idx - 1))
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }) // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!step) {
-    onClose()
-    return null
-  }
-
-  const next = () => {
-    if (i >= active.length - 1) onClose()
-    else setI(i + 1)
-  }
+  if (!step) return null
 
   const pad = 6
   const hole = rect
@@ -116,7 +121,7 @@ export default function Tour({ steps, onClose }: { steps: TourStep[]; onClose: (
       <div className="cms-modal-panel p-5" style={cardStyle}>
         <div className="mb-2 flex items-center justify-between">
           <span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
-            {i + 1} / {active.length}
+            {idx + 1} / {active.length}
           </span>
           <button onClick={onClose} className="cms-icon-btn -mr-1.5 -mt-1" aria-label="Kihagyás">
             ✕
@@ -129,13 +134,13 @@ export default function Tour({ steps, onClose }: { steps: TourStep[]; onClose: (
             Kihagyom
           </button>
           <div className="flex gap-1.5">
-            {i > 0 && (
-              <button onClick={() => setI(i - 1)} className="cms-btn-secondary !py-1.5 !text-xs">
+            {idx > 0 && (
+              <button onClick={() => setI(idx - 1)} className="cms-btn-secondary !py-1.5 !text-xs">
                 Vissza
               </button>
             )}
             <button onClick={next} className="cms-btn-primary !py-1.5 !text-xs">
-              {i >= active.length - 1 ? 'Kész ✓' : 'Tovább →'}
+              {idx >= active.length - 1 ? 'Kész ✓' : 'Tovább →'}
             </button>
           </div>
         </div>
