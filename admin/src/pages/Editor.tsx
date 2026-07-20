@@ -27,6 +27,7 @@ import {
 } from '../lib/pages'
 import PageManager from '../components/PageManager'
 import BlogManager from '../components/BlogManager'
+import { Menu, MenuItem, MenuSep } from '../components/ui/Menu'
 import Tour, { type TourStep } from '../components/Tour'
 import {
   loadCatalog,
@@ -732,27 +733,34 @@ export default function EditorPage({ user, membership }: Props) {
               </div>
             )}
 
-            {canEditAdvanced && pagesManifest && (
-              <button
-                onClick={() => setShowPages(true)}
-                className="cms-tool"
-                style={{ '--acc': '#14b8a6' } as React.CSSProperties}
-                title="Oldalak kezelése — új aloldal létrehozása vagy törlése"
-                data-tour="pages-manage"
-              >
-                📄 Oldalak
-              </button>
-            )}
-
-            <button
-              onClick={() => setShowBlog(true)}
-              className="cms-tool"
-              style={{ '--acc': '#f59e0b' } as React.CSSProperties}
-              title="Blog / cikkek kezelése"
-              data-tour="blog"
-            >
-              📰 Blog
-            </button>
+            <span data-tour="content">
+              <Menu label="Tartalom" icon="📄" accent="#14b8a6">
+                {(close) => (
+                  <>
+                    {canEditAdvanced && pagesManifest && (
+                      <MenuItem
+                        icon="📄"
+                        label="Oldalak"
+                        hint="Aloldal létrehozása / törlése"
+                        onClick={() => {
+                          setShowPages(true)
+                          close()
+                        }}
+                      />
+                    )}
+                    <MenuItem
+                      icon="📰"
+                      label="Blog"
+                      hint="Cikkek írása / szerkesztése"
+                      onClick={() => {
+                        setShowBlog(true)
+                        close()
+                      }}
+                    />
+                  </>
+                )}
+              </Menu>
+            </span>
 
             <div className="cms-segment" data-tour="viewmodes">
               <button
@@ -778,72 +786,86 @@ export default function EditorPage({ user, membership }: Props) {
             </div>
 
             {viewMode === 'live' && (
-              <div className="flex gap-1.5 items-center">
-                {canEditAdvanced && (
+              <Menu
+                label="Eszközök"
+                icon="⚙"
+                accent="#8b5cf6"
+                active={showTheme || layoutOverlayMode || freeformMode || mobilePreview}
+              >
+                {(close) => (
                   <>
-                    <button
-                      onClick={() => setShowTheme((s) => !s)}
-                      className={`cms-tool${showTheme ? ' is-active' : ''}`}
-                      style={{ '--acc': '#ec4899' } as React.CSSProperties}
-                      title="Téma színek szerkesztése (élő előnézettel)"
-                    >
-                      🎨 Színek
-                    </button>
-                    <button
-                      onClick={() =>
-                        setOverlayMode((m) => (m === 'layout' ? 'edit' : 'layout'))
-                      }
-                      className={`cms-tool${layoutOverlayMode ? ' is-active' : ''}`}
-                      style={{ '--acc': '#8b5cf6' } as React.CSSProperties}
-                      title="Húzd-rendezd a szekciókat és kártyákat közvetlenül az előnézeten. Új szekció beszúrása az Elrendezés fülön."
-                    >
-                      📐 Átrendezés
-                    </button>
-                    <button
-                      onClick={() =>
-                        setOverlayMode((m) => (m === 'freeform' ? 'edit' : 'freeform'))
-                      }
-                      className={`cms-tool${freeformMode ? ' is-active' : ''}`}
-                      style={{ '--acc': '#0ea5e9' } as React.CSSProperties}
-                      title="Pixel-szintű szabad pozícionálás (csak desktop nézet)"
-                    >
-                      🎯 Szabad pozíció
-                    </button>
-                    {freeformMode && Object.keys(layout.positions ?? {}).length > 0 && (
-                      <button
-                        onClick={() => {
-                          if (
-                            window.confirm(
-                              'Minden szabad pozíció törlése? Az elemek visszaállnak default helyükre.',
-                            )
-                          ) {
-                            setLayout({ ...layout, positions: {} })
-                          }
-                        }}
-                        className="cms-tool"
-                        title="Minden pozíció törlése"
-                      >
-                        ↺ pozíciók
-                      </button>
+                    {canEditAdvanced && (
+                      <>
+                        <MenuItem
+                          icon="🎨"
+                          label="Színek"
+                          hint="Téma színek élő előnézettel"
+                          active={showTheme}
+                          onClick={() => {
+                            setShowTheme((s) => !s)
+                            close()
+                          }}
+                        />
+                        <MenuItem
+                          icon="📐"
+                          label="Átrendezés"
+                          hint="Szekciók húzása az előnézeten"
+                          active={layoutOverlayMode}
+                          onClick={() => {
+                            setOverlayMode((m) => (m === 'layout' ? 'edit' : 'layout'))
+                            close()
+                          }}
+                        />
+                        <MenuItem
+                          icon="🎯"
+                          label="Szabad pozíció"
+                          hint="Pixel-szintű mozgatás (desktop)"
+                          active={freeformMode}
+                          onClick={() => {
+                            setOverlayMode((m) => (m === 'freeform' ? 'edit' : 'freeform'))
+                            close()
+                          }}
+                        />
+                        {freeformMode && Object.keys(layout.positions ?? {}).length > 0 && (
+                          <MenuItem
+                            icon="↺"
+                            label="Pozíciók törlése"
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  'Minden szabad pozíció törlése? Az elemek visszaállnak default helyükre.',
+                                )
+                              ) {
+                                setLayout({ ...layout, positions: {} })
+                              }
+                              close()
+                            }}
+                          />
+                        )}
+                        <MenuSep />
+                      </>
                     )}
+                    <MenuItem
+                      icon="📱"
+                      label="Mobil előnézet"
+                      hint="375px szélességű nézet"
+                      active={mobilePreview}
+                      onClick={() => {
+                        setMobilePreview((m) => !m)
+                        close()
+                      }}
+                    />
+                    <MenuItem
+                      icon="↻"
+                      label="Előnézet frissítése"
+                      onClick={() => {
+                        reloadIframe()
+                        close()
+                      }}
+                    />
                   </>
                 )}
-                <button
-                  onClick={() => setMobilePreview((m) => !m)}
-                  className={`cms-tool${mobilePreview ? ' is-active' : ''}`}
-                  style={{ '--acc': '#f59e0b' } as React.CSSProperties}
-                  title="375px szélességű iframe — mobil nézet előnézete"
-                >
-                  📱 Mobil
-                </button>
-                <button
-                  onClick={reloadIframe}
-                  className="cms-icon-btn"
-                  title="Iframe újratöltése"
-                >
-                  ↻
-                </button>
-              </div>
+              </Menu>
             )}
           </div>
 
@@ -880,21 +902,43 @@ export default function EditorPage({ user, membership }: Props) {
                 ↷
               </button>
             </div>
-            <button
-              onClick={() => setShowTour(true)}
-              className="cms-icon-btn"
-              title="Bemutató / súgó — hogyan használd a szerkesztőt"
-              aria-label="Bemutató"
+            <Menu
+              align="right"
+              trigger={(open) => (
+                <button
+                  type="button"
+                  className={`cms-icon-btn${open ? ' is-active' : ''}`}
+                  title="Fiók / súgó"
+                  aria-label="Fiók"
+                >
+                  {(user.email?.[0] || '?').toUpperCase()}
+                </button>
+              )}
             >
-              ?
-            </button>
-            <button
-              onClick={() => supabase.auth.signOut()}
-              className="cms-seg-btn"
-              title="Kijelentkezés"
-            >
-              Kijelentkezés
-            </button>
+              {(close) => (
+                <>
+                  <div className="truncate px-2.5 py-1 text-[11px] text-gray-400">{user.email}</div>
+                  <MenuSep />
+                  <MenuItem
+                    icon="❓"
+                    label="Bemutató / súgó"
+                    onClick={() => {
+                      setShowTour(true)
+                      close()
+                    }}
+                  />
+                  <MenuItem
+                    icon="↩"
+                    label="Kijelentkezés"
+                    danger
+                    onClick={() => {
+                      supabase.auth.signOut()
+                      close()
+                    }}
+                  />
+                </>
+              )}
+            </Menu>
             <button
               onClick={handleSave}
               disabled={saving || publishing}
@@ -972,10 +1016,10 @@ export default function EditorPage({ user, membership }: Props) {
                 show: !!(pagesManifest && pagesManifest.pages.length > 1),
               },
               {
-                target: 'pages-manage',
-                title: 'Új oldal létrehozása',
-                body: 'Új aloldal (pl. „Szolgáltatásaink"), átnevezés, sorrendezés vagy törlés. A menü magától frissül.',
-                show: canEditAdvanced,
+                target: 'content',
+                title: 'Tartalom: oldalak és blog',
+                body: 'A „Tartalom" menüből hozol létre új aloldalt (pl. „Szolgáltatásaink"), és itt írod/szerkeszted a blogcikkeket is.',
+                show: true,
               },
               {
                 target: 'viewmodes',
