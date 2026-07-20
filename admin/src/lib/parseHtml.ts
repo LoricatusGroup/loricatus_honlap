@@ -39,7 +39,8 @@ function readValue(el: Element, type: FieldType): string {
   if (type === 'content') return el.getAttribute('content') || ''
   if (type === 'video') {
     const f = el.tagName === 'IFRAME' ? el : el.querySelector('iframe')
-    return f?.getAttribute('src') || ''
+    const v = el.querySelector('video')
+    return f?.getAttribute('src') || v?.getAttribute('src') || ''
   }
   return ''
 }

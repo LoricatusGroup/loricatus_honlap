@@ -1119,14 +1119,16 @@ html[lang="it"] .nav-cta {
   letter-spacing: 0.06em; text-transform: uppercase;
   transition: all 0.2s;
 }
-.cookie-btn-accept { background: #fff; color: #111316; }
-.cookie-btn-accept:hover { background: rgba(255,255,255,0.85); }
+/* Accept and decline are equal-weight (GDPR): same size, both solid and
+   full-contrast — the decline is never a greyed-out afterthought. */
+.cookie-btn-accept { background: #fff; color: #111316; border: 1px solid #fff; }
+.cookie-btn-accept:hover { background: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.85); }
 .cookie-btn-decline {
-  background: transparent;
-  color: rgba(255,255,255,0.6);
-  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.16);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.4);
 }
-.cookie-btn-decline:hover { color: #fff; border-color: rgba(255,255,255,0.5); }
+.cookie-btn-decline:hover { background: rgba(255,255,255,0.26); border-color: rgba(255,255,255,0.6); }
 
 /* ── SUBPAGES ───────────────────────────────────── */
 .subpage-main {
@@ -1455,6 +1457,7 @@ html[lang="it"] .nav-cta {
   .footer-bottom-inner { flex-direction: column; text-align: center; gap: 6px; }
   .cookie-inner { flex-direction: column; align-items: stretch; text-align: center; }
   .cookie-actions { justify-content: center; }
+  .cookie-actions .cookie-btn { flex: 1; }
   .section-header { gap: 12px; }
   .section-header .section-desc { display: none; }
   .about-img-wrap { aspect-ratio: 16/9; }

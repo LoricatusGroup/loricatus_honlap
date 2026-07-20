@@ -82,6 +82,39 @@ function toEmbedUrl(url) {
   return ''
 }
 
+// Direct video file (uploaded .mp4/.webm/…) → renders in a <video>, not an
+// <iframe>. Mirror of admin/src/lib/video.ts isVideoFile.
+function isVideoFile(url) {
+  const u = (url || '').trim().split(/[?#]/)[0].toLowerCase()
+  return /\.(mp4|webm|ogv|ogg|mov|m4v)$/.test(u)
+}
+
+// Render a video value into a [data-edit-video] wrapper: embeds populate the
+// <iframe>; uploaded files render in a <video> (created if the wrapper predates
+// file support). Mirror of admin/src/lib/video.ts applyVideoTo.
+function applyVideoEl(el, value) {
+  const doc = el.ownerDocument
+  const embed = toEmbedUrl(value)
+  const iframe = el.querySelector('iframe')
+  let video = el.querySelector('video')
+  if (iframe) iframe.setAttribute('src', embed || '')
+  if (!embed && isVideoFile(value)) {
+    if (!video) {
+      video = doc.createElement('video')
+      video.setAttribute('controls', '')
+      video.setAttribute('playsinline', '')
+      video.setAttribute('preload', 'metadata')
+      video.setAttribute('style', 'position:absolute;inset:0;width:100%;height:100%;border:0;background:#000;object-fit:contain')
+      el.appendChild(video)
+    }
+    video.setAttribute('src', value)
+    video.style.display = ''
+  } else if (video) {
+    video.removeAttribute('src')
+    video.style.display = 'none'
+  }
+}
+
 function applyContent(doc, content) {
   let applied = 0
   const missing = []
@@ -97,11 +130,9 @@ function applyContent(doc, content) {
       // starts from 0 on every page load.
       ['data-edit-target', (el) => el.setAttribute('data-target', value)],
       ['data-edit-content', (el) => el.setAttribute('content', value)],
-      // data-edit-video lives on the wrapper; the <iframe> inside gets the src.
-      ['data-edit-video', (el) => {
-        const f = el.tagName === 'IFRAME' ? el : el.querySelector('iframe')
-        if (f) f.setAttribute('src', toEmbedUrl(value))
-      }],
+      // data-edit-video lives on the wrapper; embeds go to the <iframe>,
+      // uploaded files to a <video> (created if missing).
+      ['data-edit-video', (el) => applyVideoEl(el, value)],
     ]
 
     let hit = false
@@ -1086,6 +1117,7 @@ if (require.main === module) {
 module.exports = {
   applyContent,
   toEmbedUrl,
+  isVideoFile,
   soroEmbedHtml,
   generateBlog,
   formatPostDate,

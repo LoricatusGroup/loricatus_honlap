@@ -40,6 +40,11 @@
     "description": "Kép az egyik, formázható szöveg és gomb a másik hasábban."
   },
   {
+    "template": "casestudy",
+    "label": "Esettanulmány",
+    "description": "Referencia-projekt: kép, kihívás–megoldás–eredmény és mérőszámok."
+  },
+  {
     "template": "video",
     "label": "Videó (YouTube / Vimeo)",
     "description": "Beágyazott videó — csak illeszd be a YouTube vagy Vimeo linket."
