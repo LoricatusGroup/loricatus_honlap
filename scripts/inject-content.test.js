@@ -338,6 +338,12 @@ function check(name, cond) {
   const blogPage = manifest.pages.find((p) => p.id === 'blog')
   check('blog: manifest has blog page', !!blogPage)
 
+  // Soro embed: renders the container + deferred script for the configured id.
+  const soro = inj.soroEmbedHtml('abc-123')
+  check('soro: has container', soro.includes('id="soro-blog"'))
+  check('soro: has embed script', soro.includes('api/embed/abc-123') && soro.includes('defer'))
+  check('soro: spans grid width', soro.includes('grid-column:1/-1'))
+
   // Post page round-trip (writes under repo blog/<slug>, cleaned up after).
   const blogRoot = path2.join(__dirname, '..', 'blog')
   const testSlug = 'zzz-teszt-cikk'
