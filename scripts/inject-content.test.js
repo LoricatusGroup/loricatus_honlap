@@ -294,4 +294,20 @@ function check(name, cond) {
   fs.rmSync(path.dirname(out), { recursive: true, force: true })
 }
 
+// Video block: URL normalisation + end-to-end embed application
+{
+  check('video: youtube watch -> embed', inj.toEmbedUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ') === 'https://www.youtube.com/embed/dQw4w9WgXcQ')
+  check('video: youtu.be -> embed', inj.toEmbedUrl('https://youtu.be/dQw4w9WgXcQ') === 'https://www.youtube.com/embed/dQw4w9WgXcQ')
+  check('video: vimeo -> player', inj.toEmbedUrl('https://vimeo.com/123456789') === 'https://player.vimeo.com/video/123456789')
+  check('video: unknown host -> empty (no arbitrary iframe)', inj.toEmbedUrl('https://evil.example/x') === '')
+
+  const doc = makeDoc('<footer>foot</footer>')
+  inj.materializeAddedSections(doc, { added_sections: [{ id: 'asec-vid', template: 'video' }] })
+  const wrap = doc.querySelector('[data-edit-video="asec-vid-embed"]')
+  check('video: section materialized with rewritten embed key on wrapper', !!wrap && wrap.tagName !== 'IFRAME')
+  const { applied } = inj.applyContent(doc, { 'asec-vid-embed': 'https://youtu.be/dQw4w9WgXcQ' })
+  const iframe = wrap.querySelector('iframe')
+  check('video: applyContent set inner iframe src to embed url', applied === 1 && iframe.getAttribute('src') === 'https://www.youtube.com/embed/dQw4w9WgXcQ')
+}
+
 console.log(`\n${passed} checks passed`)

@@ -13,6 +13,7 @@ const EDIT_ATTR_TYPE: Record<string, FieldType> = {
   'data-edit-color': 'color',
   'data-edit-target': 'target',
   'data-edit-content': 'content',
+  'data-edit-video': 'video',
 }
 const EDIT_ATTRS = Object.keys(EDIT_ATTR_TYPE)
 
@@ -78,12 +79,18 @@ const SUFFIX_HU: Record<string, string> = {
   // media + contact
   image: 'kép', email: 'e-mail', 'email-href': 'e-mail link',
   phone: 'telefon', 'phone-href': 'telefon link',
+  // video
+  embed: 'videó linkje (YouTube / Vimeo)',
 }
 
 function readValue(el: Element, type: FieldType): string {
   if (type === 'text') return (el.textContent || '').trim()
   if (type === 'html') return el.innerHTML.trim()
   if (type === 'image') return el.getAttribute('src') || ''
+  if (type === 'video') {
+    const f = el.tagName === 'IFRAME' ? el : el.querySelector('iframe')
+    return f?.getAttribute('src') || ''
+  }
   if (type === 'href') return el.getAttribute('href') || ''
   if (type === 'color') return el.getAttribute('style') || ''
   if (type === 'target') return el.getAttribute('data-target') || ''

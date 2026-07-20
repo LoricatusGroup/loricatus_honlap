@@ -2,6 +2,7 @@
 // No React. Same-origin iframe — direct DOM access is allowed.
 
 import type { EditableField, FieldType, LayoutState } from './types'
+import { toEmbedUrl } from './video'
 
 const EDIT_ATTR_BY_TYPE: Record<FieldType, string> = {
   text: 'data-edit',
@@ -11,6 +12,7 @@ const EDIT_ATTR_BY_TYPE: Record<FieldType, string> = {
   color: 'data-edit-color',
   target: 'data-edit-target',
   content: 'data-edit-content',
+  video: 'data-edit-video',
 }
 
 export const EDIT_ATTRS = Object.values(EDIT_ATTR_BY_TYPE)
@@ -48,6 +50,10 @@ details.service-more > .service-body { display: block !important; }
   min-height: 1.2em;
   min-width: 6em;
 }
+/* A video iframe swallows clicks (cross-origin). Disable pointer events on the
+   embed in edit mode so a click lands on the data-edit-video wrapper and opens
+   the video editor instead of interacting with the player. */
+[data-edit-video] iframe, iframe[data-edit-video] { pointer-events: none !important; }
 `
 
 export function injectEditorStyles(doc: Document): void {
@@ -92,6 +98,10 @@ export function applyOneEdit(
     el.textContent = value
   } else if (type === 'content') {
     el.setAttribute('content', value)
+  } else if (type === 'video') {
+    // data-edit-video lives on the wrapper; the inner <iframe> gets the src.
+    const frame = el.tagName === 'IFRAME' ? el : el.querySelector('iframe')
+    if (frame) frame.setAttribute('src', toEmbedUrl(value))
   }
 }
 

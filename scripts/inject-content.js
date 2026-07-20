@@ -68,6 +68,20 @@ function escapeAttr(s) {
   return String(s).replace(/["\\]/g, '\\$&')
 }
 
+// Normalise a YouTube/Vimeo URL into an embeddable player URL (mirror of
+// admin/src/lib/video.ts toEmbedUrl). Returns '' for anything unrecognised, so
+// only trusted providers reach an <iframe src>.
+function toEmbedUrl(url) {
+  const u = (url || '').trim()
+  if (!u) return ''
+  if (/(?:youtube(?:-nocookie)?\.com\/embed\/|player\.vimeo\.com\/video\/)/i.test(u)) return u
+  let m = u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i)
+  if (m) return `https://www.youtube.com/embed/${m[1]}`
+  m = u.match(/vimeo\.com\/(?:video\/)?(\d{6,})/i)
+  if (m) return `https://player.vimeo.com/video/${m[1]}`
+  return ''
+}
+
 function applyContent(doc, content) {
   let applied = 0
   const missing = []
@@ -83,6 +97,11 @@ function applyContent(doc, content) {
       // starts from 0 on every page load.
       ['data-edit-target', (el) => el.setAttribute('data-target', value)],
       ['data-edit-content', (el) => el.setAttribute('content', value)],
+      // data-edit-video lives on the wrapper; the <iframe> inside gets the src.
+      ['data-edit-video', (el) => {
+        const f = el.tagName === 'IFRAME' ? el : el.querySelector('iframe')
+        if (f) f.setAttribute('src', toEmbedUrl(value))
+      }],
     ]
 
     let hit = false
@@ -136,6 +155,7 @@ const EDIT_ATTRS_LIST = [
   'data-edit-color',
   'data-edit-target',
   'data-edit-content',
+  'data-edit-video',
 ]
 
 function cloneListItem(templateEl, templateId, newId) {
@@ -356,6 +376,7 @@ function selectorForPositionId(id) {
       `[data-edit-color="${esc}"]`,
       `[data-edit-target="${esc}"]`,
       `[data-edit-content="${esc}"]`,
+      `[data-edit-video="${esc}"]`,
     ].join(',')
   }
   return null
@@ -794,6 +815,7 @@ if (require.main === module) {
 
 module.exports = {
   applyContent,
+  toEmbedUrl,
   applyLayout,
   materializeAddedItems,
   removeStrayItems,
