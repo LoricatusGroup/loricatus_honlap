@@ -359,14 +359,19 @@ function check(name, cond) {
   const removed = inj.removeStaleBlogPosts('hu', new Set(existing))
   check('blog: stale post dir removed', removed === 1 && !fs2.existsSync(path2.join(blogRoot, 'zzz-drop')))
 
-  // RSS round-trip.
+  // RSS round-trip — back up/restore the committed blog/rss.xml so the test
+  // never clobbers a real file.
+  const rssPath = path2.join(blogRoot, 'rss.xml')
+  const rssBackup = fs2.existsSync(rssPath) ? fs2.readFileSync(rssPath, 'utf-8') : null
   inj.writeBlogRss('hu', manifest, [post])
-  const rss = fs2.readFileSync(path2.join(blogRoot, 'rss.xml'), 'utf-8')
+  const rss = fs2.readFileSync(rssPath, 'utf-8')
   check('blog: rss has item title', rss.includes('<title>Első cikk</title>'))
   check('blog: rss has post link', rss.includes('<link>https://loricatus.hu/blog/elso-cikk/</link>'))
-  fs2.rmSync(path2.join(blogRoot, 'rss.xml'), { force: true })
-  // Leave blog/ empty (git won't track it); remove if empty.
-  try { fs2.rmdirSync(blogRoot) } catch { /* not empty or gone — fine */ }
+  if (rssBackup !== null) fs2.writeFileSync(rssPath, rssBackup)
+  else {
+    fs2.rmSync(rssPath, { force: true })
+    try { fs2.rmdirSync(blogRoot) } catch { /* not empty or gone — fine */ }
+  }
 }
 
 console.log(`\n${passed} checks passed`)

@@ -1071,6 +1071,7 @@ if (require.main === module) {
 module.exports = {
   applyContent,
   toEmbedUrl,
+  generateBlog,
   formatPostDate,
   blogPostUrl,
   blogIndexUrl,
