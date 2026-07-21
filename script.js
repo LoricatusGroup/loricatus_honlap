@@ -140,23 +140,43 @@
     serviceInput.addEventListener('blur', () => validateField(serviceInput, 'serviceError', v => v !== ''));
     messageInput.addEventListener('blur', () => validateField(messageInput, 'messageError', v => v.length >= 10));
 
-    // Load the Turnstile API once and render the widget (explicit mode). Polls
-    // for the async-loaded API so there's no script-order race.
+    // Lazy-load Turnstile only when the visitor approaches the contact form.
+    // It's a heavy third-party captcha and nobody needs it until they reach the
+    // form — keeping it off the initial load (and out of the speed test) while
+    // still rendering well before the user could submit.
     let turnstileWidgetId = null;
-    if (!document.querySelector('script[src*="challenges.cloudflare.com/turnstile"]')) {
-      const ts = document.createElement('script');
-      ts.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-      ts.async = true; ts.defer = true;
-      document.head.appendChild(ts);
-    }
-    const turnstileEl = document.getElementById('cfTurnstile');
-    (function renderTurnstile() {
-      if (turnstileEl && window.turnstile && turnstileWidgetId === null) {
-        turnstileWidgetId = window.turnstile.render(turnstileEl, { sitekey: TURNSTILE_SITE_KEY });
-      } else if (turnstileWidgetId === null) {
-        setTimeout(renderTurnstile, 200);
+    let turnstileStarted = false;
+    function startTurnstile() {
+      if (turnstileStarted) return;
+      turnstileStarted = true;
+      if (!document.querySelector('script[src*="challenges.cloudflare.com/turnstile"]')) {
+        const ts = document.createElement('script');
+        ts.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        ts.async = true; ts.defer = true;
+        document.head.appendChild(ts);
       }
-    })();
+      const turnstileEl = document.getElementById('cfTurnstile');
+      (function renderTurnstile() {
+        if (turnstileEl && window.turnstile && turnstileWidgetId === null) {
+          turnstileWidgetId = window.turnstile.render(turnstileEl, { sitekey: TURNSTILE_SITE_KEY });
+        } else if (turnstileWidgetId === null) {
+          setTimeout(renderTurnstile, 200);
+        }
+      })();
+    }
+    // Trigger: contact section scrolls near (400px early) OR first field focus.
+    const contactSection = document.getElementById('contact') || form;
+    if ('IntersectionObserver' in window && contactSection) {
+      const io = new IntersectionObserver((entries) => {
+        if (entries.some(e => e.isIntersecting)) { startTurnstile(); io.disconnect(); }
+      }, { rootMargin: '400px' });
+      io.observe(contactSection);
+    } else {
+      startTurnstile(); // no IO support → fall back to eager load
+    }
+    [nameInput, emailInput, serviceInput, messageInput].forEach(
+      el => el && el.addEventListener('focus', startTurnstile, { once: true })
+    );
 
     form.addEventListener('submit', async e => {
       e.preventDefault();
