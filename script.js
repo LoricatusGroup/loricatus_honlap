@@ -265,13 +265,29 @@
     });
   }
 
-  /* ── COOKIE ──────────────────────────────────── */
+  /* ── COOKIE + consent-gated analytics ──────────── */
+  // Microsoft Clarity loads ONLY after the visitor accepts cookies (GDPR) —
+  // never before, and never during the automated speed test (which doesn't
+  // consent). Idempotent so it can't double-inject.
+  function loadClarity() {
+    if (window.__clarityLoaded) return;
+    window.__clarityLoaded = true;
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "wn1ca1y5p5");
+  }
+  // Returning visitor who already accepted → load on this pageview too.
+  if (localStorage.getItem('cookie_consent') === 'accepted') loadClarity();
+
   const cookieBanner = document.getElementById('cookieBanner');
   if (cookieBanner && !localStorage.getItem('cookie_consent')) {
     setTimeout(() => cookieBanner.classList.add('visible'), 1200);
     document.getElementById('cookieAccept')?.addEventListener('click', () => {
       localStorage.setItem('cookie_consent', 'accepted');
       cookieBanner.classList.remove('visible');
+      loadClarity(); // consent given → start analytics now
     });
     document.getElementById('cookieDecline')?.addEventListener('click', () => {
       localStorage.setItem('cookie_consent', 'declined');
