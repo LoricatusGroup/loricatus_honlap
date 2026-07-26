@@ -1,0 +1,54 @@
+# Loricatus – robots.txt
+# Search engines and AI answer engines are welcome to crawl, index and cite this site.
+
+User-agent: *
+Allow: /
+Disallow: /admin-app/
+
+# Explicitly welcome AI / answer-engine crawlers (ChatGPT, Perplexity, Claude,
+# Google AI Overviews, Bing/Copilot, Apple). They may crawl and cite the site.
+User-agent: GPTBot
+Allow: /
+Disallow: /admin-app/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin-app/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin-app/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin-app/
+
+User-agent: Perplexity-User
+Allow: /
+Disallow: /admin-app/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin-app/
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /admin-app/
+
+User-agent: Claude-Web
+Allow: /
+Disallow: /admin-app/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin-app/
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /admin-app/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin-app/
+
+Sitemap: https://loricatus.hu/sitemap.xml
