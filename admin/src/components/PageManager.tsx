@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Modal from './inline/Modal'
 import { supabase } from '../lib/supabase'
 import {
@@ -11,6 +11,16 @@ import {
   type PageEntry,
   type PagesManifest,
 } from '../lib/pages'
+import {
+  listPageUploads,
+  uploadPageHtml,
+  setPageUploadMode,
+  deletePageUpload,
+  looksLikeHtml,
+  MAX_UPLOAD_BYTES,
+  type PageUpload,
+  type UploadMode,
+} from '../lib/pageUploads'
 
 interface Props {
   manifest: PagesManifest
@@ -26,6 +36,42 @@ const TEMPLATES = [
   { value: 'blank', label: 'Üres oldal', desc: 'Csak cím — szekciókból építed fel a könyvtárból' },
 ]
 
+const LOCALES = [
+  { code: 'hu', label: 'Magyar' },
+  { code: 'en', label: 'Angol' },
+  { code: 'it', label: 'Olasz' },
+] as const
+
+const UPLOAD_MODES: { value: UploadMode; label: string; desc: string }[] = [
+  {
+    value: 'shell',
+    label: 'A weboldal keretében',
+    desc: 'A feltöltött tartalom a megszokott menü és lábléc közé kerül — a látogató tud navigálni.',
+  },
+  {
+    value: 'standalone',
+    label: 'Önálló oldalként',
+    desc: 'Pontosan úgy jelenik meg, ahogy elkészült — saját design, de nincs menü és lábléc.',
+  },
+]
+
+// Read + validate a picked HTML file. Rejects wrong file types and oversized
+// files here so the owner gets a clear message instead of a failed publish.
+async function readHtmlFile(file: File): Promise<string> {
+  if (file.size > MAX_UPLOAD_BYTES) {
+    const maxMb = (MAX_UPLOAD_BYTES / 1_000_000).toFixed(0)
+    throw new Error(
+      `A fájl túl nagy (${Math.round(file.size / 1024)} KB). Legfeljebb ${maxMb} MB tölthető fel.`,
+    )
+  }
+  const text = await file.text()
+  if (!text.trim()) throw new Error('A fájl üres.')
+  if (!looksLikeHtml(text)) {
+    throw new Error('Ez nem HTML-fájlnak tűnik. Egy teljes .html oldalt tölts fel.')
+  }
+  return text
+}
+
 // The "Oldalak" panel: create / delete editor-made pages. Creating a page also
 // publishes it so its HTML is scaffolded live; the owner then edits it via the
 // page switcher (once the ~1 min publish finishes).
@@ -40,6 +86,104 @@ export default function PageManager({ manifest, locale, onClose, onChanged, onCr
   const [error, setError] = useState<string | null>(null)
   const [editId, setEditId] = useState<string | null>(null)
   const [editLabels, setEditLabels] = useState({ hu: '', en: '', it: '' })
+
+  // ── Ready-made HTML uploads ────────────────────────────────────────────────
+  // New page: build from a template, or upload a finished HTML document.
+  const [source, setSource] = useState<'template' | 'upload'>('template')
+  const [newHtml, setNewHtml] = useState<{ name: string; text: string } | null>(null)
+  const [newUploadMode, setNewUploadMode] = useState<UploadMode>('shell')
+  const [newUploadLocale, setNewUploadLocale] = useState<string>(locale)
+  // Existing pages: which page's per-locale upload panel is open + what's stored.
+  const [uploadPanelId, setUploadPanelId] = useState<string | null>(null)
+  const [uploads, setUploads] = useState<PageUpload[]>([])
+
+  const refreshUploads = () =>
+    listPageUploads().then(({ data }) => {
+      if (data) setUploads(data as PageUpload[])
+    })
+  useEffect(() => {
+    refreshUploads()
+  }, [])
+  const uploadFor = (pageId: string, lc: string) =>
+    uploads.find((u) => u.page_id === pageId && u.locale === lc) || null
+
+  const pickHtml = async (file: File | undefined, onOk: (text: string, name: string) => void) => {
+    if (!file) return
+    setError(null)
+    try {
+      const text = await readHtmlFile(file)
+      onOk(text, file.name)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'A fájl beolvasása nem sikerült.')
+    }
+  }
+
+  // Upload (or replace) the HTML of an existing page for one locale, then
+  // republish so the live file is regenerated from it.
+  const handleUploadExisting = async (
+    pageId: string,
+    lc: string,
+    text: string,
+    mode: UploadMode,
+  ) => {
+    setBusy(true)
+    setError(null)
+    const { error: err } = await uploadPageHtml(pageId, lc, text, mode)
+    if (err) {
+      setBusy(false)
+      setError(err.message)
+      return
+    }
+    await supabase.functions
+      .invoke('publish-site', { body: { locale: 'all', page: pageId } })
+      .catch(() => {})
+    await refreshUploads()
+    setBusy(false)
+    onChanged('HTML feltöltve — ~1 perc múlva frissül az élő oldal.')
+  }
+
+  // Switch an upload between "inside the site frame" and "standalone", then
+  // republish so the live page is re-rendered in the new mode.
+  const handleToggleMode = async (pageId: string, lc: string, mode: UploadMode) => {
+    setBusy(true)
+    setError(null)
+    const { error: err } = await setPageUploadMode(pageId, lc, mode)
+    if (err) {
+      setBusy(false)
+      setError(err.message)
+      return
+    }
+    await supabase.functions
+      .invoke('publish-site', { body: { locale: 'all', page: pageId } })
+      .catch(() => {})
+    await refreshUploads()
+    setBusy(false)
+    onChanged(
+      mode === 'standalone'
+        ? 'Átállítva önálló oldalra — ~1 perc múlva frissül.'
+        : 'Átállítva a weboldal keretébe — ~1 perc múlva frissül.',
+    )
+  }
+
+  const handleDeleteUpload = async (pageId: string, lc: string) => {
+    if (
+      !window.confirm(
+        'Törlöd a feltöltött HTML-t ehhez a nyelvhez? Az oldal a sablonos változatra áll vissza a következő publikáláskor.',
+      )
+    )
+      return
+    setBusy(true)
+    setError(null)
+    const { error: err } = await deletePageUpload(pageId, lc)
+    if (err) {
+      setBusy(false)
+      setError(err.message)
+      return
+    }
+    await refreshUploads()
+    setBusy(false)
+    onChanged('Feltöltött HTML törölve.')
+  }
   const slug = slugify(name)
   const taken = new Set(manifest.pages.map((p) => p.id))
   const clash = slug && taken.has(slug)
@@ -53,6 +197,10 @@ export default function PageManager({ manifest, locale, onClose, onChanged, onCr
       setError('Ilyen nevű oldal már van. Válassz másik nevet.')
       return
     }
+    if (source === 'upload' && !newHtml) {
+      setError('Válaszd ki a feltöltendő HTML-fájlt.')
+      return
+    }
     setBusy(true)
     setError(null)
     const label = name.trim()
@@ -61,11 +209,26 @@ export default function PageManager({ manifest, locale, onClose, onChanged, onCr
       en: labelEn.trim() || label,
       it: labelIt.trim() || label,
     }
-    const { error: err } = await createPage(slug, template, nav)
+    // An uploaded page still gets a page row (nav entry, URL, ordering); its
+    // body comes from the upload instead of a template.
+    const { error: err } = await createPage(slug, source === 'upload' ? 'blank' : template, nav)
     if (err) {
       setError(err.message)
       setBusy(false)
       return
+    }
+    if (source === 'upload' && newHtml) {
+      const { error: upErr } = await uploadPageHtml(
+        slug,
+        newUploadLocale,
+        newHtml.text,
+        newUploadMode,
+      )
+      if (upErr) {
+        setBusy(false)
+        setError(`Az oldal létrejött, de a HTML feltöltése nem sikerült: ${upErr.message}`)
+        return
+      }
     }
     // Scaffold every locale file in ONE publish run (locale:'all'). Firing one
     // publish per locale used to race on git push and silently drop locales.
@@ -73,6 +236,15 @@ export default function PageManager({ manifest, locale, onClose, onChanged, onCr
       .invoke('publish-site', { body: { locale: 'all', page: slug } })
       .catch(() => {})
     setBusy(false)
+    if (source === 'upload') {
+      // Don't jump the editor into an uploaded page: it has no editable CMS
+      // fields, so the page list + live URL are the useful next step.
+      onChanged(
+        `„${label}" oldal létrehozva a feltöltött HTML-lel — ~1 perc múlva élesben van a /${slug}/ címen.`,
+      )
+      onClose()
+      return
+    }
     onChanged(`„${label}" oldal létrehozva — épül (~1 perc). A szerkesztő magától megnyílik, amint kész.`)
     onCreatedPage(slug)
     onClose()
@@ -269,6 +441,17 @@ export default function PageManager({ manifest, locale, onClose, onChanged, onCr
                       <div className="flex shrink-0 items-center gap-1">
                         <button
                           type="button"
+                          className={`cms-btn-ghost !px-2.5 !text-xs ${
+                            uploadPanelId === p.id ? 'text-blue-300' : ''
+                          }`}
+                          title="Kész HTML feltöltése nyelvenként"
+                          onClick={() => setUploadPanelId(uploadPanelId === p.id ? null : p.id)}
+                          disabled={busy}
+                        >
+                          HTML
+                        </button>
+                        <button
+                          type="button"
                           className="cms-btn-ghost !px-2.5 !text-xs"
                           onClick={() => startEdit(p)}
                           disabled={busy}
@@ -284,6 +467,87 @@ export default function PageManager({ manifest, locale, onClose, onChanged, onCr
                           Törlés
                         </button>
                       </div>
+                    </div>
+                  )}
+
+                  {uploadPanelId === p.id && editId !== p.id && (
+                    <div className="mt-2.5 space-y-1.5 border-t border-white/10 pt-2.5">
+                      <p className="text-[10px] uppercase tracking-wide text-gray-400">
+                        Kész HTML nyelvenként
+                      </p>
+                      {LOCALES.map((l) => {
+                        const up = uploadFor(p.id, l.code)
+                        return (
+                          <div
+                            key={l.code}
+                            className="flex items-center justify-between gap-2 rounded-lg bg-white/5 px-2.5 py-1.5"
+                          >
+                            <div className="min-w-0">
+                              <div className="text-[12px] text-white">{l.label}</div>
+                              <div className="truncate text-[10px] text-gray-400">
+                                {up
+                                  ? `Feltöltve · ${
+                                      up.mode === 'standalone' ? 'önálló oldal' : 'weboldal keretében'
+                                    }`
+                                  : 'Nincs feltöltve — a sablon szerint jelenik meg'}
+                              </div>
+                            </div>
+                            <div className="flex shrink-0 items-center gap-1">
+                              <label
+                                className={`cms-btn-secondary !px-2 !py-1 !text-[11px] ${
+                                  busy ? 'pointer-events-none opacity-60' : ''
+                                }`}
+                              >
+                                {up ? 'Csere' : 'Feltöltés'}
+                                <input
+                                  type="file"
+                                  accept=".html,.htm,text/html"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const f = e.target.files?.[0]
+                                    e.target.value = ''
+                                    pickHtml(f, (text) =>
+                                      handleUploadExisting(
+                                        p.id,
+                                        l.code,
+                                        text,
+                                        up?.mode || 'shell',
+                                      ),
+                                    )
+                                  }}
+                                />
+                              </label>
+                              {up && (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="cms-btn-ghost !px-2 !py-1 !text-[11px]"
+                                    title="Váltás: weboldal keretében ↔ önálló oldal"
+                                    disabled={busy}
+                                    onClick={() =>
+                                      handleToggleMode(
+                                        p.id,
+                                        l.code,
+                                        up.mode === 'shell' ? 'standalone' : 'shell',
+                                      )
+                                    }
+                                  >
+                                    ⇄
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="cms-btn-ghost !px-2 !py-1 !text-[11px] text-red-300 hover:text-red-200"
+                                    disabled={busy}
+                                    onClick={() => handleDeleteUpload(p.id, l.code)}
+                                  >
+                                    Törlés
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
                     </div>
                   )}
                 </li>
@@ -339,24 +603,127 @@ export default function PageManager({ manifest, locale, onClose, onChanged, onCr
             )}
           </div>
           <div>
-            <label className="mb-1 block text-xs text-gray-300">Sablon</label>
-            <div className="grid grid-cols-1 gap-1.5">
-              {TEMPLATES.map((t) => (
-                <button
-                  key={t.value}
-                  type="button"
-                  onClick={() => setTemplate(t.value)}
-                  className={`rounded-xl border px-3.5 py-2.5 text-left transition ${
-                    template === t.value
-                      ? 'border-blue-400/60 bg-blue-500/15'
-                      : 'border-white/10 bg-white/5 hover:bg-white/10'
-                  }`}
-                >
-                  <div className="text-sm text-white">{t.label}</div>
-                  <div className="text-[11px] text-gray-400">{t.desc}</div>
-                </button>
-              ))}
+            <label className="mb-1 block text-xs text-gray-300">Miből készüljön?</label>
+            <div className="mb-2 grid grid-cols-2 gap-1.5">
+              <button
+                type="button"
+                onClick={() => setSource('template')}
+                className={`rounded-xl border px-3 py-2 text-left transition ${
+                  source === 'template'
+                    ? 'border-blue-400/60 bg-blue-500/15'
+                    : 'border-white/10 bg-white/5 hover:bg-white/10'
+                }`}
+              >
+                <div className="text-sm text-white">🧩 Sablonból</div>
+                <div className="text-[11px] text-gray-400">Szerkeszthető blokkok</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSource('upload')}
+                className={`rounded-xl border px-3 py-2 text-left transition ${
+                  source === 'upload'
+                    ? 'border-blue-400/60 bg-blue-500/15'
+                    : 'border-white/10 bg-white/5 hover:bg-white/10'
+                }`}
+              >
+                <div className="text-sm text-white">⬆ Kész HTML</div>
+                <div className="text-[11px] text-gray-400">Kész fájl feltöltése</div>
+              </button>
             </div>
+
+            {source === 'template' ? (
+              <div className="grid grid-cols-1 gap-1.5">
+                {TEMPLATES.map((t) => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onClick={() => setTemplate(t.value)}
+                    className={`rounded-xl border px-3.5 py-2.5 text-left transition ${
+                      template === t.value
+                        ? 'border-blue-400/60 bg-blue-500/15'
+                        : 'border-white/10 bg-white/5 hover:bg-white/10'
+                    }`}
+                  >
+                    <div className="text-sm text-white">{t.label}</div>
+                    <div className="text-[11px] text-gray-400">{t.desc}</div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3 rounded-xl border border-white/10 bg-white/5 p-3">
+                <div>
+                  <label className="mb-1 block text-[11px] text-gray-300">HTML-fájl</label>
+                  <div className="flex items-center gap-2">
+                    <label
+                      className={`cms-btn-secondary shrink-0 !px-3 !py-1.5 !text-xs ${
+                        busy ? 'pointer-events-none opacity-60' : ''
+                      }`}
+                    >
+                      {newHtml ? 'Másik fájl…' : '⬆ Fájl kiválasztása'}
+                      <input
+                        type="file"
+                        accept=".html,.htm,text/html"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0]
+                          e.target.value = ''
+                          pickHtml(f, (text, fname) => setNewHtml({ name: fname, text }))
+                        }}
+                      />
+                    </label>
+                    <span className="truncate text-[11px] text-gray-400">
+                      {newHtml
+                        ? `${newHtml.name} · ${Math.round(newHtml.text.length / 1024)} KB`
+                        : 'Nincs fájl kiválasztva'}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-[11px] text-gray-300">Melyik nyelvhez?</label>
+                  <div className="flex gap-1.5">
+                    {LOCALES.map((l) => (
+                      <button
+                        key={l.code}
+                        type="button"
+                        onClick={() => setNewUploadLocale(l.code)}
+                        className={`rounded-lg border px-2.5 py-1 text-xs transition ${
+                          newUploadLocale === l.code
+                            ? 'border-blue-400/60 bg-blue-500/15 text-white'
+                            : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
+                        }`}
+                      >
+                        {l.label}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="mt-1 text-[10px] text-gray-500">
+                    A többi nyelvhez később, a lista „HTML" gombjánál tölthetsz fel változatot.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-[11px] text-gray-300">Megjelenés</label>
+                  <div className="grid grid-cols-1 gap-1.5">
+                    {UPLOAD_MODES.map((m) => (
+                      <button
+                        key={m.value}
+                        type="button"
+                        onClick={() => setNewUploadMode(m.value)}
+                        className={`rounded-lg border px-3 py-2 text-left transition ${
+                          newUploadMode === m.value
+                            ? 'border-blue-400/60 bg-blue-500/15'
+                            : 'border-white/10 bg-white/5 hover:bg-white/10'
+                        }`}
+                      >
+                        <div className="text-[13px] text-white">{m.label}</div>
+                        <div className="text-[10px] leading-snug text-gray-400">{m.desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

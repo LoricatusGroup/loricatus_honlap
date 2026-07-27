@@ -327,6 +327,50 @@ function check(name, cond) {
   check('video: switch back to embed restores iframe', wrap.querySelector('iframe').getAttribute('src') === 'https://www.youtube.com/embed/dQw4w9WgXcQ')
 }
 
+// Uploaded full-HTML pages (M7): standalone verbatim vs shell-wrapped
+{
+  const manifest = inj.loadManifest()
+  const page = { id: 'feltoltott', nav: { hu: 'Feltöltött' },
+    locales: { hu: { slug: 'feltoltott', file: 'feltoltott/index.html', url: '/feltoltott/' } } }
+  const uploaded =
+    '<!DOCTYPE html><html><head><title>Szolgáltatásaink</title>' +
+    '<meta name="description" content="Mit kínálunk">' +
+    '<style>.hero{color:red}</style><link rel="stylesheet" href="https://cdn.example/x.css">' +
+    '</head><body><h1>Ár: 100$ &amp; több</h1><p>Törzs $& $1 szöveg</p></body></html>'
+
+  // standalone → byte-for-byte what was uploaded
+  const standalone = inj.renderUploadedPage({ html: uploaded, mode: 'standalone' }, page, 'hu', manifest)
+  check('upload: standalone is verbatim', standalone === uploaded)
+
+  // shell → site chrome + uploaded body/styles, title/desc taken from upload
+  const shell = inj.renderUploadedPage({ html: uploaded, mode: 'shell' }, page, 'hu', manifest)
+  check('upload: shell keeps site nav', shell.includes('data-navauto'))
+  check('upload: shell keeps site footer', shell.includes('class="footer"'))
+  check('upload: shell has uploaded body', shell.includes('<h1>Ár: 100$ &amp; több</h1>'))
+  check('upload: shell carries uploaded <style>', shell.includes('.hero{color:red}'))
+  check('upload: shell carries uploaded stylesheet link', shell.includes('cdn.example/x.css'))
+  check('upload: shell uses uploaded title', shell.includes('<title data-edit="page-title">Szolgáltatásaink</title>'))
+  check('upload: shell uses uploaded description', shell.includes('content="Mit kínálunk"'))
+  // `$&`/`$1` in uploaded HTML must survive. With string-form String.replace,
+  // `$&` would expand to the matched placeholder — so the decisive checks are
+  // that no `__BODY__` leaked and the literal text is intact ('&' is correctly
+  // serialized to `&amp;`, which renders back as `$&`).
+  check('upload: no placeholder leaked by $-patterns', !shell.includes('__BODY__'))
+  check('upload: $-patterns preserved', shell.includes('Törzs $&amp; $1 szöveg'))
+  check('upload: body wrapped for scoping', shell.includes('class="uploaded-page"'))
+  // no <html> nesting: the shell is one document
+  check('upload: shell has single <html>', (shell.match(/<html/gi) || []).length === 1)
+
+  // title falls back to the nav label when the upload has none
+  const noTitle = inj.renderUploadedPage({ html: '<html><body><p>x</p></body></html>', mode: 'shell' }, page, 'hu', manifest)
+  check('upload: title falls back to page label', noTitle.includes('Feltöltött'))
+
+  // findUpload matches on page + locale
+  const ups = [{ page_id: 'a', locale: 'hu', html: '1' }, { page_id: 'a', locale: 'en', html: '2' }]
+  check('upload: findUpload matches locale', inj.findUpload(ups, 'a', 'en').html === '2')
+  check('upload: findUpload misses unknown page', inj.findUpload(ups, 'b', 'hu') === null)
+}
+
 // Case-study block: partial materializes with rewritten keys + editable content
 {
   const doc = makeDoc('<footer>foot</footer>')

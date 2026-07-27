@@ -627,6 +627,94 @@ function mergeManifest(manifest, dynamicRows) {
 
 // Create a page's HTML file from the base shell + body template. Nav/lang are
 // filled by syncNav/syncLangSwitcher; content is baked by applyContent.
+// ── Uploaded full-HTML pages (M7) ───────────────────────────────────────────
+// An editor can hand a page a ready-made HTML document instead of building it
+// from CMS blocks. One upload per (page, locale); `mode` decides the rendering.
+
+async function loadPageUploads() {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return []
+  try {
+    let url = `${SUPABASE_URL}/rest/v1/page_uploads?select=page_id,locale,html,mode`
+    const siteId = process.env.SITE_ID
+    if (siteId) url += `&site_id=eq.${encodeURIComponent(siteId)}`
+    const res = await fetch(url, {
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+    })
+    if (!res.ok) {
+      console.warn(`page_uploads fetch failed: ${res.status}`)
+      return []
+    }
+    const rows = await res.json()
+    return Array.isArray(rows) ? rows : []
+  } catch (e) {
+    console.warn(`page_uploads fetch error: ${e.message}`)
+    return []
+  }
+}
+
+function findUpload(uploads, pageId, locale) {
+  return (uploads || []).find((u) => u.page_id === pageId && u.locale === locale) || null
+}
+
+// Render an uploaded document into the file we publish.
+//   'standalone' → served exactly as uploaded (its own design, no site chrome);
+//                  canonical/hreflang still get injected later by applySeo.
+//   'shell'      → its <body> (plus the <style>/<link> it brought) is lifted
+//                  into the site shell, so the page keeps the nav + footer.
+// All replacements use function form: uploaded HTML may contain `$&`/`$1`,
+// which string-form String.replace would interpret as capture references.
+function renderUploadedPage(upload, page, locale, manifest) {
+  const uploaded = String((upload && upload.html) || '')
+  if (((upload && upload.mode) || 'shell') === 'standalone') return uploaded
+
+  const src = new JSDOM(uploaded).window.document
+  const label = navLabel(page, locale)
+  const titleEl = src.querySelector('title')
+  const title = ((titleEl && titleEl.textContent) || '').trim() || label
+  const descEl = src.querySelector('meta[name="description"]')
+  const desc = ((descEl && descEl.getAttribute('content')) || '').trim() || label
+
+  // Carry over the styling the uploaded page depends on.
+  const headBits = []
+  src.querySelectorAll('head style').forEach((el) => headBits.push(el.outerHTML))
+  src
+    .querySelectorAll('head link[rel="stylesheet"], head link[rel="preconnect"], head link[rel="dns-prefetch"]')
+    .forEach((el) => headBits.push(el.outerHTML))
+
+  // Body keeps everything it had, including inline <style>/<script>.
+  const body = src.body ? src.body.innerHTML : uploaded
+
+  const base = fs.readFileSync(
+    path.join(__dirname, '..', 'page-templates', '_base.html'),
+    'utf-8',
+  )
+  const home = (manifest.pages || []).find((p) => p.id === 'home')
+  const homeUrl = (home && home.locales[locale] && home.locales[locale].url) || '/'
+  const cta =
+    { hu: 'Ajánlatkérés', en: 'Get a quote', it: 'Richiedi preventivo' }[locale] || 'Ajánlatkérés'
+
+  let html = base
+    .replace(/__LANG__/g, () => locale)
+    .replace(/__TITLE__/g, () => escapeHtmlText(title))
+    .replace(/__DESC__/g, () => escapeHtmlText(desc))
+    .replace(/__HOME__/g, () => homeUrl)
+    .replace(/__CTA__/g, () => escapeHtmlText(cta))
+    .replace('__BODY__', () => `<main class="uploaded-page">\n${body}\n</main>`)
+  if (headBits.length) {
+    html = html.replace('</head>', () => `${headBits.join('\n')}\n</head>`)
+  }
+  return html
+}
+
+// Write the page file for an uploaded page. Runs on every publish so a
+// re-upload takes effect (unlike scaffolding, which only fills a missing file).
+function writeUploadedPage(htmlPath, upload, page, locale, manifest) {
+  const html = renderUploadedPage(upload, page, locale, manifest)
+  fs.mkdirSync(path.dirname(htmlPath), { recursive: true })
+  fs.writeFileSync(htmlPath, html)
+  console.log(`Rendered uploaded page (${upload.mode || 'shell'}): ${htmlPath}`)
+}
+
 function scaffoldPageFile(htmlPath, page, locale, manifest) {
   const baseHtml = fs.readFileSync(
     path.join(__dirname, '..', 'page-templates', '_base.html'),
@@ -1043,9 +1131,14 @@ async function main() {
   const layout = pageData.layout || {}
 
   const htmlPath = path.join(__dirname, '..', target.filePath)
-  // A dynamic page's file won't exist on its first publish — scaffold it from
-  // the base shell + its body template.
-  if (!fs.existsSync(htmlPath)) {
+  // An uploaded (ready-made HTML) page is rendered from the upload on every
+  // publish, so replacing the file in the editor takes effect immediately.
+  const upload = findUpload(await loadPageUploads(), PAGE, LOCALE)
+  if (upload) {
+    writeUploadedPage(htmlPath, upload, target.page, LOCALE, merged)
+  } else if (!fs.existsSync(htmlPath)) {
+    // A dynamic page's file won't exist on its first publish — scaffold it from
+    // the base shell + its body template.
     if (target.page && target.page.template) {
       scaffoldPageFile(htmlPath, target.page, LOCALE, merged)
     } else {
@@ -1127,6 +1220,8 @@ module.exports = {
   generateBlogPost,
   writeBlogRss,
   removeStaleBlogPosts,
+  renderUploadedPage,
+  findUpload,
   applyLayout,
   materializeAddedItems,
   removeStrayItems,
