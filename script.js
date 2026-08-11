@@ -286,9 +286,9 @@
   }
 
   /* ── COOKIE + consent-gated analytics ──────────── */
-  // Microsoft Clarity loads ONLY after the visitor accepts cookies (GDPR) —
-  // never before, and never during the automated speed test (which doesn't
-  // consent). Idempotent so it can't double-inject.
+  // Analytics (Microsoft Clarity + Google Analytics) load ONLY after the
+  // visitor accepts cookies (GDPR) — never before, and never during automated
+  // speed tests (which don't consent). Both loaders are idempotent.
   function loadClarity() {
     if (window.__clarityLoaded) return;
     window.__clarityLoaded = true;
@@ -298,8 +298,29 @@
       y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "wn1ca1y5p5");
   }
+
+  // Google Analytics 4 (gtag.js).
+  var GA_MEASUREMENT_ID = 'G-LHG57EDJJQ';
+  function loadGoogleAnalytics() {
+    if (window.__gaLoaded) return;
+    window.__gaLoaded = true;
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    window.gtag = gtag;
+    gtag('js', new Date());
+    gtag('config', GA_MEASUREMENT_ID);
+  }
+
+  function loadAnalytics() {
+    loadClarity();
+    loadGoogleAnalytics();
+  }
   // Returning visitor who already accepted → load on this pageview too.
-  if (localStorage.getItem('cookie_consent') === 'accepted') loadClarity();
+  if (localStorage.getItem('cookie_consent') === 'accepted') loadAnalytics();
 
   const cookieBanner = document.getElementById('cookieBanner');
   if (cookieBanner && !localStorage.getItem('cookie_consent')) {
@@ -307,7 +328,7 @@
     document.getElementById('cookieAccept')?.addEventListener('click', () => {
       localStorage.setItem('cookie_consent', 'accepted');
       cookieBanner.classList.remove('visible');
-      loadClarity(); // consent given → start analytics now
+      loadAnalytics(); // consent given → start analytics now
     });
     document.getElementById('cookieDecline')?.addEventListener('click', () => {
       localStorage.setItem('cookie_consent', 'declined');
