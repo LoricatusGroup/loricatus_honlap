@@ -13,6 +13,7 @@ const EDIT_ATTR_BY_TYPE: Record<FieldType, string> = {
   target: 'data-edit-target',
   content: 'data-edit-content',
   video: 'data-edit-video',
+  placeholder: 'data-edit-placeholder',
 }
 
 export const EDIT_ATTRS = Object.values(EDIT_ATTR_BY_TYPE)
@@ -98,6 +99,8 @@ export function applyOneEdit(
     el.textContent = value
   } else if (type === 'content') {
     el.setAttribute('content', value)
+  } else if (type === 'placeholder') {
+    el.setAttribute('placeholder', value)
   } else if (type === 'video') {
     // data-edit-video lives on the wrapper; embeds go to the <iframe>, uploaded
     // files to a <video> (created if missing).
@@ -204,7 +207,7 @@ export function attachEditClickHandler(
   const mdHandler = (e: MouseEvent) => {
     const target = e.target as { closest?: (sel: string) => Element | null } | null
     if (!target || typeof target.closest !== 'function') return
-    if (target.closest('a[href], button')) {
+    if (target.closest('a[href], button, input, textarea, select')) {
       e.stopPropagation()
       e.stopImmediatePropagation?.()
     }

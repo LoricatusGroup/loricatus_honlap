@@ -14,6 +14,7 @@ const EDIT_ATTR_TYPE: Record<string, FieldType> = {
   'data-edit-target': 'target',
   'data-edit-content': 'content',
   'data-edit-video': 'video',
+  'data-edit-placeholder': 'placeholder',
 }
 const EDIT_ATTRS = Object.keys(EDIT_ATTR_TYPE)
 
@@ -101,6 +102,7 @@ function readValue(el: Element, type: FieldType): string {
   if (type === 'color') return el.getAttribute('style') || ''
   if (type === 'target') return el.getAttribute('data-target') || ''
   if (type === 'content') return el.getAttribute('content') || ''
+  if (type === 'placeholder') return el.getAttribute('placeholder') || ''
   return ''
 }
 

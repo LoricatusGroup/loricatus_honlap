@@ -974,6 +974,20 @@ export default function EditorPage({ user, membership }: Props) {
                   <div className="truncate px-2.5 py-1 text-[11px] text-gray-400">{user.email}</div>
                   <MenuSep />
                   <MenuItem
+                    icon="🌐"
+                    label="Vissza az élő oldalra"
+                    hint="A weboldal megnyitása új lapon"
+                    onClick={() => {
+                      // iframeSrc is the live URL of the page being edited (it
+                      // is what the preview loads) and exists in both the
+                      // manifest and fallback config. New tab, so unsaved work
+                      // in the editor is never lost.
+                      window.open(localeConfig.iframeSrc || '/', '_blank', 'noopener')
+                      close()
+                    }}
+                  />
+                  <MenuSep />
+                  <MenuItem
                     icon="❓"
                     label="Bemutató / súgó"
                     onClick={() => {

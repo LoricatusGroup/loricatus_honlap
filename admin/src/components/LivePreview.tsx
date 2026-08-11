@@ -170,7 +170,7 @@ export default function LivePreview({
         setModal({ kind: 'href', field })
       } else if (type === 'target') {
         setModal({ kind: 'number', field })
-      } else if (type === 'content') {
+      } else if (type === 'content' || type === 'placeholder') {
         setModal({ kind: 'content', field })
       } else if (type === 'video') {
         setModal({ kind: 'video', field })
@@ -201,7 +201,7 @@ export default function LivePreview({
         setModal({ kind: 'href', field })
       } else if (type === 'target') {
         setModal({ kind: 'number', field })
-      } else if (type === 'content') {
+      } else if (type === 'content' || type === 'placeholder') {
         setModal({ kind: 'content', field })
       } else if (type === 'video') {
         setModal({ kind: 'video', field })
