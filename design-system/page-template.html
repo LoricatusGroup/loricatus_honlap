@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oldal címe — Loricatus</title>
+<!-- Ez az egyetlen sor hozza az egész arculatot (a betűtípusok is benne vannak). -->
+<link rel="stylesheet" href="brand.css">
+</head>
+<body>
+
+<!-- SÖTÉT HERO — oldalanként pontosan egy -->
+<header class="hero-dark">
+  <div class="container">
+    <span class="section-tag">Rövid címke</span>
+    <h1>Fő cím<br><span style="color:var(--accent)">kiemelt része</span></h1>
+    <p>Két mondat arról, mit nyújt az oldal. Rövid, konkrét, túlzás nélkül.</p>
+    <a class="btn btn-primary" href="#kapcsolat">Kérjen ajánlatot</a>
+  </div>
+</header>
+
+<!-- TARTALMI SZEKCIÓ: címke → cím → leírás → tartalom -->
+<section class="section">
+  <div class="container">
+    <span class="section-tag">Mit nyújtunk</span>
+    <h2 class="section-title">Szekció címe</h2>
+    <p class="section-desc" style="max-width:52ch">Egy-két mondatos bevezető a szekcióhoz.</p>
+
+    <div class="grid-3" style="margin-top:40px">
+      <article class="card">
+        <div class="card-num">01</div>
+        <h3>Első pont</h3>
+        <p>Rövid magyarázat, legfeljebb három-négy sor.</p>
+      </article>
+      <article class="card">
+        <div class="card-num">02</div>
+        <h3>Második pont</h3>
+        <p>Rövid magyarázat, legfeljebb három-négy sor.</p>
+      </article>
+      <article class="card">
+        <div class="card-num">03</div>
+        <h3>Harmadik pont</h3>
+        <p>Rövid magyarázat, legfeljebb három-négy sor.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- VÁLTAKOZÓ HÁTTERŰ SZEKCIÓ -->
+<section class="section section-alt">
+  <div class="container">
+    <span class="section-tag">Részletek</span>
+    <h2 class="section-title">Második szekció</h2>
+    <p class="section-desc" style="max-width:60ch">Törzsszöveg. A bekezdés legfeljebb 60–70 karakter széles legyen,
+    hogy olvasható maradjon.</p>
+  </div>
+</section>
+
+<!-- VILÁGOS CTA SÁV: itt a gomb SÖTÉT, nem akcentus -->
+<section id="kapcsolat" class="section">
+  <div class="container" style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+    <div>
+      <h3 style="margin:0 0 6px;font-size:1.25rem;font-weight:700">Kezdjük egy közös bemutatóval</h3>
+      <p style="margin:0;color:var(--muted);font-size:.9rem">Egy órás egyeztetés, kötelezettség nélkül.</p>
+    </div>
+    <a class="btn btn-primary" style="margin-left:auto" href="mailto:info@loricatus.hu">Időpontot kérek</a>
+  </div>
+</section>
+
+<footer class="container" style="padding-top:28px;padding-bottom:28px;display:flex;justify-content:space-between;
+gap:16px;flex-wrap:wrap;font-size:.8rem;color:var(--muted);border-top:1px solid var(--border)">
+  <span>&copy; 2026 Loricatus. Minden jog fenntartva.</span>
+  <span style="font-family:var(--font-mono);font-size:.72rem">Engedélyezett EU drónoperátor &middot; A2 CofC</span>
+</footer>
+
+</body>
+</html>
