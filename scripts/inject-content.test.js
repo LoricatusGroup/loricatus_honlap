@@ -329,6 +329,26 @@ function check(name, cond) {
   check('video: switch back to embed restores iframe', wrap.querySelector('iframe').getAttribute('src') === 'https://www.youtube.com/embed/dQw4w9WgXcQ')
 }
 
+// Form placeholders are editable content too (data-edit-placeholder)
+{
+  const doc = makeDoc(
+    '<form><input id="company" placeholder="Pl. Példa Kft." data-edit-placeholder="contact-company-ph">' +
+    '<textarea placeholder="Írja le..." data-edit-placeholder="contact-message-ph"></textarea></form>',
+  )
+  const { applied, missing } = inj.applyContent(doc, {
+    'contact-company-ph': 'Pl. Teszt Zrt.',
+    'contact-message-ph': 'Új segédszöveg',
+  })
+  check('placeholder: both applied', applied === 2 && missing.length === 0)
+  check('placeholder: input updated',
+    doc.querySelector('#company').getAttribute('placeholder') === 'Pl. Teszt Zrt.')
+  check('placeholder: textarea updated',
+    doc.querySelector('textarea').getAttribute('placeholder') === 'Új segédszöveg')
+  // the key must not leak into other attributes
+  check('placeholder: value not written to textContent',
+    (doc.querySelector('#company').textContent || '') === '')
+}
+
 // Uploaded full-HTML pages (M7): standalone verbatim vs shell-wrapped
 {
   const manifest = inj.loadManifest()

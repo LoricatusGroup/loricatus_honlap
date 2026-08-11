@@ -9,6 +9,7 @@ const ATTR_TYPE_MAP: Record<string, FieldType> = {
   'data-edit-target': 'target',
   'data-edit-content': 'content',
   'data-edit-video': 'video',
+  'data-edit-placeholder': 'placeholder',
 }
 
 const SECTION_LABELS: Record<string, string> = {
@@ -37,6 +38,7 @@ function readValue(el: Element, type: FieldType): string {
   if (type === 'color') return el.getAttribute('style') || ''
   if (type === 'target') return el.getAttribute('data-target') || ''
   if (type === 'content') return el.getAttribute('content') || ''
+  if (type === 'placeholder') return el.getAttribute('placeholder') || ''
   if (type === 'video') {
     const f = el.tagName === 'IFRAME' ? el : el.querySelector('iframe')
     const v = el.querySelector('video')
@@ -59,6 +61,7 @@ const WORD_HU: Record<string, string> = {
   bg: 'háttér', background: 'háttér',
   menu: 'menü', phone: 'telefon', email: 'e-mail', address: 'cím',
   hours: 'nyitvatartás', meta: 'meta', stat: 'statisztika', hint: 'tipp',
+  ph: 'mintaszöveg (szürke segédszöveg)',
   // section words used inside nav-menu-* keys
   services: 'Szolgáltatások', about: 'Rólunk', equipment: 'Eszközpark',
   portfolio: 'Projektek', contact: 'Kapcsolat',
