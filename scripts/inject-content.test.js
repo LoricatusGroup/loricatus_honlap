@@ -104,10 +104,12 @@ function check(name, cond) {
   const manifest = inj.loadManifest()
   const xml = inj.buildSitemapXml(manifest)
   const locs = (xml.match(/<loc>/g) || []).length
-  check('sitemap: 9 pages (home+ref+blog x3) + 3 extras = 12 urls', locs === 12)
+  check('sitemap: 12 pages (home+rolunk+ref+blog x3) + 3 extras = 15 urls', locs === 15)
   check('sitemap: contains referenciak hu', xml.includes('<loc>https://loricatus.hu/referenciak/</loc>'))
   check('sitemap: contains referenciak it', xml.includes('<loc>https://loricatus.hu/it/referenciak/</loc>'))
   check('sitemap: contains blog index', xml.includes('<loc>https://loricatus.hu/blog/</loc>'))
+  check('sitemap: contains rolunk hu', xml.includes('<loc>https://loricatus.hu/rolunk/</loc>'))
+  check('sitemap: contains rolunk en', xml.includes('<loc>https://loricatus.hu/en/rolunk/</loc>'))
   check('sitemap: contains extra /tudastar/', xml.includes('<loc>https://loricatus.hu/tudastar/</loc>'))
   // Blog post urls passed as extra are appended.
   const xml2 = inj.buildSitemapXml(manifest, ['https://loricatus.hu/blog/elso-cikk/'])
@@ -203,8 +205,8 @@ function check(name, cond) {
   const doc = makeDoc('<nav><ul class="nav-links" data-navauto></ul></nav>')
   inj.syncNav(doc, merged, '/szolgaltatasok/', 'hu')
   const links = Array.from(doc.querySelectorAll('ul.nav-links li[data-navpage]'))
-  // home + referenciak + dynamic(szolgaltatasok) + blog + cta
-  check('navauto: 5 items incl. blog + cta', links.length === 5)
+  // home + rolunk + referenciak + dynamic(szolgaltatasok) + blog + cta
+  check('navauto: 6 items incl. rolunk + blog + cta', links.length === 6)
   check('navauto: home link first', links[0].getAttribute('data-navpage') === 'home')
   check('navauto: last is cta (mobile)', links[links.length - 1].getAttribute('data-navpage') === 'cta')
   check('navauto: cta points to home #contact', doc.querySelector('[data-navpage="cta"] a').getAttribute('href') === '/#contact')

@@ -1,43 +1,128 @@
 {
   "baseUrl": "https://loricatus.hu",
-  "locales": ["hu", "en", "it"],
+  "locales": [
+    "hu",
+    "en",
+    "it"
+  ],
   "defaultLocale": "hu",
-  "soroBlog": { "hu": "3c63aa50-934c-4cb5-b0ab-a1c29610f337" },
+  "soroBlog": {
+    "hu": "3c63aa50-934c-4cb5-b0ab-a1c29610f337"
+  },
   "pages": [
     {
       "id": "home",
-      "nav": { "hu": "Főoldal", "en": "Home", "it": "Home" },
+      "nav": {
+        "hu": "Főoldal",
+        "en": "Home",
+        "it": "Home"
+      },
       "inNav": false,
       "order": 0,
       "locales": {
-        "hu": { "slug": "index", "file": "index.html", "url": "/" },
-        "en": { "slug": "index-en", "file": "en/index.html", "url": "/en/" },
-        "it": { "slug": "index-it", "file": "it/index.html", "url": "/it/" }
+        "hu": {
+          "slug": "index",
+          "file": "index.html",
+          "url": "/"
+        },
+        "en": {
+          "slug": "index-en",
+          "file": "en/index.html",
+          "url": "/en/"
+        },
+        "it": {
+          "slug": "index-it",
+          "file": "it/index.html",
+          "url": "/it/"
+        }
+      }
+    },
+    {
+      "id": "rolunk",
+      "nav": {
+        "hu": "Rólunk",
+        "en": "About",
+        "it": "Chi siamo"
+      },
+      "inNav": true,
+      "order": 30,
+      "locales": {
+        "hu": {
+          "slug": "rolunk",
+          "file": "rolunk/index.html",
+          "url": "/rolunk/"
+        },
+        "en": {
+          "slug": "rolunk-en",
+          "file": "en/rolunk/index.html",
+          "url": "/en/rolunk/"
+        },
+        "it": {
+          "slug": "rolunk-it",
+          "file": "it/rolunk/index.html",
+          "url": "/it/rolunk/"
+        }
       }
     },
     {
       "id": "referenciak",
-      "nav": { "hu": "Referenciák", "en": "Case studies", "it": "Referenze" },
+      "nav": {
+        "hu": "Referenciák",
+        "en": "Case studies",
+        "it": "Referenze"
+      },
       "inNav": true,
       "order": 45,
       "locales": {
-        "hu": { "slug": "referenciak", "file": "referenciak/index.html", "url": "/referenciak/" },
-        "en": { "slug": "referenciak-en", "file": "en/referenciak/index.html", "url": "/en/referenciak/" },
-        "it": { "slug": "referenciak-it", "file": "it/referenciak/index.html", "url": "/it/referenciak/" }
+        "hu": {
+          "slug": "referenciak",
+          "file": "referenciak/index.html",
+          "url": "/referenciak/"
+        },
+        "en": {
+          "slug": "referenciak-en",
+          "file": "en/referenciak/index.html",
+          "url": "/en/referenciak/"
+        },
+        "it": {
+          "slug": "referenciak-it",
+          "file": "it/referenciak/index.html",
+          "url": "/it/referenciak/"
+        }
       }
     },
     {
       "id": "blog",
-      "nav": { "hu": "Blog", "en": "Blog", "it": "Blog" },
+      "nav": {
+        "hu": "Blog",
+        "en": "Blog",
+        "it": "Blog"
+      },
       "inNav": true,
       "order": 60,
       "generated": true,
       "locales": {
-        "hu": { "slug": "blog", "file": "blog/index.html", "url": "/blog/" },
-        "en": { "slug": "blog-en", "file": "en/blog/index.html", "url": "/en/blog/" },
-        "it": { "slug": "blog-it", "file": "it/blog/index.html", "url": "/it/blog/" }
+        "hu": {
+          "slug": "blog",
+          "file": "blog/index.html",
+          "url": "/blog/"
+        },
+        "en": {
+          "slug": "blog-en",
+          "file": "en/blog/index.html",
+          "url": "/en/blog/"
+        },
+        "it": {
+          "slug": "blog-it",
+          "file": "it/blog/index.html",
+          "url": "/it/blog/"
+        }
       }
     }
   ],
-  "extraUrls": ["/tudastar/", "/adatvedelem/", "/cookie-szabalyzat/"]
+  "extraUrls": [
+    "/tudastar/",
+    "/adatvedelem/",
+    "/cookie-szabalyzat/"
+  ]
 }
