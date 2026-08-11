@@ -293,26 +293,39 @@ html[lang="it"] .nav-cta {
 .hamburger.open span:nth-child(2) { opacity: 0; }
 .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4.5px, -4.5px); }
 
-/* Navbar transparent state: white text over dark hero image */
-.navbar:not(.scrolled) .nav-links a { color: rgba(255,255,255,0.7); }
-.navbar:not(.scrolled) .nav-links a:hover,
-.navbar:not(.scrolled) .nav-links a.active { color: #fff; }
-.navbar:not(.scrolled) .nav-cta { color: #fff; border-color: rgba(255,255,255,0.35); }
-.navbar:not(.scrolled) .nav-cta:hover { background: #fff; color: #111316; border-color: #fff; }
-.navbar:not(.scrolled) .lang-link {
+/* Navbar transparent state: white text over dark hero image.
+   Only pages that actually have that hero (the language home pages) get it —
+   on subpages the background is light, where white text is unreadable. Those
+   fall through to the default dark navbar styling above. */
+body:has(.hero) .navbar:not(.scrolled) .nav-links a { color: rgba(255,255,255,0.7); }
+body:has(.hero) .navbar:not(.scrolled) .nav-links a:hover,
+body:has(.hero) .navbar:not(.scrolled) .nav-links a.active { color: #fff; }
+body:has(.hero) .navbar:not(.scrolled) .nav-cta { color: #fff; border-color: rgba(255,255,255,0.35); }
+body:has(.hero) .navbar:not(.scrolled) .nav-cta:hover { background: #fff; color: #111316; border-color: #fff; }
+body:has(.hero) .navbar:not(.scrolled) .lang-link {
   color: rgba(255,255,255,0.78);
   border-color: rgba(255,255,255,0.25);
 }
-.navbar:not(.scrolled) .lang-link:hover {
+body:has(.hero) .navbar:not(.scrolled) .lang-link:hover {
   color: #fff;
   border-color: rgba(255,255,255,0.45);
 }
-.navbar:not(.scrolled) .lang-link.is-active {
+body:has(.hero) .navbar:not(.scrolled) .lang-link.is-active {
   background: #fff;
   color: #111316;
   border-color: #fff;
 }
-.navbar:not(.scrolled) .hamburger span { background: #fff; }
+body:has(.hero) .navbar:not(.scrolled) .hamburger span { background: #fff; }
+
+/* Subpages: no dark hero behind the bar, so keep it solid and legible from the
+   very top instead of only after scrolling 40px. */
+body:not(:has(.hero)) .navbar {
+  background: rgba(248, 246, 242, 0.96);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-color: var(--border);
+}
+body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
 
 /* ── HERO ───────────────────────────────────────── */
 .hero {
