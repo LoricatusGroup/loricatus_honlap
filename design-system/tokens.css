@@ -2,8 +2,8 @@
    Ha egyetlen fájlt akarsz, ami mindent tud: brand.css.
    Forrás: loricatus.hu style.css :root (a valódi élő értékek). */
 :root{
-  --bg:#F8F6F2; --bg2:#EEEAE3; --border:rgba(0,0,0,0.09);
-  --text:#111316; --muted:#737e88; --dim:#c2ccd4; --accent:#c7d540;
+  --bg:#EEEEEB; --bg2:#DCDCD7; --border:rgba(43,59,70,0.16);
+  --text:#2B3B46; --muted:#556269; --dim:#999FA0; --accent:#C8FA32;
   --font-sans:'Aktiv Grotesk Corp',system-ui,sans-serif;
   --font-mono:'IBM Plex Mono',monospace;
   --nav-h:64px; --w:1200px; --pad:clamp(20px,4vw,48px);

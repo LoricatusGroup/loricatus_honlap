@@ -36,15 +36,21 @@
   font-weight: 500; font-style: normal; font-display: swap;
 }
 
-/* ── TOKENS ─────────────────────────────────────── */
+/* ── TOKENS ─────────────────────────────────────────
+   A három márkaszín az arculati kézikönyv 20. oldaláról, változtatás nélkül:
+     ANTRACIT #2B3B46 · LIME #C8FA32 · ACÉL #DCDCD7
+   A kézikönyv másodlagos palettát nem definiál, ezért --bg, --muted, --dim és
+   --border ebből a háromból van levezetve. Mindegyik párosítás WCAG AA (4.5:1):
+     antracit/--bg 9.94  antracit/acél 8.40  muted/--bg 5.41  muted/acél 4.57
+   --muted a leghalványabb érték, ami még acél háttéren is átmegy AA-n. */
 :root {
-  --bg:        #F8F6F2;
-  --bg2:       #EEEAE3;
-  --border:    rgba(0, 0, 0, 0.09);
-  --text:      #111316;
-  --muted:     #737e88;
-  --dim:       #c2ccd4;
-  --accent:    #c7d540;
+  --bg:        #EEEEEB;              /* acél→fehér 50%: alapfelület */
+  --bg2:       #DCDCD7;              /* ACÉL, pontos márkaszín */
+  --border:    rgba(43, 59, 70, 0.16); /* antracit 16% */
+  --text:      #2B3B46;              /* ANTRACIT, pontos márkaszín */
+  --muted:     #556269;              /* antracit→acél 24% */
+  --dim:       #999FA0;              /* antracit→acél 62%: csak dekoráció, nem szöveg */
+  --accent:    #C8FA32;              /* LIME, pontos márkaszín */
 
   --font-sans: 'Aktiv Grotesk Corp', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
@@ -54,6 +60,14 @@
   --pad: clamp(20px, 4vw, 48px);
 
   --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  /* A logo.svg fehér, a kézikönyv 33-34. oldala viszont kötött színeket ír elő:
+     acél háttéren KIZÁRÓLAG antracit, fotó háttéren acél vagy antracit -- tiszta
+     fekete és tiszta fehér egyik esetben sem megengedett. Ez a két szűrőlánc a
+     fehér kiindulást pontosan a márkaszínre viszi (Chromiumban mérve:
+     antracit rgb(43,58,69) vs. cél rgb(43,59,70); acél rgb(220,220,215)). */
+  --logo-antracit: brightness(0) saturate(100%) invert(60.2%) sepia(62.6%) saturate(164%) hue-rotate(161deg) brightness(36%) contrast(109%);
+  --logo-acel: brightness(0) saturate(100%) invert(104.5%) sepia(17.4%) saturate(307%) hue-rotate(10deg) brightness(101%) contrast(73%);
 }
 
 /* ── RESET ──────────────────────────────────────── */
@@ -164,13 +178,13 @@ input, textarea, [contenteditable="true"] { caret-color: var(--text); }
   color: var(--bg);
   border: 1px solid var(--text);
 }
-.btn-primary:hover { background: #2b3b46; border-color: #2b3b46; color: #fff; }
+.btn-primary:hover { background: #202C34; border-color: #202C34; color: #fff; }
 .btn-secondary {
   background: transparent;
   color: var(--text);
-  border: 1px solid rgba(0,0,0,0.25);
+  border: 1px solid rgba(43, 59, 70,0.25);
 }
-.btn-secondary:hover { border-color: rgba(0,0,0,0.5); background: rgba(0,0,0,0.04); }
+.btn-secondary:hover { border-color: rgba(43, 59, 70,0.5); background: rgba(43, 59, 70,0.04); }
 .btn-full { width: 100%; justify-content: center; }
 .btn-sm { padding: 9px 20px; font-size: 0.78rem; }
 .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
@@ -185,7 +199,7 @@ input, textarea, [contenteditable="true"] { caret-color: var(--text); }
   border-bottom: 1px solid transparent;
 }
 .navbar.scrolled {
-  background: rgba(248, 246, 242, 0.96);
+  background: rgba(238, 238, 235, 0.96);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   border-color: var(--border);
@@ -206,7 +220,9 @@ input, textarea, [contenteditable="true"] { caret-color: var(--text); }
 .navbar.nav-wide .nav-container { max-width: none; gap: 12px; }
 .navbar.nav-wide .nav-links a { padding: 7px 8px; letter-spacing: 0.02em; }
 .logo-svg { height: 20px; width: auto; object-fit: contain; transition: filter 0.3s; }
-.navbar.scrolled .logo-svg { filter: brightness(0) saturate(100%); }
+.navbar.scrolled .logo-svg { filter: var(--logo-antracit); }
+/* Hero fotó fölött: a kézikönyv szerint fotó háttéren acél vagy antracit -- nem fehér. */
+body:has(.hero) .navbar:not(.scrolled) .logo-svg { filter: var(--logo-acel); }
 .nav-links {
   display: flex;
   align-items: center;
@@ -228,7 +244,7 @@ input, textarea, [contenteditable="true"] { caret-color: var(--text); }
 .nav-cta {
   flex-shrink: 0;
   padding: 9px 18px;
-  border: 1px solid rgba(0,0,0,0.25);
+  border: 1px solid rgba(43, 59, 70,0.25);
   color: var(--text);
   font-size: 0.8rem;
   font-weight: 600;
@@ -250,7 +266,7 @@ input, textarea, [contenteditable="true"] { caret-color: var(--text); }
   justify-content: center;
   min-width: 32px;
   padding: 6px 8px;
-  border: 1px solid rgba(0,0,0,0.16);
+  border: 1px solid rgba(43, 59, 70,0.16);
   font-family: var(--font-mono);
   font-size: 0.68rem;
   letter-spacing: 0.12em;
@@ -260,7 +276,7 @@ input, textarea, [contenteditable="true"] { caret-color: var(--text); }
 }
 .lang-link:hover {
   color: var(--text);
-  border-color: rgba(0,0,0,0.35);
+  border-color: rgba(43, 59, 70,0.35);
 }
 .lang-link.is-active {
   background: var(--text);
@@ -301,7 +317,7 @@ body:has(.hero) .navbar:not(.scrolled) .nav-links a { color: rgba(255,255,255,0.
 body:has(.hero) .navbar:not(.scrolled) .nav-links a:hover,
 body:has(.hero) .navbar:not(.scrolled) .nav-links a.active { color: #fff; }
 body:has(.hero) .navbar:not(.scrolled) .nav-cta { color: #fff; border-color: rgba(255,255,255,0.35); }
-body:has(.hero) .navbar:not(.scrolled) .nav-cta:hover { background: #fff; color: #111316; border-color: #fff; }
+body:has(.hero) .navbar:not(.scrolled) .nav-cta:hover { background: #fff; color: #2B3B46; border-color: #fff; }
 body:has(.hero) .navbar:not(.scrolled) .lang-link {
   color: rgba(255,255,255,0.78);
   border-color: rgba(255,255,255,0.25);
@@ -312,7 +328,7 @@ body:has(.hero) .navbar:not(.scrolled) .lang-link:hover {
 }
 body:has(.hero) .navbar:not(.scrolled) .lang-link.is-active {
   background: #fff;
-  color: #111316;
+  color: #2B3B46;
   border-color: #fff;
 }
 body:has(.hero) .navbar:not(.scrolled) .hamburger span { background: #fff; }
@@ -320,12 +336,12 @@ body:has(.hero) .navbar:not(.scrolled) .hamburger span { background: #fff; }
 /* Subpages: no dark hero behind the bar, so keep it solid and legible from the
    very top instead of only after scrolling 40px. */
 body:not(:has(.hero)) .navbar {
-  background: rgba(248, 246, 242, 0.96);
+  background: rgba(238, 238, 235, 0.96);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   border-color: var(--border);
 }
-body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
+body:not(:has(.hero)) .logo-svg { filter: var(--logo-antracit); }
 
 /* ── HERO ───────────────────────────────────────── */
 .hero {
@@ -342,9 +358,9 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
   position: absolute; inset: 0;
   background: linear-gradient(
     to top,
-    rgba(9, 9, 11, 0.97) 0%,
-    rgba(9, 9, 11, 0.65) 50%,
-    rgba(9, 9, 11, 0.35) 100%
+    rgba(43, 59, 70, 0.97) 0%,
+    rgba(43, 59, 70, 0.65) 50%,
+    rgba(43, 59, 70, 0.35) 100%
   );
 }
 .hero-content {
@@ -439,7 +455,7 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   border-top: 1px solid rgba(255,255,255,0.12);
-  background: rgba(9,9,11,0.7);
+  background: rgba(43, 59, 70,0.7);
 }
 .hero-stat {
   padding: 28px var(--pad);
@@ -508,7 +524,9 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
   display: flex;
   width: 40px; height: 40px;
   align-items: center; justify-content: center;
-  color: var(--dim);
+  /* A kézikönyv 39. oldala szerint világos háttéren az ikon antracit. --muted
+     ennek a levezetett, halványabb tagja (5.41:1), hover-en teljes antracit. */
+  color: var(--muted);
   margin-bottom: 20px;
   transition: color 0.3s var(--ease);
 }
@@ -566,7 +584,7 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
 .about-img-badge {
   position: absolute;
   bottom: 0; left: 0;
-  background: rgba(9,9,11,0.92);
+  background: rgba(43, 59, 70,0.92);
   border-top: 1px solid var(--border);
   border-right: 1px solid var(--border);
   padding: 16px 20px;
@@ -746,7 +764,7 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  background: linear-gradient(to top, rgba(9,9,11,0.9) 0%, transparent 60%);
+  background: linear-gradient(to top, rgba(43, 59, 70,0.9) 0%, transparent 60%);
 }
 .portfolio-cat {
   font-family: var(--font-mono);
@@ -952,7 +970,7 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-  border-color: rgba(0,0,0,0.4);
+  border-color: rgba(43, 59, 70,0.4);
 }
 .form-group input::placeholder,
 .form-group textarea::placeholder { color: var(--muted); }
@@ -963,7 +981,7 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
   padding-right: 40px;
   cursor: pointer;
 }
-.form-group select option { background: #111316; color: #F8F6F2; }
+.form-group select option { background: #2B3B46; color: #EEEEEB; }
 .form-group textarea { resize: vertical; min-height: 120px; }
 .form-error { font-size: 0.74rem; color: #ff6b6b; display: none; margin-top: -4px; font-family: var(--font-mono); }
 .form-group.error input,
@@ -981,7 +999,7 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
 .form-success {
   display: flex; align-items: center; gap: 12px;
   padding: 16px 20px;
-  border: 1px solid rgba(199,213,64,0.25);
+  border: 1px solid rgba(200, 250, 50,0.25);
   color: var(--text);
   font-size: 0.9rem;
   font-weight: 500;
@@ -991,7 +1009,7 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
 @keyframes successIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .btn-loader {
   width: 16px; height: 16px;
-  border: 1.5px solid rgba(0,0,0,0.25);
+  border: 1.5px solid rgba(43, 59, 70,0.25);
   border-top-color: var(--bg);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
@@ -1011,7 +1029,7 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
   width: auto;
   object-fit: contain;
   margin-bottom: 18px;
-  filter: brightness(0) saturate(100%);
+  filter: var(--logo-antracit);
 }
 .footer-brand p { font-size: 0.84rem; color: var(--muted); line-height: 1.7; max-width: 260px; margin-bottom: 22px; }
 .footer-social { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -1067,7 +1085,7 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
 .lightbox.active { opacity: 1; visibility: visible; }
 .lightbox-backdrop {
   position: absolute; inset: 0;
-  background: rgba(0,0,0,0.94);
+  background: rgba(43, 59, 70,0.94);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
 }
@@ -1111,7 +1129,7 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
 /* ── COOKIE ──────────────────────────────────────── */
 .cookie-banner {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 8888;
-  background: rgba(9,9,11,0.97);
+  background: rgba(43, 59, 70,0.97);
   border-top: 1px solid var(--border);
   padding: 18px 0;
   transform: translateY(100%);
@@ -1134,7 +1152,7 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
 }
 /* Accept and decline are equal-weight (GDPR): same size, both solid and
    full-contrast — the decline is never a greyed-out afterthought. */
-.cookie-btn-accept { background: #fff; color: #111316; border: 1px solid #fff; }
+.cookie-btn-accept { background: #fff; color: #2B3B46; border: 1px solid #fff; }
 .cookie-btn-accept:hover { background: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.85); }
 .cookie-btn-decline {
   background: rgba(255,255,255,0.16);
@@ -1147,9 +1165,9 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
 .subpage-main {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(199,213,64,0.14), transparent 34%),
+    radial-gradient(circle at top left, rgba(200, 250, 50,0.14), transparent 34%),
     radial-gradient(circle at top right, rgba(43,59,70,0.18), transparent 30%),
-    linear-gradient(180deg, rgba(255,255,255,0.92), rgba(248,246,242,1));
+    linear-gradient(180deg, rgba(255,255,255,0.92), rgba(238, 238, 235,1));
 }
 .subpage-hero {
   padding: calc(var(--nav-h) + 72px) 0 42px;
@@ -1223,7 +1241,7 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
   text-decoration: underline;
   text-underline-offset: 0.18em;
 }
-.subpage-card a:hover { color: #2b3b46; }
+.subpage-card a:hover { color: #202C34; }
 .subpage-list {
   display: grid;
   gap: 10px;
@@ -1248,7 +1266,7 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
 .subpage-note {
   padding: 18px 20px;
   border-left: 3px solid var(--accent);
-  background: rgba(199,213,64,0.12);
+  background: rgba(200, 250, 50,0.12);
   color: var(--muted);
   line-height: 1.7;
 }
@@ -1276,13 +1294,13 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
   width: 15px;
   height: 15px;
 }
-.subpage-link:hover { color: #2b3b46; }
+.subpage-link:hover { color: #202C34; }
 .subpage-tag {
   display: inline-flex;
   align-items: center;
   width: fit-content;
   padding: 6px 10px;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid rgba(43, 59, 70,0.12);
   font-family: var(--font-mono);
   font-size: 0.66rem;
   letter-spacing: 0.12em;
@@ -1358,7 +1376,7 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
     display: none;
     position: fixed;
     top: var(--nav-h); left: 0; right: 0;
-    background: rgba(9,9,11,0.98);
+    background: rgba(43, 59, 70,0.98);
     -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
     padding: 12px 16px 24px;
@@ -1576,7 +1594,7 @@ body:not(:has(.hero)) .logo-svg { filter: brightness(0) saturate(100%); }
 .blog-card-excerpt { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 0 0 14px; }
 .blog-card-more { margin-top: auto; font-size: 13px; font-weight: 600; }
 .blog-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-.blog-tag { font-size: 11px; padding: 3px 10px; border-radius: 999px; background: rgba(0,0,0,0.05); color: var(--muted); }
+.blog-tag { font-size: 11px; padding: 3px 10px; border-radius: 999px; background: rgba(43, 59, 70,0.05); color: var(--muted); }
 .blog-empty { grid-column: 1 / -1; color: var(--muted); padding: 64px 0; text-align: center; font-size: 16px; }
 .blog-post .blog-back { display: inline-block; margin-bottom: 20px; font-size: 13px; color: var(--muted); text-decoration: none; }
 .blog-post .blog-back:hover { color: var(--text); }
