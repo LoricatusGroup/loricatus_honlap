@@ -37,7 +37,9 @@ export default function FieldEditor({ field, onChange }: Props) {
         />
       )}
 
-      {field.type === 'image' && <ImageUploader value={field.value} onChange={onChange} />}
+      {(field.type === 'image' || field.type === 'bg') && (
+        <ImageUploader value={field.value} onChange={onChange} />
+      )}
 
       {field.type === 'href' && (
         <input

@@ -10,6 +10,7 @@ const ATTR_TYPE_MAP: Record<string, FieldType> = {
   'data-edit-content': 'content',
   'data-edit-video': 'video',
   'data-edit-placeholder': 'placeholder',
+  'data-edit-bg': 'bg',
 }
 
 const SECTION_LABELS: Record<string, string> = {
@@ -28,9 +29,15 @@ const SECTION_LABELS: Record<string, string> = {
   testimonials: 'Vélemények',
   contact: 'Kapcsolat',
   footer: 'Footer',
+  rolunk: 'Rólunk oldal',
 }
 
 function readValue(el: Element, type: FieldType): string {
+  if (type === 'bg') {
+    // Background images live in the inline style, not in an attribute.
+    const m = /url\(\s*['\"]?([^'\")]+)['\"]?\s*\)/.exec(el.getAttribute('style') || '')
+    return m ? m[1] : ''
+  }
   if (type === 'text') return (el.textContent || '').trim()
   if (type === 'html') return el.innerHTML.trim()
   if (type === 'image') return el.getAttribute('src') || ''
@@ -66,6 +73,10 @@ const WORD_HU: Record<string, string> = {
   services: 'Szolgáltatások', about: 'Rólunk', equipment: 'Eszközpark',
   portfolio: 'Projektek', contact: 'Kapcsolat',
   line1: '1. sor', line2: '2. sor', line3: '3. sor', line: 'sor',
+  // Rólunk oldal: fülek és elemtípusok
+  kockazat: 'Kockázat', eletciklus: 'Életciklus', esettanulmany: 'Esettanulmány',
+  focim: 'főcím', cim: 'cím', alcim: 'alcím', szoveg: 'szöveg',
+  pont: 'felsorolás', idezet: 'idézet', kepalairas: 'képaláírás',
 }
 
 function translatePart(p: string): string {

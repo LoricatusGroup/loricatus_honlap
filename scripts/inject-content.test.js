@@ -349,6 +349,30 @@ function check(name, cond) {
     (doc.querySelector('#company').textContent || '') === '')
 }
 
+// Background images (data-edit-bg): the Rólunk page holds its imagery in inline
+// styles, so only the url() may change -- the sizing around it must survive.
+{
+  const doc = makeDoc(
+    '<div id="a" style=\'height: 240px; background: url("/assets/rolunk/old.webp") center / cover no-repeat; border-radius: 8px\' data-edit-bg="rolunk-hatterkep-01"></div>' +
+    '<div id="b" style="height: 100px" data-edit-bg="rolunk-hatterkep-02"></div>',
+  )
+  const { applied, missing } = inj.applyContent(doc, {
+    'rolunk-hatterkep-01': '/assets/rolunk/uj.webp',
+    'rolunk-hatterkep-02': '/assets/rolunk/masik.jpg',
+  })
+  check('bg: both applied', applied === 2 && missing.length === 0)
+  const sa = doc.querySelector('#a').getAttribute('style')
+  check('bg: url swapped', sa.includes('url("/assets/rolunk/uj.webp")'))
+  check('bg: old url gone', !sa.includes('old.webp'))
+  check('bg: sizing preserved', sa.includes('center / cover') && sa.includes('240px')
+    && sa.includes('border-radius: 8px'))
+  const sb = doc.querySelector('#b').getAttribute('style')
+  check('bg: added when style had no url', sb.includes('background-image:url("/assets/rolunk/masik.jpg")'))
+  check('bg: existing declaration kept', sb.includes('height: 100px'))
+  check('bg: value not written to textContent',
+    (doc.querySelector('#a').textContent || '') === '')
+}
+
 // Uploaded full-HTML pages (M7): standalone verbatim vs shell-wrapped
 {
   const manifest = inj.loadManifest()
