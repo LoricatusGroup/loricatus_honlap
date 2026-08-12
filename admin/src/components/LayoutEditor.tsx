@@ -163,7 +163,7 @@ export default function LayoutEditor({
                   type="button"
                   title={c.description}
                   onClick={() => onAddSection(c.template)}
-                  className="px-3 py-2 text-sm bg-lime hover:bg-[#D4FF52] text-antracit-700 font-semibold uppercase tracking-wide"
+                  className="px-3 py-2 text-sm rounded-md bg-lime hover:bg-[#D4FF52] text-antracit-700 font-semibold uppercase tracking-wide"
                 >
                   ➕ {c.label}
                 </button>
@@ -223,7 +223,7 @@ export default function LayoutEditor({
               <button
                 type="button"
                 onClick={() => onAddItem(list.name)}
-                className="mt-3 px-3 py-2 text-sm bg-lime hover:bg-[#D4FF52] text-antracit-700 font-semibold uppercase tracking-wide"
+                className="mt-3 px-3 py-2 text-sm rounded-md bg-lime hover:bg-[#D4FF52] text-antracit-700 font-semibold uppercase tracking-wide"
               >
                 + Új {list.label.toLowerCase()} hozzáadása
               </button>
@@ -282,7 +282,7 @@ function SortableRow({
       <span className="flex-1 truncate">
         {label}
         {addedBadge && (
-          <span className="ml-2 text-xs px-1.5 py-0.5 bg-lime-soft text-lime">új</span>
+          <span className="ml-2 text-xs px-1.5 py-0.5 rounded bg-lime-soft text-lime">új</span>
         )}
       </span>
       {onToggleHidden && (
