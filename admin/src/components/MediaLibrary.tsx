@@ -57,7 +57,7 @@ export default function MediaLibrary({ value, onPick }: Props) {
               onClick={() => onPick(a.url)}
               className={`relative aspect-square overflow-hidden rounded-lg border transition ${
                 active
-                  ? 'border-blue-500 ring-2 ring-blue-500/40'
+                  ? 'border-lime ring-2 ring-lime-line'
                   : 'border-white/10 hover:border-white/30'
               }`}
             >

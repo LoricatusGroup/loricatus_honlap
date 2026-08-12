@@ -137,7 +137,7 @@ function PostForm({
         {slug && (
           <p className="mt-1.5 text-[11px] text-gray-400">
             URL: <span className="text-gray-300">{locale === 'hu' ? '/blog/' : `/${locale}/blog/`}{slug}/</span>
-            <button type="button" className="ml-2 text-blue-300 hover:text-blue-200"
+            <button type="button" className="ml-2 text-lime hover:text-lime"
               onClick={() => setSlugTouched((v) => !v)}>
               {slugTouched ? 'automatikus' : 'szerkeszt'}
             </button>
@@ -177,7 +177,7 @@ function PostForm({
             onMouseDown={(e) => { e.preventDefault(); exec('removeFormat'); exec('unlink') }}>⌫ Formázás</button>
         </div>
         <div ref={bodyRef} contentEditable suppressContentEditableWarning
-          className="cms-input min-h-[220px] max-h-[45vh] overflow-y-auto leading-relaxed [&_a]:text-blue-300 [&_a]:underline [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5" />
+          className="cms-input min-h-[220px] max-h-[45vh] overflow-y-auto leading-relaxed [&_a]:text-lime [&_a]:underline [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5" />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -292,7 +292,7 @@ export default function BlogManager({ locale, onClose, onChanged }: Props) {
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="truncate text-sm text-white">{p.title || '(cím nélkül)'}</span>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] ${p.status === 'published' ? 'bg-green-500/20 text-green-200' : 'bg-white/10 text-gray-300'}`}>
+                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] ${p.status === 'published' ? 'bg-lime-soft text-lime' : 'bg-white/10 text-gray-300'}`}>
                     {p.status === 'published' ? 'Publikált' : 'Piszkozat'}
                   </span>
                 </div>

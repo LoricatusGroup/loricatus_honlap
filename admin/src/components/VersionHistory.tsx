@@ -123,7 +123,7 @@ export default function VersionHistory({
                   <div className="flex items-center gap-2 text-sm font-medium text-white">
                     {fmtWhen(v.created_at)}
                     {i === 0 && (
-                      <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
+                      <span className="rounded-full bg-lime-soft px-2 py-0.5 text-[10px] font-semibold text-lime">
                         legutóbbi
                       </span>
                     )}

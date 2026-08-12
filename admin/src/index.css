@@ -2,192 +2,240 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Premium glass modal system (components/inline/*) ───────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   A szerkesztő arculata: Loricatus Brand Book 2024.
+   Három szín (20. o.): ANTRACIT #2B3B46 · LIME #C8FA32 · ACÉL #DCDCD7.
+   Sötét felület soha nem tiszta fekete, hanem antracit. A lime kis felületen
+   akcentus, és amikor háttér, a rajta lévő szöveg antracit (9.45:1).
+   Sarkok: a márka szögletes -- gombon, mezőn, chipen nincs lekerekítés;
+   lekerekítés csak nagy felületen (modál, panel), ott 12-16px.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@font-face {
+  font-family: 'Aktiv Grotesk Corp';
+  src: url('/assets/fonts/AktivGroteskCorp-Regular.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Aktiv Grotesk Corp';
+  src: url('/assets/fonts/AktivGroteskCorp-Medium.woff2') format('woff2');
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Aktiv Grotesk Corp';
+  src: url('/assets/fonts/AktivGroteskCorp-Bold.woff2') format('woff2');
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('/assets/fonts/IBMPlexMono-Regular.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('/assets/fonts/IBMPlexMono-Medium.woff2') format('woff2');
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+
+:root {
+  --lor-antracit: #2B3B46;
+  --lor-lime: #C8FA32;
+  --lor-acel: #DCDCD7;
+  --lor-deep: #1B242B;   /* antracit sötétebb tagja: mélyebb rétegek */
+  --lor-line: rgba(220, 220, 215, 0.14);
+  --lor-line-strong: rgba(220, 220, 215, 0.24);
+  --lor-r-lg: 14px;      /* nagy felület -- a könyv 12-16px-et enged */
+}
+
+body {
+  font-family: 'Aktiv Grotesk Corp', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Modálok ────────────────────────────────────────────────────────────── */
 .cms-modal-backdrop {
-  background: rgba(8, 10, 15, 0.5);
+  background: rgba(27, 36, 43, 0.62);
   -webkit-backdrop-filter: blur(6px) saturate(120%);
   backdrop-filter: blur(6px) saturate(120%);
   animation: cms-fade 0.18s ease-out;
 }
 .cms-modal-panel {
-  background: linear-gradient(180deg, rgba(38, 41, 51, 0.82), rgba(22, 24, 31, 0.86));
+  background: linear-gradient(180deg, #33454F, var(--lor-antracit));
   -webkit-backdrop-filter: blur(28px) saturate(150%);
   backdrop-filter: blur(28px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 20px;
+  border: 1px solid var(--lor-line-strong);
+  border-radius: var(--lor-r-lg);
   box-shadow:
-    0 30px 70px -18px rgba(0, 0, 0, 0.65),
-    0 6px 20px -8px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
+    0 30px 70px -18px rgba(9, 11, 12, 0.6),
+    0 6px 20px -8px rgba(9, 11, 12, 0.45);
   animation: cms-pop 0.22s cubic-bezier(0.2, 0.85, 0.25, 1);
 }
 
+/* ── Űrlapmezők: szögletesek, a fókusz lime ─────────────────────────────── */
 .cms-input {
   width: 100%;
-  border-radius: 12px;
+  border-radius: 0;
   padding: 10px 14px;
   font-size: 14px;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.045);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: inherit;
+  color: var(--lor-acel);
+  background: rgba(220, 220, 215, 0.05);
+  border: 1px solid var(--lor-line-strong);
   transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
 }
-.cms-input::placeholder { color: rgba(255, 255, 255, 0.35); }
+.cms-input::placeholder { color: rgba(220, 220, 215, 0.38); }
 .cms-input:focus {
   outline: none;
-  border-color: rgba(59, 130, 246, 0.7);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--lor-lime);
+  box-shadow: 0 0 0 2px rgba(200, 250, 50, 0.28);
+  background: rgba(220, 220, 215, 0.07);
 }
 
+/* ── Gombok ─────────────────────────────────────────────────────────────── */
 .cms-btn-primary {
-  border-radius: 12px;
+  border-radius: 0;
   padding: 9px 18px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #fff;
-  background: #2563eb;
-  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--lor-antracit);      /* lime háttéren antracit felirat */
+  background: var(--lor-lime);
+  border: 1px solid var(--lor-lime);
   cursor: pointer;
-  box-shadow: 0 8px 20px -6px rgba(37, 99, 235, 0.6);
-  transition: background-color 0.15s;
+  transition: background-color 0.15s, border-color 0.15s;
 }
-.cms-btn-primary:hover { background: #3b82f6; }
-.cms-btn-primary:disabled { opacity: 0.55; cursor: default; box-shadow: none; }
+.cms-btn-primary:hover { background: #D4FF52; border-color: #D4FF52; }
+.cms-btn-primary:disabled { opacity: 0.45; cursor: default; }
 
 .cms-btn-ghost {
-  border-radius: 12px;
+  border-radius: 0;
   padding: 9px 16px;
-  font-size: 14px;
-  color: #d1d5db;
+  font-size: 13px;
+  color: rgba(220, 220, 215, 0.72);
   background: transparent;
   border: none;
   cursor: pointer;
   transition: background-color 0.15s, color 0.15s;
 }
-.cms-btn-ghost:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+.cms-btn-ghost:hover { background: rgba(220, 220, 215, 0.09); color: var(--lor-acel); }
 
 .cms-btn-secondary {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border-radius: 12px;
+  border-radius: 0;
   padding: 9px 16px;
-  font-size: 14px;
-  color: #e5e7eb;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 13px;
+  color: var(--lor-acel);
+  background: transparent;
+  border: 1px solid var(--lor-line-strong);
   cursor: pointer;
-  transition: background-color 0.15s, color 0.15s;
+  transition: background-color 0.15s, border-color 0.15s;
 }
-.cms-btn-secondary:hover { background: rgba(255, 255, 255, 0.09); color: #fff; }
+.cms-btn-secondary:hover { background: rgba(220, 220, 215, 0.08); border-color: rgba(220, 220, 215, 0.4); }
 
 .cms-icon-btn {
   width: 32px;
   height: 32px;
   display: grid;
   place-items: center;
-  border-radius: 10px;
-  color: rgba(255, 255, 255, 0.5);
+  border-radius: 0;
+  color: rgba(220, 220, 215, 0.55);
   background: transparent;
   border: none;
   cursor: pointer;
   transition: background-color 0.15s, color 0.15s;
 }
-.cms-icon-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.cms-icon-btn:hover { background: rgba(220, 220, 215, 0.1); color: var(--lor-acel); }
 
-/* ── Editor toolbar (premium glass) ─────────────────────────────────────── */
+/* ── Fejléc ─────────────────────────────────────────────────────────────── */
 .cms-toolbar {
-  background: linear-gradient(180deg, rgba(30, 33, 42, 0.9), rgba(19, 21, 28, 0.92));
+  background: linear-gradient(180deg, #32444E, var(--lor-antracit));
   -webkit-backdrop-filter: blur(22px) saturate(150%);
   backdrop-filter: blur(22px) saturate(150%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.75);
+  border-bottom: 1px solid var(--lor-line);
+  box-shadow: 0 10px 30px -18px rgba(9, 11, 12, 0.7);
 }
 
+/* A márkajel az embléma, nem betű-monogram. */
 .cms-brand-mark {
   width: 36px;
   height: 36px;
   flex: none;
-  border-radius: 11px;
+  border-radius: 0;
   display: grid;
   place-items: center;
-  font-weight: 800;
-  font-size: 17px;
-  letter-spacing: -0.02em;
-  color: #fff;
-  background: linear-gradient(140deg, #818cf8, #2563eb 55%, #0ea5e9);
-  box-shadow:
-    0 8px 18px -6px rgba(37, 99, 235, 0.65),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  background: var(--lor-antracit);
+  border: 1px solid var(--lor-line-strong);
 }
+.cms-brand-mark img { width: 22px; height: 22px; display: block; }
 
-/* Segmented control (locale / view-mode / undo-redo) */
+/* ── Szegmentált vezérlő ────────────────────────────────────────────────── */
 .cms-segment {
   display: inline-flex;
   align-items: center;
   padding: 3px;
   gap: 2px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0;
+  background: rgba(220, 220, 215, 0.05);
+  border: 1px solid var(--lor-line);
 }
 .cms-seg-btn {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   padding: 6px 12px;
-  border-radius: 9px;
-  font-size: 12.5px;
+  border-radius: 0;
+  font-size: 12px;
   font-weight: 500;
   line-height: 1;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(220, 220, 215, 0.62);
   background: transparent;
   border: none;
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
+  transition: background-color 0.15s, color 0.15s;
 }
 .cms-seg-btn:hover:not(.is-active):not(:disabled) {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.06);
+  color: var(--lor-acel);
+  background: rgba(220, 220, 215, 0.07);
 }
 .cms-seg-btn.is-active {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.14);
-  box-shadow: 0 2px 8px -3px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: var(--lor-antracit);
+  background: var(--lor-lime);
 }
 .cms-seg-btn:disabled { opacity: 0.4; cursor: default; }
 
-/* Tool toggle pills (mode switches with a coherent accent palette) */
+/* ── Eszköz-kapcsolók ───────────────────────────────────────────────────── */
 .cms-tool {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   padding: 7px 11px;
-  border-radius: 10px;
-  font-size: 12.5px;
+  border-radius: 0;
+  font-size: 12px;
   font-weight: 500;
   line-height: 1;
-  color: rgba(255, 255, 255, 0.66);
-  background: rgba(255, 255, 255, 0.045);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(220, 220, 215, 0.7);
+  background: rgba(220, 220, 215, 0.05);
+  border: 1px solid var(--lor-line);
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color 0.15s, color 0.15s, box-shadow 0.15s, border-color 0.15s;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
 }
 .cms-tool:hover:not(.is-active) {
-  background: rgba(255, 255, 255, 0.09);
-  color: #fff;
+  background: rgba(220, 220, 215, 0.1);
+  color: var(--lor-acel);
 }
+/* Aktív állapotban a lime a jelölő; a felirat antracit, hogy olvasható legyen. */
 .cms-tool.is-active {
-  color: #fff;
-  background: var(--acc, #6366f1);
-  border-color: transparent;
-  box-shadow: 0 5px 16px -5px var(--acc, #6366f1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  color: var(--lor-antracit);
+  background: var(--lor-lime);
+  border-color: var(--lor-lime);
 }
 
-/* Dropdown menus (toolbar overflow) */
+/* ── Legördülő menük ────────────────────────────────────────────────────── */
 .cms-menu {
   position: absolute;
   top: 100%;
@@ -195,11 +243,10 @@
   z-index: 40;
   min-width: 214px;
   padding: 6px;
-  border-radius: 14px;
-  background: rgba(22, 25, 33, 0.98);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(12px);
+  border-radius: var(--lor-r-lg);
+  background: var(--lor-antracit);
+  border: 1px solid var(--lor-line-strong);
+  box-shadow: 0 18px 44px rgba(9, 11, 12, 0.5);
 }
 .cms-menu-item {
   display: flex;
@@ -207,97 +254,98 @@
   gap: 8px;
   width: 100%;
   padding: 8px 9px;
-  border-radius: 10px;
+  border-radius: 0;
   font-size: 13px;
-  color: #e5e7eb;
+  color: var(--lor-acel);
   text-align: left;
   cursor: pointer;
   transition: background-color 0.12s;
 }
-.cms-menu-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-.cms-menu-item.is-danger {
-  color: #fca5a5;
-}
+.cms-menu-item:hover { background: rgba(220, 220, 215, 0.09); }
+.cms-menu-item.is-danger { color: #F5A3A3; }
 .cms-menu-check {
   flex: none;
   width: 13px;
   font-size: 11px;
-  color: #34d399;
+  color: var(--lor-lime);
 }
-.cms-menu-ico {
-  flex: none;
-  width: 18px;
-  text-align: center;
-}
+.cms-menu-ico { flex: none; width: 18px; text-align: center; }
 .cms-menu-sep {
   height: 1px;
   margin: 6px 4px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--lor-line);
 }
 
-/* Save / Publish actions */
+/* ── Mentés / Publikálás ────────────────────────────────────────────────────
+   A mentés másodlagos (körvonal), a publikálás az elsődleges lime -- egy
+   nézetben egy hangsúlyos gomb, ahogy a kézikönyv logikája kívánja. */
 .cms-btn-save {
-  border-radius: 11px;
+  border-radius: 0;
   padding: 8px 17px;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   line-height: 1;
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.07);
+  color: var(--lor-acel);
+  border: 1px solid var(--lor-line-strong);
+  background: transparent;
   cursor: pointer;
-  transition: background-color 0.15s, box-shadow 0.15s, border-color 0.15s;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
 }
-.cms-btn-save:hover:not(:disabled) { background: rgba(255, 255, 255, 0.13); }
-.cms-btn-save:disabled { opacity: 0.5; cursor: default; }
+.cms-btn-save:hover:not(:disabled) { background: rgba(220, 220, 215, 0.1); }
+.cms-btn-save:disabled { opacity: 0.45; cursor: default; }
 .cms-btn-save.is-dirty {
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
-  border-color: transparent;
-  box-shadow: 0 6px 18px -6px rgba(37, 99, 235, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border-color: var(--lor-lime);
+  color: var(--lor-lime);
 }
-.cms-btn-save.is-dirty:hover:not(:disabled) { filter: brightness(1.08); }
+.cms-btn-save.is-dirty:hover:not(:disabled) { background: rgba(200, 250, 50, 0.12); }
 
 .cms-btn-publish {
-  border-radius: 11px;
+  border-radius: 0;
   padding: 8px 18px;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   line-height: 1;
-  color: #fff;
-  border: none;
+  color: var(--lor-antracit);
+  border: 1px solid var(--lor-lime);
   cursor: pointer;
-  background: linear-gradient(135deg, #15803d, #22c55e);
-  box-shadow: 0 7px 20px -6px rgba(34, 197, 94, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.22);
-  transition: filter 0.15s, box-shadow 0.15s;
+  background: var(--lor-lime);
+  transition: background-color 0.15s;
 }
-.cms-btn-publish:hover:not(:disabled) { filter: brightness(1.08); }
-.cms-btn-publish:disabled { opacity: 0.5; cursor: default; box-shadow: none; }
+.cms-btn-publish:hover:not(:disabled) { background: #D4FF52; }
+.cms-btn-publish:disabled { opacity: 0.45; cursor: default; }
 
-/* Side sheet (theme panel) + content cards */
+/* ── Oldalpanel és kártyák ──────────────────────────────────────────────── */
 .cms-sidesheet {
-  background: linear-gradient(180deg, rgba(32, 35, 44, 0.92), rgba(20, 22, 29, 0.94));
+  background: linear-gradient(180deg, #33454F, var(--lor-antracit));
   -webkit-backdrop-filter: blur(26px) saturate(150%);
   backdrop-filter: blur(26px) saturate(150%);
-  border-left: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: -24px 0 60px -24px rgba(0, 0, 0, 0.7);
+  border-left: 1px solid var(--lor-line-strong);
+  box-shadow: -24px 0 60px -24px rgba(9, 11, 12, 0.7);
   animation: cms-slide-in 0.22s cubic-bezier(0.2, 0.85, 0.25, 1);
 }
 .cms-card {
-  background: linear-gradient(180deg, rgba(38, 41, 51, 0.55), rgba(26, 28, 36, 0.62));
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 16px;
-  box-shadow: 0 12px 32px -20px rgba(0, 0, 0, 0.6);
+  background: rgba(220, 220, 215, 0.045);
+  border: 1px solid var(--lor-line);
+  border-radius: var(--lor-r-lg);
 }
+
+/* Mono felirat a kis, nagybetűs címkékre -- a könyv másodlagos betűtípusa. */
+.cms-label {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(220, 220, 215, 0.55);
+}
+
 @keyframes cms-slide-in {
   from { opacity: 0; transform: translateX(16px); }
   to { opacity: 1; transform: none; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .cms-sidesheet { animation: none; }
-}
-
 @keyframes cms-fade {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -307,6 +355,7 @@
   to { opacity: 1; transform: none; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .cms-sidesheet,
   .cms-modal-backdrop,
   .cms-modal-panel { animation: none; }
 }

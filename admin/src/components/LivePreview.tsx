@@ -247,7 +247,7 @@ export default function LivePreview({
           className={`absolute top-12 left-1/2 -translate-x-1/2 z-[1100] text-xs px-3 py-1.5 rounded-full shadow-md backdrop-blur ${
             layoutOverlayMode
               ? 'bg-purple-900/80 text-purple-100'
-              : 'bg-green-900/80 text-green-100'
+              : 'bg-lime-soft text-lime'
           }`}
         >
           {layoutOverlayMode &&
