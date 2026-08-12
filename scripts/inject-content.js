@@ -115,6 +115,29 @@ function applyVideoEl(el, value) {
   }
 }
 
+// A háttérkép-mező értéke "url | pozíció | méret". Csak az url kötelező; a
+// hiányzó részek a meglévő stílust hagyják érintetlenül, így a régebben
+// mentett, csak URL-t tartalmazó értékek is jók maradnak.
+// Tükre: admin/src/lib/iframeBridge.ts applyBgValue().
+function applyBgValue(style, value) {
+  const [url = '', position = '', size = ''] = String(value).split('|').map((s) => s.trim())
+  let out = style
+  const setProp = (prop, v) => {
+    if (!v) return
+    const re = new RegExp(`${prop}\\s*:\\s*[^;]*`, 'i')
+    if (re.test(out)) out = out.replace(re, `${prop}:${v}`)
+    else out = `${out}${out && !out.trim().endsWith(';') ? '; ' : ''}${prop}:${v}`
+  }
+  if (url) {
+    const re = /url\(\s*['"]?[^'")]*['"]?\s*\)/
+    if (re.test(out)) out = out.replace(re, `url("${url}")`)
+    else setProp('background-image', `url("${url}")`)
+  }
+  setProp('background-position', position)
+  setProp('background-size', size)
+  return out
+}
+
 function applyContent(doc, content) {
   let applied = 0
   const missing = []
@@ -131,15 +154,9 @@ function applyContent(doc, content) {
       ['data-edit-target', (el) => el.setAttribute('data-target', value)],
       ['data-edit-content', (el) => el.setAttribute('content', value)],
       ['data-edit-placeholder', (el) => el.setAttribute('placeholder', value)],
-      // Background images sit in the inline style; swap just the url() so the
-      // surrounding size/position declarations are preserved.
-      ['data-edit-bg', (el) => {
-        const style = el.getAttribute('style') || ''
-        const re = /url\(\s*['\"]?[^'\")]*['\"]?\s*\)/
-        el.setAttribute('style', re.test(style)
-          ? style.replace(re, `url("${value}")`)
-          : `${style}${style && !style.trim().endsWith(';') ? ';' : ''}background-image:url("${value}")`)
-      }],
+      // Background images sit in the inline style. The value is
+      // "url | position | size" — see applyBgValue.
+      ['data-edit-bg', (el) => el.setAttribute('style', applyBgValue(el.getAttribute('style') || '', value))],
       // data-edit-video lives on the wrapper; embeds go to the <iframe>,
       // uploaded files to a <video> (created if missing).
       ['data-edit-video', (el) => applyVideoEl(el, value)],

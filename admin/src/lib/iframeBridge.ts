@@ -70,6 +70,29 @@ function escapeAttr(s: string): string {
   return s.replace(/["\\]/g, '\\$&')
 }
 
+// A háttérkép-mező értéke "url | pozíció | méret". Csak az url kötelező —
+// egyrészes érték csak a képet cseréli, a pozíciót és a méretet érintetlenül
+// hagyja, így a korábban mentett tartalmak változatlanul jók.
+// Tükre: scripts/inject-content.js applyBgValue().
+export function applyBgValue(style: string, value: string): string {
+  const [url = '', position = '', size = ''] = String(value).split('|').map((s) => s.trim())
+  let out = style
+  const setProp = (prop: string, v: string) => {
+    if (!v) return
+    const re = new RegExp(`${prop}\\s*:\\s*[^;]*`, 'i')
+    if (re.test(out)) out = out.replace(re, `${prop}:${v}`)
+    else out = `${out}${out && !out.trim().endsWith(';') ? '; ' : ''}${prop}:${v}`
+  }
+  if (url) {
+    const re = /url\(\s*['"]?[^'")]*['"]?\s*\)/
+    if (re.test(out)) out = out.replace(re, `url("${url}")`)
+    else setProp('background-image', `url("${url}")`)
+  }
+  setProp('background-position', position)
+  setProp('background-size', size)
+  return out
+}
+
 export function findElement(
   doc: Document,
   type: FieldType,
@@ -103,13 +126,7 @@ export function applyOneEdit(
   } else if (type === 'placeholder') {
     el.setAttribute('placeholder', value)
   } else if (type === 'bg') {
-    // Rewrite only the url() inside the existing inline style, so the
-    // sizing/position declarations around it survive the edit.
-    const style = el.getAttribute('style') || ''
-    const next = /url\(\s*['\"]?[^'\")]*['\"]?\s*\)/.test(style)
-      ? style.replace(/url\(\s*['\"]?[^'\")]*['\"]?\s*\)/, `url("${value}")`)
-      : `${style}${style && !style.trim().endsWith(';') ? ';' : ''}background-image:url("${value}")`
-    el.setAttribute('style', next)
+    el.setAttribute('style', applyBgValue(el.getAttribute('style') || '', value))
   } else if (type === 'video') {
     // data-edit-video lives on the wrapper; embeds go to the <iframe>, uploaded
     // files to a <video> (created if missing).

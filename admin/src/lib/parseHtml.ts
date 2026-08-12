@@ -34,9 +34,13 @@ const SECTION_LABELS: Record<string, string> = {
 
 function readValue(el: Element, type: FieldType): string {
   if (type === 'bg') {
-    // Background images live in the inline style, not in an attribute.
-    const m = /url\(\s*['\"]?([^'\")]+)['\"]?\s*\)/.exec(el.getAttribute('style') || '')
-    return m ? m[1] : ''
+    // Background images live in the inline style, not in an attribute. The
+    // value carries image, position and size as "url | position | size".
+    const style = el.getAttribute('style') || ''
+    const url = /url\(\s*['\"]?([^'\")]+)['\"]?\s*\)/.exec(style)?.[1] || ''
+    const pos = /background-position\s*:\s*([^;]+)/i.exec(style)?.[1]?.trim() || 'center'
+    const size = /background-size\s*:\s*([^;]+)/i.exec(style)?.[1]?.trim() || 'cover'
+    return `${url} | ${pos} | ${size}`
   }
   if (type === 'text') return (el.textContent || '').trim()
   if (type === 'html') return el.innerHTML.trim()
