@@ -442,7 +442,7 @@ export default function PageManager({ manifest, locale, onClose, onChanged, onCr
                         <button
                           type="button"
                           className={`cms-btn-ghost !px-2.5 !text-xs ${
-                            uploadPanelId === p.id ? 'text-blue-300' : ''
+                            uploadPanelId === p.id ? 'text-lime' : ''
                           }`}
                           title="Kész HTML feltöltése nyelvenként"
                           onClick={() => setUploadPanelId(uploadPanelId === p.id ? null : p.id)}
@@ -579,7 +579,7 @@ export default function PageManager({ manifest, locale, onClose, onChanged, onCr
               <button
                 type="button"
                 onClick={() => setShowLangLabels(true)}
-                className="mt-2 text-[11px] text-blue-300 hover:text-blue-200"
+                className="mt-2 text-[11px] text-lime hover:text-lime"
               >
                 + Eltérő felirat EN / IT nyelven
               </button>
@@ -610,7 +610,7 @@ export default function PageManager({ manifest, locale, onClose, onChanged, onCr
                 onClick={() => setSource('template')}
                 className={`rounded-xl border px-3 py-2 text-left transition ${
                   source === 'template'
-                    ? 'border-blue-400/60 bg-blue-500/15'
+                    ? 'border-lime-line bg-lime-soft'
                     : 'border-white/10 bg-white/5 hover:bg-white/10'
                 }`}
               >
@@ -622,7 +622,7 @@ export default function PageManager({ manifest, locale, onClose, onChanged, onCr
                 onClick={() => setSource('upload')}
                 className={`rounded-xl border px-3 py-2 text-left transition ${
                   source === 'upload'
-                    ? 'border-blue-400/60 bg-blue-500/15'
+                    ? 'border-lime-line bg-lime-soft'
                     : 'border-white/10 bg-white/5 hover:bg-white/10'
                 }`}
               >
@@ -640,7 +640,7 @@ export default function PageManager({ manifest, locale, onClose, onChanged, onCr
                     onClick={() => setTemplate(t.value)}
                     className={`rounded-xl border px-3.5 py-2.5 text-left transition ${
                       template === t.value
-                        ? 'border-blue-400/60 bg-blue-500/15'
+                        ? 'border-lime-line bg-lime-soft'
                         : 'border-white/10 bg-white/5 hover:bg-white/10'
                     }`}
                   >
@@ -689,7 +689,7 @@ export default function PageManager({ manifest, locale, onClose, onChanged, onCr
                         onClick={() => setNewUploadLocale(l.code)}
                         className={`rounded-lg border px-2.5 py-1 text-xs transition ${
                           newUploadLocale === l.code
-                            ? 'border-blue-400/60 bg-blue-500/15 text-white'
+                            ? 'border-lime-line bg-lime-soft text-white'
                             : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
                         }`}
                       >
@@ -712,7 +712,7 @@ export default function PageManager({ manifest, locale, onClose, onChanged, onCr
                         onClick={() => setNewUploadMode(m.value)}
                         className={`rounded-lg border px-3 py-2 text-left transition ${
                           newUploadMode === m.value
-                            ? 'border-blue-400/60 bg-blue-500/15'
+                            ? 'border-lime-line bg-lime-soft'
                             : 'border-white/10 bg-white/5 hover:bg-white/10'
                         }`}
                       >

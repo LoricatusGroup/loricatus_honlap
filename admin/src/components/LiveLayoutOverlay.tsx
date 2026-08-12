@@ -254,7 +254,7 @@ interface HandleOverlayProps {
 
 function HandleOverlay({ data, dragging, dropPosition, onMouseDown }: HandleOverlayProps) {
   const sectionStyle = data.kind === 'section'
-  const baseColor = sectionStyle ? 'bg-purple-600/85 hover:bg-purple-600' : 'bg-blue-600/85 hover:bg-blue-600'
+  const baseColor = sectionStyle ? 'bg-lime/85 hover:bg-lime' : 'bg-acel/85 hover:bg-acel'
 
   // Outline is visual-only (pointer-events: none) so mouse-wheel scroll still
   // reaches the iframe. Drag from the small ☰ corner icon.

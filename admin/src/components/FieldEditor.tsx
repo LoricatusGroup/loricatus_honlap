@@ -24,7 +24,7 @@ export default function FieldEditor({ field, onChange }: Props) {
           type="text"
           value={field.value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full px-3 py-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-lime"
         />
       )}
 
@@ -33,7 +33,7 @@ export default function FieldEditor({ field, onChange }: Props) {
           value={field.value}
           onChange={(e) => onChange(e.target.value)}
           rows={4}
-          className="w-full px-3 py-2 bg-gray-700 rounded text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 bg-gray-700 rounded text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-lime"
         />
       )}
 
@@ -45,7 +45,7 @@ export default function FieldEditor({ field, onChange }: Props) {
           value={field.value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="URL vagy #horgony"
-          className="w-full px-3 py-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-lime"
         />
       )}
 
@@ -64,7 +64,7 @@ export default function FieldEditor({ field, onChange }: Props) {
           value={field.value}
           onChange={(e) => onChange(e.target.value)}
           min="0"
-          className="w-32 px-3 py-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-32 px-3 py-2 bg-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-lime"
         />
       )}
 
@@ -73,7 +73,7 @@ export default function FieldEditor({ field, onChange }: Props) {
           value={field.value}
           onChange={(e) => onChange(e.target.value)}
           rows={2}
-          className="w-full px-3 py-2 bg-gray-700 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 bg-gray-700 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-lime"
         />
       )}
     </div>

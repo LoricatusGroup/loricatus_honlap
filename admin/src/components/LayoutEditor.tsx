@@ -163,7 +163,7 @@ export default function LayoutEditor({
                   type="button"
                   title={c.description}
                   onClick={() => onAddSection(c.template)}
-                  className="px-3 py-2 text-sm bg-blue-700 hover:bg-blue-600 rounded text-white font-medium"
+                  className="px-3 py-2 text-sm bg-lime hover:bg-[#D4FF52] text-antracit-700 font-semibold uppercase tracking-wide"
                 >
                   ➕ {c.label}
                 </button>
@@ -223,7 +223,7 @@ export default function LayoutEditor({
               <button
                 type="button"
                 onClick={() => onAddItem(list.name)}
-                className="mt-3 px-3 py-2 text-sm bg-blue-700 hover:bg-blue-600 rounded text-white font-medium"
+                className="mt-3 px-3 py-2 text-sm bg-lime hover:bg-[#D4FF52] text-antracit-700 font-semibold uppercase tracking-wide"
               >
                 + Új {list.label.toLowerCase()} hozzáadása
               </button>
@@ -282,7 +282,7 @@ function SortableRow({
       <span className="flex-1 truncate">
         {label}
         {addedBadge && (
-          <span className="ml-2 text-xs px-1.5 py-0.5 bg-blue-900 text-blue-200 rounded">új</span>
+          <span className="ml-2 text-xs px-1.5 py-0.5 bg-lime-soft text-lime">új</span>
         )}
       </span>
       {onToggleHidden && (
@@ -291,7 +291,7 @@ function SortableRow({
             type="checkbox"
             checked={!hidden}
             onChange={(e) => onToggleHidden(!e.target.checked)}
-            className="accent-blue-500"
+            className="accent-lime"
           />
           Látható
         </label>

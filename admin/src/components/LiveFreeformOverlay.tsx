@@ -278,7 +278,7 @@ function HandleBox({ data, dragging, modified, onMouseDown, onReset }: HandleBox
         <button
           type="button"
           onMouseDown={onMouseDown}
-          className="bg-green-600/85 hover:bg-green-600 text-white text-[11px] leading-none px-1 py-0.5 rounded-br shadow-sm active:scale-95"
+          className="bg-lime/85 hover:bg-lime text-antracit-700 text-[11px] leading-none px-1 py-0.5 rounded-br shadow-sm active:scale-95"
           style={{
             cursor: 'grab',
             userSelect: 'none',

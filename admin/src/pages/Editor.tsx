@@ -730,7 +730,7 @@ export default function EditorPage({ user, membership }: Props) {
         <div className="px-4 sm:px-6 py-2.5 flex flex-wrap gap-x-3 gap-y-2.5 justify-between items-center">
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-2.5">
-              <div className="cms-brand-mark" aria-hidden="true">L</div>
+              <div className="cms-brand-mark" aria-hidden="true"><img src="/assets/logo-mark-lime.svg" alt="" /></div>
               <div className="leading-tight">
                 <h1 className="text-[15px] font-semibold tracking-tight">Loricatus Editor</h1>
                 <p className="text-[11px] text-gray-400">
@@ -775,7 +775,7 @@ export default function EditorPage({ user, membership }: Props) {
             )}
 
             <span data-tour="content">
-              <Menu label="Tartalom" icon="📄" accent="#14b8a6">
+              <Menu label="Tartalom" icon="📄">
                 {(close) => (
                   <>
                     {canEditAdvanced && pagesManifest && (
@@ -841,7 +841,6 @@ export default function EditorPage({ user, membership }: Props) {
               <Menu
                 label="Eszközök"
                 icon="⚙"
-                accent="#8b5cf6"
                 active={showTheme || layoutOverlayMode || freeformMode || mobilePreview}
               >
                 {(close) => (
@@ -930,8 +929,8 @@ export default function EditorPage({ user, membership }: Props) {
                   status.type === 'error'
                     ? 'text-red-300'
                     : status.type === 'success'
-                    ? 'text-green-300'
-                    : 'text-blue-300'
+                    ? 'text-lime'
+                    : 'text-lime'
                 }`}
               >
                 {status.text}

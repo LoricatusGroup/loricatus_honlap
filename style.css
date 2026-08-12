@@ -1039,6 +1039,12 @@ body:not(:has(.hero)) .logo-svg { filter: var(--logo-antracit); }
   margin-bottom: 18px;
   filter: var(--logo-antracit);
 }
+/* A footer első oszlopa (1.8fr egy 1200px-es rácsban) ~380px, tehát elfér a
+   horizontális lockup a maga 325px-es minimumával. Szűkebb nézetben a rács
+   2, majd 1 oszlopra vált, ott a logotípia megy tovább. */
+@media (min-width: 1261px) {
+  .footer-brand .footer-logo { width: 325px; height: auto; margin-bottom: 22px; }
+}
 .footer-brand p { font-size: 0.84rem; color: var(--muted); line-height: 1.7; max-width: 260px; margin-bottom: 22px; }
 .footer-social { display: flex; gap: 8px; flex-wrap: wrap; }
 .social-btn {

@@ -91,7 +91,7 @@ export default function HtmlEditModal({ label, initialValue, onSave, onClose }: 
         ref={editorRef}
         contentEditable
         suppressContentEditableWarning
-        className="cms-input min-h-[160px] max-h-[50vh] overflow-y-auto leading-relaxed [&_a]:text-blue-300 [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
+        className="cms-input min-h-[160px] max-h-[50vh] overflow-y-auto leading-relaxed [&_a]:text-lime [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
       />
     </Modal>
   )

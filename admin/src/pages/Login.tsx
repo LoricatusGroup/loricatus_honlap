@@ -42,14 +42,14 @@ export default function LoginPage() {
             placeholder="email@pelda.hu"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 bg-gray-700 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 bg-gray-800 border border-white/15 text-white placeholder-gray-400 focus:outline-none focus:border-lime focus:ring-2 focus:ring-lime-line"
             required
             autoFocus
           />
           <button
             type="submit"
             disabled={loading || !email}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-900 disabled:cursor-not-allowed py-2 rounded font-medium transition"
+            className="w-full bg-lime hover:bg-[#D4FF52] text-antracit-700 disabled:bg-gray-600 disabled:text-gray-300 disabled:cursor-not-allowed py-2.5 font-semibold uppercase tracking-wide transition"
           >
             {loading ? 'Küldés…' : 'Bejelentkezési link küldése'}
           </button>
@@ -57,7 +57,7 @@ export default function LoginPage() {
         {message && (
           <p
             className={`mt-4 text-sm p-3 rounded ${
-              message.type === 'error' ? 'bg-red-900/50 text-red-200' : 'bg-blue-900/50 text-blue-200'
+              message.type === 'error' ? 'bg-red-900/50 text-red-200' : 'bg-lime-soft text-lime'
             }`}
           >
             {message.text}
