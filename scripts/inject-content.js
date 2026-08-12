@@ -131,6 +131,15 @@ function applyContent(doc, content) {
       ['data-edit-target', (el) => el.setAttribute('data-target', value)],
       ['data-edit-content', (el) => el.setAttribute('content', value)],
       ['data-edit-placeholder', (el) => el.setAttribute('placeholder', value)],
+      // Background images sit in the inline style; swap just the url() so the
+      // surrounding size/position declarations are preserved.
+      ['data-edit-bg', (el) => {
+        const style = el.getAttribute('style') || ''
+        const re = /url\(\s*['\"]?[^'\")]*['\"]?\s*\)/
+        el.setAttribute('style', re.test(style)
+          ? style.replace(re, `url("${value}")`)
+          : `${style}${style && !style.trim().endsWith(';') ? ';' : ''}background-image:url("${value}")`)
+      }],
       // data-edit-video lives on the wrapper; embeds go to the <iframe>,
       // uploaded files to a <video> (created if missing).
       ['data-edit-video', (el) => applyVideoEl(el, value)],
@@ -189,6 +198,7 @@ const EDIT_ATTRS_LIST = [
   'data-edit-content',
   'data-edit-video',
   'data-edit-placeholder',
+  'data-edit-bg',
 ]
 
 function cloneListItem(templateEl, templateId, newId) {
@@ -411,6 +421,7 @@ function selectorForPositionId(id) {
       `[data-edit-content="${esc}"]`,
       `[data-edit-video="${esc}"]`,
       `[data-edit-placeholder="${esc}"]`,
+      `[data-edit-bg="${esc}"]`,
     ].join(',')
   }
   return null

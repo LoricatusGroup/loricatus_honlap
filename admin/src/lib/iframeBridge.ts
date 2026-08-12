@@ -14,6 +14,7 @@ const EDIT_ATTR_BY_TYPE: Record<FieldType, string> = {
   content: 'data-edit-content',
   video: 'data-edit-video',
   placeholder: 'data-edit-placeholder',
+  bg: 'data-edit-bg',
 }
 
 export const EDIT_ATTRS = Object.values(EDIT_ATTR_BY_TYPE)
@@ -101,6 +102,14 @@ export function applyOneEdit(
     el.setAttribute('content', value)
   } else if (type === 'placeholder') {
     el.setAttribute('placeholder', value)
+  } else if (type === 'bg') {
+    // Rewrite only the url() inside the existing inline style, so the
+    // sizing/position declarations around it survive the edit.
+    const style = el.getAttribute('style') || ''
+    const next = /url\(\s*['\"]?[^'\")]*['\"]?\s*\)/.test(style)
+      ? style.replace(/url\(\s*['\"]?[^'\")]*['\"]?\s*\)/, `url("${value}")`)
+      : `${style}${style && !style.trim().endsWith(';') ? ';' : ''}background-image:url("${value}")`
+    el.setAttribute('style', next)
   } else if (type === 'video') {
     // data-edit-video lives on the wrapper; embeds go to the <iframe>, uploaded
     // files to a <video> (created if missing).
@@ -256,6 +265,19 @@ export function attachEditClickHandler(
         el.removeAttribute('data-cms-orig-href')
       })
     }
+  })
+
+  // Tabbed pages (e.g. Rólunk) keep the inactive panel behind `hidden`. Since
+  // edit mode swallows every click, the tab buttons cannot be used to reach it
+  // — that content would be permanently uneditable. Reveal all panels while
+  // editing so every field is reachable; the page returns to tabs on cleanup.
+  doc.querySelectorAll('[data-lor-panel][hidden]').forEach((el) => {
+    el.removeAttribute('hidden')
+    el.setAttribute('data-cms-was-hidden', '1')
+    restoreFns.push(() => {
+      el.setAttribute('hidden', '')
+      el.removeAttribute('data-cms-was-hidden')
+    })
   })
 
   return () => {
