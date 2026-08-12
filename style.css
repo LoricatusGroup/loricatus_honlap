@@ -220,6 +220,14 @@ input, textarea, [contenteditable="true"] { caret-color: var(--text); }
 .navbar.nav-wide .nav-container { max-width: none; gap: 12px; }
 .navbar.nav-wide .nav-links a { padding: 7px 8px; letter-spacing: 0.02em; }
 .logo-svg { height: 20px; width: auto; object-fit: contain; transition: filter 0.3s; }
+/* Teljes szélességű fejléc: a kézikönyv 22. oldala a horizontális lockupra
+   325px minimális szélességet ír elő, ami a 6.47-es oldalaránnyal ~50px
+   magasságot jelent -- ezért nő meg a sáv is. 1260px alatt a nav amúgy is
+   kompakt módba vált, ott a logotípia megy, aminek 80px a minimuma. */
+@media (min-width: 1261px) {
+  :root { --nav-h: 80px; }
+  .logo-svg { width: 325px; height: auto; }
+}
 .navbar.scrolled .logo-svg { filter: var(--logo-antracit); }
 /* Hero fotó fölött: a kézikönyv szerint fotó háttéren acél vagy antracit -- nem fehér. */
 body:has(.hero) .navbar:not(.scrolled) .logo-svg { filter: var(--logo-acel); }
