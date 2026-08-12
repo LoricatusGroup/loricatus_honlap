@@ -4,8 +4,8 @@
 <title>Űrlap — Loricatus Design System</title>
 <style>@font-face{font-family:'Aktiv Grotesk Corp';src:url('../fonts/AktivGroteskCorp-Light.woff2') format('woff2'),url('https://loricatus.hu/assets/fonts/AktivGroteskCorp-Light.woff2') format('woff2');font-weight:300;font-style:normal;font-display:swap}@font-face{font-family:'Aktiv Grotesk Corp';src:url('../fonts/AktivGroteskCorp-Regular.woff2') format('woff2'),url('https://loricatus.hu/assets/fonts/AktivGroteskCorp-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:'Aktiv Grotesk Corp';src:url('../fonts/AktivGroteskCorp-Medium.woff2') format('woff2'),url('https://loricatus.hu/assets/fonts/AktivGroteskCorp-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}@font-face{font-family:'Aktiv Grotesk Corp';src:url('../fonts/AktivGroteskCorp-Bold.woff2') format('woff2'),url('https://loricatus.hu/assets/fonts/AktivGroteskCorp-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}@font-face{font-family:'IBM Plex Mono';src:url('../fonts/IBMPlexMono-Regular.woff2') format('woff2'),url('https://loricatus.hu/assets/fonts/IBMPlexMono-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:'IBM Plex Mono';src:url('../fonts/IBMPlexMono-Medium.woff2') format('woff2'),url('https://loricatus.hu/assets/fonts/IBMPlexMono-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
 :root{
-  --bg:#F8F6F2; --bg2:#EEEAE3; --border:rgba(0,0,0,0.09);
-  --text:#111316; --muted:#737e88; --dim:#c2ccd4; --accent:#c7d540;
+  --bg:#EEEEEB; --bg2:#DCDCD7; --border:rgba(43,59,70,0.16);
+  --text:#2B3B46; --muted:#556269; --dim:#999FA0; --accent:#C8FA32;
   --font-sans:'Aktiv Grotesk Corp',system-ui,sans-serif;
   --font-mono:'IBM Plex Mono',monospace;
   --nav-h:64px; --w:1200px; --pad:clamp(20px,4vw,48px);
@@ -21,9 +21,9 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-sans
 /* ── real site component styles (verbatim from style.css) ── */
 .btn{display:inline-flex;align-items:center;gap:10px;padding:13px 28px;font-family:var(--font-sans);font-size:.82rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;transition:background .2s,color .2s,border-color .2s;white-space:nowrap;cursor:pointer;border-radius:0}
 .btn-primary{background:var(--text);color:var(--bg);border:1px solid var(--text)}
-.btn-primary:hover{background:#2b3b46;border-color:#2b3b46;color:#fff}
-.btn-secondary{background:transparent;color:var(--text);border:1px solid rgba(0,0,0,.25)}
-.btn-secondary:hover{border-color:rgba(0,0,0,.5);background:rgba(0,0,0,.04)}
+.btn-primary:hover{background:#202C34;border-color:#202C34;color:#fff}
+.btn-secondary{background:transparent;color:var(--text);border:1px solid rgba(43,59,70,.25)}
+.btn-secondary:hover{border-color:rgba(43,59,70,.5);background:rgba(43,59,70,.04)}
 .btn-sm{padding:9px 20px;font-size:.78rem}
 .btn-full{width:100%;justify-content:center}
 .section-tag{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text);background:var(--accent);display:inline-block;padding:3px 10px;margin-bottom:20px}
