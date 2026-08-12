@@ -1,5 +1,6 @@
 import type { EditableField } from '../lib/types'
 import ImageUploader from './ImageUploader'
+import BgFieldEditor from './BgFieldEditor'
 
 interface Props {
   field: EditableField
@@ -37,9 +38,9 @@ export default function FieldEditor({ field, onChange }: Props) {
         />
       )}
 
-      {(field.type === 'image' || field.type === 'bg') && (
-        <ImageUploader value={field.value} onChange={onChange} />
-      )}
+      {field.type === 'image' && <ImageUploader value={field.value} onChange={onChange} />}
+
+      {field.type === 'bg' && <BgFieldEditor value={field.value} onChange={onChange} />}
 
       {field.type === 'href' && (
         <input

@@ -350,25 +350,40 @@ function check(name, cond) {
 }
 
 // Background images (data-edit-bg): the Rólunk page holds its imagery in inline
-// styles, so only the url() may change -- the sizing around it must survive.
+// styles. The value is "url | position | size"; a one-part value must only swap
+// the image and leave the framing alone, so older saved content stays valid.
 {
+  const base = 'height: 240px; background-image:url("/assets/rolunk/old.webp"); '
+    + 'background-position:center; background-size:cover; border-radius: 8px'
   const doc = makeDoc(
-    '<div id="a" style=\'height: 240px; background: url("/assets/rolunk/old.webp") center / cover no-repeat; border-radius: 8px\' data-edit-bg="rolunk-hatterkep-01"></div>' +
-    '<div id="b" style="height: 100px" data-edit-bg="rolunk-hatterkep-02"></div>',
+    `<div id="a" style='${base}' data-edit-bg="rolunk-hatterkep-01"></div>` +
+    `<div id="b" style='${base}' data-edit-bg="rolunk-hatterkep-02"></div>` +
+    '<div id="c" style="height: 100px" data-edit-bg="rolunk-hatterkep-03"></div>',
   )
   const { applied, missing } = inj.applyContent(doc, {
-    'rolunk-hatterkep-01': '/assets/rolunk/uj.webp',
+    'rolunk-hatterkep-01': '/assets/rolunk/uj.webp | top left | contain',
     'rolunk-hatterkep-02': '/assets/rolunk/masik.jpg',
+    'rolunk-hatterkep-03': '/assets/rolunk/harmadik.png | bottom | auto',
   })
-  check('bg: both applied', applied === 2 && missing.length === 0)
+  check('bg: all applied', applied === 3 && missing.length === 0)
+
   const sa = doc.querySelector('#a').getAttribute('style')
-  check('bg: url swapped', sa.includes('url("/assets/rolunk/uj.webp")'))
-  check('bg: old url gone', !sa.includes('old.webp'))
-  check('bg: sizing preserved', sa.includes('center / cover') && sa.includes('240px')
-    && sa.includes('border-radius: 8px'))
+  check('bg: url swapped', sa.includes('url("/assets/rolunk/uj.webp")') && !sa.includes('old.webp'))
+  check('bg: position set', /background-position:\s*top left/.test(sa))
+  check('bg: size set', /background-size:\s*contain/.test(sa))
+  check('bg: unrelated declarations kept', sa.includes('240px') && sa.includes('border-radius: 8px'))
+
+  // one-part value: image only, framing untouched (backwards compatibility)
   const sb = doc.querySelector('#b').getAttribute('style')
-  check('bg: added when style had no url', sb.includes('background-image:url("/assets/rolunk/masik.jpg")'))
-  check('bg: existing declaration kept', sb.includes('height: 100px'))
+  check('bg: url-only swaps image', sb.includes('url("/assets/rolunk/masik.jpg")'))
+  check('bg: url-only keeps position', /background-position:\s*center/.test(sb))
+  check('bg: url-only keeps size', /background-size:\s*cover/.test(sb))
+
+  // element with no background yet: all three get added
+  const sc = doc.querySelector('#c').getAttribute('style')
+  check('bg: added to bare element', sc.includes('background-image:url("/assets/rolunk/harmadik.png")')
+    && /background-position:\s*bottom/.test(sc) && /background-size:\s*auto/.test(sc))
+  check('bg: bare element keeps its own style', sc.includes('height: 100px'))
   check('bg: value not written to textContent',
     (doc.querySelector('#a').textContent || '') === '')
 }
