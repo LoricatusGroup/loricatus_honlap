@@ -42,14 +42,14 @@ export default function LoginPage() {
             placeholder="email@pelda.hu"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 bg-gray-800 border border-white/15 text-white placeholder-gray-400 focus:outline-none focus:border-lime focus:ring-2 focus:ring-lime-line"
+            className="w-full px-4 py-2 rounded-md bg-gray-800 border border-white/15 text-white placeholder-gray-400 focus:outline-none focus:border-lime focus:ring-2 focus:ring-lime-line"
             required
             autoFocus
           />
           <button
             type="submit"
             disabled={loading || !email}
-            className="w-full bg-lime hover:bg-[#D4FF52] text-antracit-700 disabled:bg-gray-600 disabled:text-gray-300 disabled:cursor-not-allowed py-2.5 font-semibold uppercase tracking-wide transition"
+            className="w-full rounded-md bg-lime hover:bg-[#D4FF52] text-antracit-700 disabled:bg-gray-600 disabled:text-gray-300 disabled:cursor-not-allowed py-2.5 font-semibold uppercase tracking-wide transition"
           >
             {loading ? 'Küldés…' : 'Bejelentkezési link küldése'}
           </button>
