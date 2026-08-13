@@ -423,6 +423,23 @@ export default function EditorPage({ user, membership }: Props) {
     setLocaleState(next)
   }
 
+  // Switching page reloads everything, same as switching locale — so it gets
+  // the same warning. Without it, "let me just look at the other page" silently
+  // discarded whatever wasn't auto-saved yet.
+  const switchPage = (next: string) => {
+    if (next === page) return
+    if (
+      hasUnsaved &&
+      !window.confirm(
+        'Vannak mentetlen változások. Tényleg váltasz oldalra? A változások elvesznek.',
+      )
+    ) {
+      return
+    }
+    setStatus(null)
+    setPage(next)
+  }
+
   const handleFieldChange = (key: string, value: string) => {
     setFields((prev) => prev.map((f) => (f.key === key ? { ...f, value } : f)))
   }
@@ -631,6 +648,41 @@ export default function EditorPage({ user, membership }: Props) {
     return () => clearTimeout(timer)
   }, [currentSnapshot, loading, saving, publishing, conflict])
 
+  // Two safety nets around leaving the editor:
+  //
+  //   • hidden tab  → save the draft immediately, rather than trusting the 5s
+  //     timer above to fire in a backgrounded (heavily throttled) tab;
+  //   • unload      → the browser's own "leave site?" prompt, for navigating
+  //     away or closing the tab mid-edit.
+  //
+  // Registered once and reading the live values through refs, so the listeners
+  // are not torn down and re-added on every keystroke.
+  const hasUnsavedRef = useRef(false)
+  const busyRef = useRef(false)
+  useEffect(() => {
+    hasUnsavedRef.current = hasUnsaved
+    busyRef.current = saving || publishing || conflict || loading
+  })
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState !== 'hidden') return
+      if (!hasUnsavedRef.current || busyRef.current) return
+      saveRef.current()
+    }
+    const onUnload = (e: BeforeUnloadEvent) => {
+      if (!hasUnsavedRef.current) return
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    window.addEventListener('beforeunload', onUnload)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('beforeunload', onUnload)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Keyboard shortcuts. Ctrl/Cmd+S = save, Ctrl/Cmd+Z = undo,
   // Ctrl/Cmd+Shift+Z (or Ctrl+Y) = redo. 1/2/3 = switch view mode (but
   // not when an input is focused).
@@ -692,7 +744,7 @@ export default function EditorPage({ user, membership }: Props) {
             Ellenőrzés folyamatban…
           </div>
           <div className="mt-5 flex justify-center gap-2">
-            <button onClick={() => setPage('home')} className="cms-btn-ghost">
+            <button onClick={() => switchPage('home')} className="cms-btn-ghost">
               ← Vissza a Főoldalra
             </button>
             <button onClick={() => setRetryTick((t) => t + 1)} className="cms-btn-primary">
@@ -764,7 +816,7 @@ export default function EditorPage({ user, membership }: Props) {
                 {pagesManifest.pages.map((p) => (
                   <button
                     key={p.id}
-                    onClick={() => setPage(p.id)}
+                    onClick={() => switchPage(p.id)}
                     className={`cms-seg-btn${page === p.id ? ' is-active' : ''}`}
                     title={`Oldal: ${pageNavLabel(p, locale)}`}
                   >
@@ -1089,7 +1141,7 @@ export default function EditorPage({ user, membership }: Props) {
             // Jump straight to the new page; the "building" screen auto-opens the
             // editor once its first publish finishes.
             setViewMode('form')
-            setPage(id)
+            switchPage(id)
           }}
         />
       )}
