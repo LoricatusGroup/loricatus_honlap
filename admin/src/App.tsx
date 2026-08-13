@@ -4,6 +4,22 @@ import { supabase, SITE_ID, type Membership } from './lib/supabase'
 import LoginPage from './pages/Login'
 import EditorPage from './pages/Editor'
 
+// Same person as before? Then keep the object we already have.
+//
+// Supabase re-reads the stored session every time the tab regains focus
+// (auth-js listens on `visibilitychange`) and notifies every subscriber with
+// SIGNED_IN — or TOKEN_REFRESHED once the hour-long access token is due for
+// renewal. The session is deserialized from storage, so `session.user` is a
+// brand-new object each time even though nothing about the user changed.
+// Storing it blindly would change React's idea of `user`, re-run the
+// membership lookup below, unmount the editor and throw away every unsaved
+// edit — which is exactly what happened when someone switched tabs and came
+// back. Comparing by id keeps the identity stable across those re-emits.
+function sameUser(prev: User | null, next: User | null): User | null {
+  if (prev && next && prev.id === next.id && prev.email === next.email) return prev
+  return next
+}
+
 export default function App() {
   const [user, setUser] = useState<User | null>(null)
   // undefined = not checked yet, null = checked & not a member, object = member
@@ -12,14 +28,14 @@ export default function App() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user)
+      setUser((prev) => sameUser(prev, data.user))
       setLoading(false)
     })
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+      setUser((prev) => sameUser(prev, session?.user ?? null))
     })
 
     return () => subscription.unsubscribe()
@@ -29,9 +45,13 @@ export default function App() {
   // current_membership() returns the caller's {role, can_edit_advanced} for
   // SITE_ID, or no row if they aren't a member. The RLS policies are the real
   // enforcement — this drives a clean UI and the text/advanced capability gate.
+  // Keyed on the user id, not the user object: only a genuinely different
+  // person needs a fresh membership lookup. Anything else (a token refresh, a
+  // profile field changing) must leave the mounted editor alone.
+  const userId = user?.id ?? null
   useEffect(() => {
     let cancelled = false
-    if (!user) {
+    if (!userId) {
       setMembership(undefined)
       return
     }
@@ -44,7 +64,7 @@ export default function App() {
     return () => {
       cancelled = true
     }
-  }, [user])
+  }, [userId])
 
   if (loading) {
     return (
