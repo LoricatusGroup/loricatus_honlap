@@ -510,4 +510,70 @@ function check(name, cond) {
   }
 }
 
+// AI-compare links: the three hrefs are derived from one CMS field, so editing
+// the question in the editor must move all three at publish time.
+{
+  const doc = new JSDOM(
+    '<!DOCTYPE html><html><head>' +
+      '<meta name="ai-compare-prompt" data-edit-content="footer-ai-prompt" content="Eredeti kérdés">' +
+      '</head><body><div class="ai-compare-band">' +
+      '<a data-ai-service="chatgpt" href="https://chatgpt.com/?hints=search&q=elavult"></a>' +
+      '<a data-ai-service="claude" href="https://claude.ai/new?q=elavult"></a>' +
+      '<a data-ai-service="perplexity" href="https://www.perplexity.ai/search?q=elavult"></a>' +
+      '<a data-ai-service="ismeretlen" href="https://example.com/?q=x"></a>' +
+      '</div></body></html>',
+  ).window.document
+
+  inj.applyContent(doc, { 'footer-ai-prompt': 'Foglald össze a Loricatus & társai oldalt' })
+  const href = (s) => doc.querySelector(`[data-ai-service="${s}"]`).getAttribute('href')
+  const q = encodeURIComponent('Foglald össze a Loricatus & társai oldalt')
+
+  check('ai: meta content updated from the CMS field',
+    doc.querySelector('meta[name="ai-compare-prompt"]').getAttribute('content') ===
+      'Foglald össze a Loricatus & társai oldalt')
+  check('ai: chatgpt href rebuilt', href('chatgpt') === `https://chatgpt.com/?hints=search&q=${q}`)
+  check('ai: claude href rebuilt', href('claude') === `https://claude.ai/new?q=${q}`)
+  check('ai: perplexity href rebuilt', href('perplexity') === `https://www.perplexity.ai/search?q=${q}`)
+  check('ai: ampersand in the question is encoded, not left raw',
+    href('claude').includes('%26') && !href('claude').includes('társai'))
+  check('ai: unknown service left alone', href('ismeretlen') === 'https://example.com/?q=x')
+
+  // A page without the band must not blow up.
+  const bare = makeDoc('<p data-edit="x">a</p>')
+  const { applied } = inj.applyContent(bare, { x: 'b' })
+  check('ai: page without the band still applies content', applied === 1)
+}
+
+// Generated pages (blog posts, editor-created pages) come from one shared
+// template, so an English post must not end up asking the question in Hungarian.
+{
+  const base = require('fs').readFileSync(
+    require('path').join(__dirname, '..', 'page-templates', '_base.html'), 'utf-8')
+  check('base: template still carries the placeholders',
+    base.includes('__AI_PROMPT__') && base.includes('__AI_Q__') && base.includes('__AI_LEAD__'))
+
+  for (const [loc, needle, lead] of [
+    ['hu', 'https://loricatus.hu oldalt', 'Hasonlíts össze minket'],
+    ['en', 'https://loricatus.hu/en/', 'Compare us using'],
+    ['it', 'https://loricatus.hu/it/', 'Confrontaci con'],
+  ]) {
+    const html = inj.fillAiCompare(base, loc)
+    check(`base/${loc}: no placeholder left behind`, !/__AI_[A-Z]+__/.test(html))
+    check(`base/${loc}: the question points at this locale`, html.includes(needle))
+    check(`base/${loc}: the lead is in this language`, html.includes(lead))
+
+    const doc = new JSDOM(html).window.document
+    const prompt = doc.querySelector('meta[name="ai-compare-prompt"]').getAttribute('content')
+    const href = doc.querySelector('[data-ai-service="claude"]').getAttribute('href')
+    check(`base/${loc}: the baked link carries the whole question`,
+      new URL(href).searchParams.get('q') === prompt)
+    check(`base/${loc}: the question is editable from the CMS`,
+      doc.querySelector('meta[data-edit-content="footer-ai-prompt"]') !== null)
+  }
+
+  // An unknown locale must still produce a usable page, not placeholders.
+  check('base: unknown locale falls back to Hungarian',
+    !/__AI_[A-Z]+__/.test(inj.fillAiCompare(base, 'de')))
+}
+
 console.log(`\n${passed} checks passed`)

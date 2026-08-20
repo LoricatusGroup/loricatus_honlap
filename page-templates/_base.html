@@ -10,7 +10,7 @@
   <link rel="icon" href="/favicon.ico" sizes="32x32">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-  <link rel="stylesheet" href="/style.css?v=19">
+  <link rel="stylesheet" href="/style.css?v=20">
   <style>
     .pg-hero { padding: calc(var(--nav-h) + 64px) 0 32px; background: var(--bg2); border-bottom: 1px solid var(--border); }
     .pg-wrap { max-width: var(--w); margin: 0 auto; padding: 0 clamp(20px, 4vw, 48px); }
@@ -18,7 +18,8 @@
     .pg-section p { max-width: 720px; font-size: 16px; line-height: 1.7; color: var(--text); }
     .pg-block { border-top: 1px solid var(--border); padding-top: 28px; margin-top: 28px; }
   </style>
-<style id="cms-theme"></style></head>
+<style id="cms-theme"></style>  <meta name="ai-compare-prompt" data-edit-content="footer-ai-prompt" content="__AI_PROMPT__">
+</head>
 
 <body>
 
@@ -35,6 +36,24 @@
   __BODY__
 
   <footer class="footer">
+    <div class="ai-compare-band">
+      <div class="container ai-compare">
+        <p class="ai-compare-lead" data-edit="footer-ai-lead">__AI_LEAD__</p>
+        <div class="ai-compare-links">
+          <a class="ai-compare-btn" data-ai-service="chatgpt"
+             href="https://chatgpt.com/?hints=search&amp;q=__AI_Q__"
+             target="_blank" rel="noopener noreferrer nofollow">__AI_CHATGPT__</a>
+          <a class="ai-compare-btn" data-ai-service="claude"
+             href="https://claude.ai/new?q=__AI_Q__"
+             target="_blank" rel="noopener noreferrer nofollow">__AI_CLAUDE__</a>
+          <a class="ai-compare-btn" data-ai-service="perplexity"
+             href="https://www.perplexity.ai/search?q=__AI_Q__"
+             target="_blank" rel="noopener noreferrer nofollow">__AI_PERPLEXITY__</a>
+        </div>
+        <p class="ai-compare-note" data-edit="footer-ai-note">__AI_NOTE__</p>
+      </div>
+    </div>
+    <!-- /ai-compare -->
     <div class="footer-bottom">
       <div class="container footer-bottom-inner">
         <span data-edit="footer-copyright">© 2026 Loricatus. Minden jog fenntartva.</span>
@@ -43,6 +62,6 @@
     </div>
   </footer>
 
-  <script src="/script.js?v=9" defer=""></script>
+  <script src="/script.js?v=10" defer=""></script>
 
 </body></html>

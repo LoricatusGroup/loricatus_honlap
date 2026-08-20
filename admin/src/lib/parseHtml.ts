@@ -73,6 +73,8 @@ const WORD_HU: Record<string, string> = {
   menu: 'menü', phone: 'telefon', email: 'e-mail', address: 'cím',
   hours: 'nyitvatartás', meta: 'meta', stat: 'statisztika', hint: 'tipp',
   ph: 'mintaszöveg (szürke segédszöveg)',
+  // AI-összehasonlító sáv a footerben
+  ai: 'AI-gombok', prompt: 'kérdés az asszisztensnek', lead: 'felirat', note: 'magyarázat',
   // section words used inside nav-menu-* keys
   services: 'Szolgáltatások', about: 'Rólunk', equipment: 'Eszközpark',
   portfolio: 'Projektek', contact: 'Kapcsolat',
