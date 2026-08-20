@@ -218,9 +218,13 @@ function applyContent(doc, content) {
       ['data-edit-src', (el) => el.setAttribute('src', value)],
       ['data-edit-href', (el) => el.setAttribute('href', value)],
       ['data-edit-color', (el) => el.setAttribute('style', value)],
-      // data-target only — keep textContent at "0" so the count-up animation
-      // starts from 0 on every page load.
-      ['data-edit-target', (el) => el.setAttribute('data-target', value)],
+      // The number goes into the text as well as data-target: readers without
+      // JavaScript (AI crawlers above all) must see "500", not "0". script.js
+      // resets it to 0 before animating, so the count-up is unchanged.
+      ['data-edit-target', (el) => {
+        el.setAttribute('data-target', value)
+        el.textContent = value
+      }],
       ['data-edit-content', (el) => el.setAttribute('content', value)],
       ['data-edit-placeholder', (el) => el.setAttribute('placeholder', value)],
       // Background images sit in the inline style. The value is
