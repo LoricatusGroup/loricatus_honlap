@@ -138,6 +138,16 @@ function applyBgValue(style, value) {
   return out
 }
 
+// Every question closes in two layers. First the source constraint -- the facts
+// come from the site, and a gap stays a gap. Then, in its own sentence, the
+// "what is this for me" part: that is inference, not something the site claims,
+// and the two are better kept apart.
+//
+// The "otherwise ask me one short question" clause is not politeness. The
+// question is a fixed string in a link, so the assistant knows nothing about
+// the visitor; without it, nothing stops it inventing a "you". With it, the
+// button opens a conversation, which beats a tidy summary.
+//
 // The question names the company in full and pins the domain up front: the
 // bare word "Loricatus" made Perplexity reach for similarly-spelt Hungarian
 // place and family names, and pull in sources that had nothing to do with the
@@ -157,21 +167,21 @@ const AI_COMPARE_UI = {
     chatgpt: 'ChatGPT-vel', claude: 'Claude-dal', perplexity: 'Perplexityvel',
     note: 'Az asszisztens előre megírt kérdéssel nyílik meg, elolvassa ezt az oldalt, és összefoglalja neked.',
     prompt:
-      'Nézd meg a Loricatus Kft. (https://loricatus.hu) honlapját és a https://loricatus.hu/llms.txt áttekintőt, amelyben az aloldalak listája is megvan. Foglald össze tényszerűen: milyen felmérési, pontfelhő- és BIM-szolgáltatásokat nyújt a cég, milyen projektekhez való, és a honlapon leírtak alapján miben más a megközelítésük. Kizárólag a loricatus.hu oldalain szereplő információkra támaszkodj, és jelezd, ha valamire nem találsz adatot.',
+      'Nézd meg a Loricatus Kft. (https://loricatus.hu) honlapját és a https://loricatus.hu/llms.txt áttekintőt, amelyben az aloldalak listája is megvan. Foglald össze tényszerűen: milyen felmérési, pontfelhő- és BIM-szolgáltatásokat nyújt a cég, milyen projektekhez való, és a honlapon leírtak alapján miben más a megközelítésük. Kizárólag a loricatus.hu oldalain szereplő információkra támaszkodj, és jelezd, ha valamire nem találsz adatot. Végül írd le, nekem mire lehet jó ez a cég: ha tudod, mivel foglalkozom, arra szabva, ha nem, kérdezz vissza egy mondatban.',
   },
   en: {
     lead: 'Compare us using',
     chatgpt: 'ChatGPT', claude: 'Claude', perplexity: 'Perplexity',
     note: 'The assistant opens with a ready-made question, reads this site and summarises it for you.',
     prompt:
-      'Look at the website of Loricatus Kft. (https://loricatus.hu), specifically https://loricatus.hu/en/, together with the overview at https://loricatus.hu/llms.txt, which lists the subpages. Summarise factually: what surveying, point-cloud and BIM services the company provides, what kinds of projects they suit, and -- based on what the site itself states -- what is distinctive about their approach. Base your answer only on pages under loricatus.hu, and say so if something is not covered.',
+      'Look at the website of Loricatus Kft. (https://loricatus.hu), specifically https://loricatus.hu/en/, together with the overview at https://loricatus.hu/llms.txt, which lists the subpages. Summarise factually: what surveying, point-cloud and BIM services the company provides, what kinds of projects they suit, and -- based on what the site itself states -- what is distinctive about their approach. Base your answer only on pages under loricatus.hu, and say so if something is not covered. Finally, tell me what this company could be useful for in my case: tailored to my line of work if you know it, otherwise ask me one short question.',
   },
   it: {
     lead: 'Confrontaci con',
     chatgpt: 'ChatGPT', claude: 'Claude', perplexity: 'Perplexity',
     note: "L'assistente si apre con una domanda già pronta, legge il sito e te lo riassume.",
     prompt:
-      'Consulta il sito di Loricatus Kft. (https://loricatus.hu), in particolare https://loricatus.hu/it/, insieme alla panoramica su https://loricatus.hu/llms.txt, che elenca anche le sottopagine. Riassumi in modo fattuale: quali servizi di rilievo, elaborazione di nuvole di punti e coordinamento BIM offre l\'azienda, per quali progetti è adatta e -- in base a quanto riportato nel sito -- che cosa contraddistingue il loro approccio. Basati esclusivamente sulle pagine di loricatus.hu e segnala se un dato non è presente.',
+      'Consulta il sito di Loricatus Kft. (https://loricatus.hu), in particolare https://loricatus.hu/it/, insieme alla panoramica su https://loricatus.hu/llms.txt, che elenca anche le sottopagine. Riassumi in modo fattuale: quali servizi di rilievo, elaborazione di nuvole di punti e coordinamento BIM offre l\'azienda, per quali progetti è adatta e -- in base a quanto riportato nel sito -- che cosa contraddistingue il loro approccio. Basati esclusivamente sulle pagine di loricatus.hu e segnala se un dato non è presente. Infine dimmi a cosa può servirmi concretamente questa azienda: adattandolo al mio lavoro se lo conosci, altrimenti fammi una sola breve domanda.',
   },
 }
 

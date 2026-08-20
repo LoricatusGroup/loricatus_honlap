@@ -575,6 +575,12 @@ function check(name, cond) {
     // it must not quietly fall out of a future rewording.
     check(`base/${loc}: the question names the company and pins the domain`,
       prompt.includes('Loricatus Kft.') && prompt.includes('loricatus.hu'))
+    // The visitor-facing half: answer what this is good for *me*, and ask back
+    // rather than inventing a "you" when there is nothing to go on.
+    check(`base/${loc}: the question asks what this is good for the visitor`,
+      /nekem mire lehet jó|useful for in my case|servirmi concretamente/.test(prompt))
+    check(`base/${loc}: it asks back instead of guessing`,
+      /kérdezz vissza|ask me one short question|fammi una sola breve domanda/.test(prompt))
   }
 
   // An unknown locale must still produce a usable page, not placeholders.
