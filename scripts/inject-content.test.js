@@ -576,4 +576,14 @@ function check(name, cond) {
     !/__AI_[A-Z]+__/.test(inj.fillAiCompare(base, 'de')))
 }
 
+// Stat counters: the number must survive into the text, not just the attribute.
+// A reader without JavaScript -- every AI crawler -- otherwise sees "0 projects".
+{
+  const doc = makeDoc('<span class="stat-num" data-target="500" data-edit-target="hero-stat-1-num">500</span>')
+  inj.applyContent(doc, { 'hero-stat-1-num': '640' })
+  const el = doc.querySelector('.stat-num')
+  check('stat: data-target updated', el.getAttribute('data-target') === '640')
+  check('stat: the number is readable without JavaScript', el.textContent === '640')
+}
+
 console.log(`\n${passed} checks passed`)

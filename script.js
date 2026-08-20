@@ -80,7 +80,14 @@
       }
     });
   }, { threshold: 0.5 });
-  document.querySelectorAll('.stat-num[data-target]').forEach(el => counterObs.observe(el));
+  // A statikus HTML a valódi számot tartalmazza, mert a JavaScriptet nem futtató
+  // olvasók (AI-crawlerek, kikapcsolt JS) különben nullát látnának ott, ahol
+  // "500+ elvégzett projekt" áll. A nullázás ezért ide költözött: a látogató
+  // ugyanúgy nulláról felfutó számot lát, mint eddig.
+  document.querySelectorAll('.stat-num[data-target]').forEach(el => {
+    el.textContent = '0';
+    counterObs.observe(el);
+  });
 
   /* ── CONTACT FORM ────────────────────────────── */
   // Self-hosted submission via the Supabase submit-form edge function
