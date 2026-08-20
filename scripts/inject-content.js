@@ -138,6 +138,13 @@ function applyBgValue(style, value) {
   return out
 }
 
+// The question names the company in full and pins the domain up front: the
+// bare word "Loricatus" made Perplexity reach for similarly-spelt Hungarian
+// place and family names, and pull in sources that had nothing to do with the
+// company. For the same reason it asks what is distinctive *according to the
+// site* rather than how the company compares to others -- the earlier wording
+// sent it off hunting for competitor data we do not control.
+//
 // Pages generated from page-templates/_base.html (blog posts, editor-created
 // pages) exist in all three languages, so the AI-compare band cannot carry a
 // hard-coded Hungarian question the way the fixed pages do. The template leaves
@@ -150,21 +157,21 @@ const AI_COMPARE_UI = {
     chatgpt: 'ChatGPT-vel', claude: 'Claude-dal', perplexity: 'Perplexityvel',
     note: 'Az asszisztens előre megírt kérdéssel nyílik meg, elolvassa ezt az oldalt, és összefoglalja neked.',
     prompt:
-      'Nézd meg a https://loricatus.hu oldalt és a https://loricatus.hu/llms.txt áttekintőt (ebben megtalálod az aloldalak listáját is), majd foglald össze tényszerűen: milyen felmérési, pontfelhő- és BIM-szolgáltatásokat nyújt a Loricatus, milyen projektekhez való, és mi különbözteti meg egy hagyományos geodéziai vagy szkennelő szolgáltatótól. Csak az oldalon szereplő információkra támaszkodj, és jelezd, ha valamire nem találsz adatot.',
+      'Nézd meg a Loricatus Kft. (https://loricatus.hu) honlapját és a https://loricatus.hu/llms.txt áttekintőt, amelyben az aloldalak listája is megvan. Foglald össze tényszerűen: milyen felmérési, pontfelhő- és BIM-szolgáltatásokat nyújt a cég, milyen projektekhez való, és a honlapon leírtak alapján miben más a megközelítésük. Kizárólag a loricatus.hu oldalain szereplő információkra támaszkodj, és jelezd, ha valamire nem találsz adatot.',
   },
   en: {
     lead: 'Compare us using',
     chatgpt: 'ChatGPT', claude: 'Claude', perplexity: 'Perplexity',
     note: 'The assistant opens with a ready-made question, reads this site and summarises it for you.',
     prompt:
-      'Read https://loricatus.hu/en/ and the overview at https://loricatus.hu/llms.txt (it lists the subpages too), then summarise factually: what surveying, point-cloud and BIM services Loricatus provides, what kinds of projects they suit, and how they differ from a conventional surveying or scanning provider. Use only what the site actually states, and say so if something is not covered.',
+      'Look at the website of Loricatus Kft. (https://loricatus.hu), specifically https://loricatus.hu/en/, together with the overview at https://loricatus.hu/llms.txt, which lists the subpages. Summarise factually: what surveying, point-cloud and BIM services the company provides, what kinds of projects they suit, and -- based on what the site itself states -- what is distinctive about their approach. Base your answer only on pages under loricatus.hu, and say so if something is not covered.',
   },
   it: {
     lead: 'Confrontaci con',
     chatgpt: 'ChatGPT', claude: 'Claude', perplexity: 'Perplexity',
     note: "L'assistente si apre con una domanda già pronta, legge il sito e te lo riassume.",
     prompt:
-      'Consulta https://loricatus.hu/it/ e la panoramica su https://loricatus.hu/llms.txt (elenca anche le sottopagine), poi riassumi in modo fattuale: quali servizi di rilievo, elaborazione di nuvole di punti e coordinamento BIM offre Loricatus, per quali progetti è adatta e in cosa si distingue da un fornitore tradizionale di rilievi o scansioni. Basati solo su quanto riportato nel sito e segnala se un dato non è presente.',
+      'Consulta il sito di Loricatus Kft. (https://loricatus.hu), in particolare https://loricatus.hu/it/, insieme alla panoramica su https://loricatus.hu/llms.txt, che elenca anche le sottopagine. Riassumi in modo fattuale: quali servizi di rilievo, elaborazione di nuvole di punti e coordinamento BIM offre l\'azienda, per quali progetti è adatta e -- in base a quanto riportato nel sito -- che cosa contraddistingue il loro approccio. Basati esclusivamente sulle pagine di loricatus.hu e segnala se un dato non è presente.',
   },
 }
 

@@ -553,7 +553,7 @@ function check(name, cond) {
     base.includes('__AI_PROMPT__') && base.includes('__AI_Q__') && base.includes('__AI_LEAD__'))
 
   for (const [loc, needle, lead] of [
-    ['hu', 'https://loricatus.hu oldalt', 'Hasonlíts össze minket'],
+    ['hu', 'honlapját', 'Hasonlíts össze minket'],
     ['en', 'https://loricatus.hu/en/', 'Compare us using'],
     ['it', 'https://loricatus.hu/it/', 'Confrontaci con'],
   ]) {
@@ -569,6 +569,12 @@ function check(name, cond) {
       new URL(href).searchParams.get('q') === prompt)
     check(`base/${loc}: the question is editable from the CMS`,
       doc.querySelector('meta[data-edit-content="footer-ai-prompt"]') !== null)
+    // The bare word "Loricatus" is close enough to Hungarian place and family
+    // names that a search-first assistant wandered off to unrelated sources.
+    // Naming the company in full and pinning the domain is what stops that, so
+    // it must not quietly fall out of a future rewording.
+    check(`base/${loc}: the question names the company and pins the domain`,
+      prompt.includes('Loricatus Kft.') && prompt.includes('loricatus.hu'))
   }
 
   // An unknown locale must still produce a usable page, not placeholders.
