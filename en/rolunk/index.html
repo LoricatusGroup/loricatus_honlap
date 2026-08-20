@@ -17,7 +17,7 @@
   <link rel="icon" href="/favicon.ico" sizes="32x32">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-  <link rel="stylesheet" href="/style.css?v=19">
+  <link rel="stylesheet" href="/style.css?v=20">
   <style>
   /* clear the fixed site navbar, the way .pg-hero does on the other subpages */
   .lor-wrap { background: var(--bg); padding-top: var(--nav-h, 64px); }
@@ -35,7 +35,8 @@
   .lor-panel[hidden] { display: none; }
   @keyframes lorFade { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 </style>
-<style id="cms-theme"></style></head>
+<style id="cms-theme"></style>  <meta name="ai-compare-prompt" data-edit-content="footer-ai-prompt" content="Read https://loricatus.hu/en/rolunk/ (overview: https://loricatus.hu/llms.txt) and summarise how Loricatus works on a general-contractor project: which problems it addresses, what the process looks like, and what the client actually receives. Use only what the site actually states, and say so if something is not covered.">
+</head>
 
 <body>
 
@@ -464,6 +465,24 @@
   </main>
 
   <footer class="footer">
+    <div class="ai-compare-band">
+      <div class="container ai-compare">
+        <p class="ai-compare-lead" data-edit="footer-ai-lead">Compare us using</p>
+        <div class="ai-compare-links">
+          <a class="ai-compare-btn" data-ai-service="chatgpt"
+             href="https://chatgpt.com/?hints=search&amp;q=Read%20https%3A%2F%2Floricatus.hu%2Fen%2Frolunk%2F%20(overview%3A%20https%3A%2F%2Floricatus.hu%2Fllms.txt)%20and%20summarise%20how%20Loricatus%20works%20on%20a%20general-contractor%20project%3A%20which%20problems%20it%20addresses%2C%20what%20the%20process%20looks%20like%2C%20and%20what%20the%20client%20actually%20receives.%20Use%20only%20what%20the%20site%20actually%20states%2C%20and%20say%20so%20if%20something%20is%20not%20covered."
+             target="_blank" rel="noopener noreferrer nofollow">ChatGPT</a>
+          <a class="ai-compare-btn" data-ai-service="claude"
+             href="https://claude.ai/new?q=Read%20https%3A%2F%2Floricatus.hu%2Fen%2Frolunk%2F%20(overview%3A%20https%3A%2F%2Floricatus.hu%2Fllms.txt)%20and%20summarise%20how%20Loricatus%20works%20on%20a%20general-contractor%20project%3A%20which%20problems%20it%20addresses%2C%20what%20the%20process%20looks%20like%2C%20and%20what%20the%20client%20actually%20receives.%20Use%20only%20what%20the%20site%20actually%20states%2C%20and%20say%20so%20if%20something%20is%20not%20covered."
+             target="_blank" rel="noopener noreferrer nofollow">Claude</a>
+          <a class="ai-compare-btn" data-ai-service="perplexity"
+             href="https://www.perplexity.ai/search?q=Read%20https%3A%2F%2Floricatus.hu%2Fen%2Frolunk%2F%20(overview%3A%20https%3A%2F%2Floricatus.hu%2Fllms.txt)%20and%20summarise%20how%20Loricatus%20works%20on%20a%20general-contractor%20project%3A%20which%20problems%20it%20addresses%2C%20what%20the%20process%20looks%20like%2C%20and%20what%20the%20client%20actually%20receives.%20Use%20only%20what%20the%20site%20actually%20states%2C%20and%20say%20so%20if%20something%20is%20not%20covered."
+             target="_blank" rel="noopener noreferrer nofollow">Perplexity</a>
+        </div>
+        <p class="ai-compare-note" data-edit="footer-ai-note">The assistant opens with a ready-made question, reads this site and summarises it for you.</p>
+      </div>
+    </div>
+    <!-- /ai-compare -->
     <div class="footer-bottom">
       <div class="container footer-bottom-inner">
         <span data-edit="footer-copyright">© 2026 Loricatus. All rights reserved.</span>
@@ -472,7 +491,7 @@
     </div>
   </footer>
 
-  <script src="/script.js?v=9" defer=""></script>
+  <script src="/script.js?v=10" defer=""></script>
   <script>
   (function () {
     var tabs = document.querySelectorAll('[data-lor-tab]');

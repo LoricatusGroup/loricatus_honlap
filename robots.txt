@@ -52,3 +52,6 @@ Allow: /
 Disallow: /admin-app/
 
 Sitemap: https://loricatus.hu/sitemap.xml
+
+# Rövid, gépi áttekintő az oldal tartalmáról AI-asszisztenseknek:
+# https://loricatus.hu/llms.txt

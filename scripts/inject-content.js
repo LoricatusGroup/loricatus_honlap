@@ -138,6 +138,75 @@ function applyBgValue(style, value) {
   return out
 }
 
+// Pages generated from page-templates/_base.html (blog posts, editor-created
+// pages) exist in all three languages, so the AI-compare band cannot carry a
+// hard-coded Hungarian question the way the fixed pages do. The template leaves
+// __AI_* placeholders behind and this fills them per locale, exactly like
+// __CTA__. The question is a CMS field, so once the owner edits it, the value
+// stored for that page wins on the next publish.
+const AI_COMPARE_UI = {
+  hu: {
+    lead: 'Hasonlíts össze minket',
+    chatgpt: 'ChatGPT-vel', claude: 'Claude-dal', perplexity: 'Perplexityvel',
+    note: 'Az asszisztens előre megírt kérdéssel nyílik meg, elolvassa ezt az oldalt, és összefoglalja neked.',
+    prompt:
+      'Nézd meg a https://loricatus.hu oldalt és a https://loricatus.hu/llms.txt áttekintőt (ebben megtalálod az aloldalak listáját is), majd foglald össze tényszerűen: milyen felmérési, pontfelhő- és BIM-szolgáltatásokat nyújt a Loricatus, milyen projektekhez való, és mi különbözteti meg egy hagyományos geodéziai vagy szkennelő szolgáltatótól. Csak az oldalon szereplő információkra támaszkodj, és jelezd, ha valamire nem találsz adatot.',
+  },
+  en: {
+    lead: 'Compare us using',
+    chatgpt: 'ChatGPT', claude: 'Claude', perplexity: 'Perplexity',
+    note: 'The assistant opens with a ready-made question, reads this site and summarises it for you.',
+    prompt:
+      'Read https://loricatus.hu/en/ and the overview at https://loricatus.hu/llms.txt (it lists the subpages too), then summarise factually: what surveying, point-cloud and BIM services Loricatus provides, what kinds of projects they suit, and how they differ from a conventional surveying or scanning provider. Use only what the site actually states, and say so if something is not covered.',
+  },
+  it: {
+    lead: 'Confrontaci con',
+    chatgpt: 'ChatGPT', claude: 'Claude', perplexity: 'Perplexity',
+    note: "L'assistente si apre con una domanda già pronta, legge il sito e te lo riassume.",
+    prompt:
+      'Consulta https://loricatus.hu/it/ e la panoramica su https://loricatus.hu/llms.txt (elenca anche le sottopagine), poi riassumi in modo fattuale: quali servizi di rilievo, elaborazione di nuvole di punti e coordinamento BIM offre Loricatus, per quali progetti è adatta e in cosa si distingue da un fornitore tradizionale di rilievi o scansioni. Basati solo su quanto riportato nel sito e segnala se un dato non è presente.',
+  },
+}
+
+function fillAiCompare(html, locale) {
+  const ui = AI_COMPARE_UI[locale] || AI_COMPARE_UI.hu
+  return html
+    .replace(/__AI_PROMPT__/g, () => escapeAttr(ui.prompt))
+    .replace(/__AI_Q__/g, () => encodeURIComponent(ui.prompt))
+    .replace(/__AI_LEAD__/g, () => escapeHtmlText(ui.lead))
+    .replace(/__AI_NOTE__/g, () => escapeHtmlText(ui.note))
+    .replace(/__AI_CHATGPT__/g, () => escapeHtmlText(ui.chatgpt))
+    .replace(/__AI_CLAUDE__/g, () => escapeHtmlText(ui.claude))
+    .replace(/__AI_PERPLEXITY__/g, () => escapeHtmlText(ui.perplexity))
+}
+
+// Keep the AI-compare links in step with the question the owner edited.
+//
+// The question is one CMS field; the three hrefs are derived from it. script.js
+// does the same at runtime, but baking it here means the links are already
+// correct in the published HTML — so they work without JavaScript, and anything
+// that reads the raw HTML sees the real target.
+const AI_COMPARE_TARGETS = {
+  chatgpt: (q) => `https://chatgpt.com/?hints=search&q=${q}`,
+  claude: (q) => `https://claude.ai/new?q=${q}`,
+  perplexity: (q) => `https://www.perplexity.ai/search?q=${q}`,
+}
+
+function syncAiCompareLinks(doc) {
+  const meta = doc.querySelector('meta[name="ai-compare-prompt"]')
+  const prompt = (meta && meta.getAttribute('content') || '').trim()
+  if (!prompt) return 0
+  const q = encodeURIComponent(prompt)
+  let n = 0
+  doc.querySelectorAll('[data-ai-service]').forEach((a) => {
+    const make = AI_COMPARE_TARGETS[a.getAttribute('data-ai-service')]
+    if (!make) return
+    a.setAttribute('href', make(q))
+    n++
+  })
+  return n
+}
+
 function applyContent(doc, content) {
   let applied = 0
   const missing = []
@@ -174,6 +243,8 @@ function applyContent(doc, content) {
     }
     if (!hit) missing.push(key)
   }
+
+  syncAiCompareLinks(doc)
 
   return { applied, missing }
 }
@@ -724,7 +795,7 @@ function renderUploadedPage(upload, page, locale, manifest) {
   const cta =
     { hu: 'Ajánlatkérés', en: 'Get a quote', it: 'Richiedi preventivo' }[locale] || 'Ajánlatkérés'
 
-  let html = base
+  let html = fillAiCompare(base, locale)
     .replace(/__LANG__/g, () => locale)
     .replace(/__TITLE__/g, () => escapeHtmlText(title))
     .replace(/__DESC__/g, () => escapeHtmlText(desc))
@@ -762,7 +833,7 @@ function scaffoldPageFile(htmlPath, page, locale, manifest) {
   const homeUrl = (home && home.locales[locale] && home.locales[locale].url) || '/'
   const label = navLabel(page, locale)
   const cta = { hu: 'Ajánlatkérés', en: 'Get a quote', it: 'Richiedi preventivo' }[locale] || 'Ajánlatkérés'
-  const html = baseHtml
+  const html = fillAiCompare(baseHtml, locale)
     .replace(/__LANG__/g, locale)
     .replace(/__TITLE__/g, `${escapeHtmlText(label)} – Loricatus`)
     .replace(/__DESC__/g, escapeHtmlText(label))
@@ -932,13 +1003,16 @@ function readBaseShell(locale, manifest, label, desc, bodyHtml) {
   const home = (manifest.pages || []).find((p) => p.id === 'home')
   const homeUrl = (home && home.locales[locale] && home.locales[locale].url) || '/'
   const cta = { hu: 'Ajánlatkérés', en: 'Get a quote', it: 'Richiedi preventivo' }[locale] || 'Ajánlatkérés'
-  return base
-    .replace(/__LANG__/g, locale)
-    .replace(/__TITLE__/g, `${escapeHtmlText(label)} – Loricatus`)
-    .replace(/__DESC__/g, escapeHtmlText(desc || label))
-    .replace(/__HOME__/g, homeUrl)
-    .replace(/__CTA__/g, escapeHtmlText(cta))
-    .replace('__BODY__', bodyHtml)
+  return fillAiCompare(
+    base
+      .replace(/__LANG__/g, locale)
+      .replace(/__TITLE__/g, `${escapeHtmlText(label)} – Loricatus`)
+      .replace(/__DESC__/g, escapeHtmlText(desc || label))
+      .replace(/__HOME__/g, homeUrl)
+      .replace(/__CTA__/g, escapeHtmlText(cta))
+      .replace('__BODY__', bodyHtml),
+    locale,
+  )
 }
 
 function buildPostCard(post, locale) {
@@ -1240,6 +1314,8 @@ if (require.main === module) {
 
 module.exports = {
   applyContent,
+  fillAiCompare,
+  syncAiCompareLinks,
   toEmbedUrl,
   isVideoFile,
   soroEmbedHtml,

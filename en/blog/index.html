@@ -10,7 +10,7 @@
   <link rel="icon" href="/favicon.ico" sizes="32x32">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-  <link rel="stylesheet" href="/style.css?v=19">
+  <link rel="stylesheet" href="/style.css?v=20">
   <style>
     .pg-hero { padding: calc(var(--nav-h) + 64px) 0 32px; background: var(--bg2); border-bottom: 1px solid var(--border); }
     .pg-wrap { max-width: var(--w); margin: 0 auto; padding: 0 clamp(20px, 4vw, 48px); }
@@ -18,7 +18,8 @@
     .pg-section p { max-width: 720px; font-size: 16px; line-height: 1.7; color: var(--text); }
     .pg-block { border-top: 1px solid var(--border); padding-top: 28px; margin-top: 28px; }
   </style>
-<style id="cms-theme"></style><link rel="canonical" href="https://loricatus.hu/en/blog/"><link rel="alternate" hreflang="hu" href="https://loricatus.hu/blog/"><link rel="alternate" hreflang="en" href="https://loricatus.hu/en/blog/"><link rel="alternate" hreflang="it" href="https://loricatus.hu/it/blog/"><link rel="alternate" hreflang="x-default" href="https://loricatus.hu/blog/"></head>
+<style id="cms-theme"></style><link rel="canonical" href="https://loricatus.hu/en/blog/"><link rel="alternate" hreflang="hu" href="https://loricatus.hu/blog/"><link rel="alternate" hreflang="en" href="https://loricatus.hu/en/blog/"><link rel="alternate" hreflang="it" href="https://loricatus.hu/it/blog/"><link rel="alternate" hreflang="x-default" href="https://loricatus.hu/blog/">  <meta name="ai-compare-prompt" data-edit-content="footer-ai-prompt" content="Read https://loricatus.hu/en/blog/ and the overview at https://loricatus.hu/llms.txt, then summarise what Loricatus writes about and what that says about the company's technical approach. Use only what the site actually states, and say so if something is not covered.">
+</head>
 
 <body>
 
@@ -48,6 +49,24 @@
 
 
   <footer class="footer">
+    <div class="ai-compare-band">
+      <div class="container ai-compare">
+        <p class="ai-compare-lead" data-edit="footer-ai-lead">Compare us using</p>
+        <div class="ai-compare-links">
+          <a class="ai-compare-btn" data-ai-service="chatgpt"
+             href="https://chatgpt.com/?hints=search&amp;q=Read%20https%3A%2F%2Floricatus.hu%2Fen%2Fblog%2F%20and%20the%20overview%20at%20https%3A%2F%2Floricatus.hu%2Fllms.txt%2C%20then%20summarise%20what%20Loricatus%20writes%20about%20and%20what%20that%20says%20about%20the%20company's%20technical%20approach.%20Use%20only%20what%20the%20site%20actually%20states%2C%20and%20say%20so%20if%20something%20is%20not%20covered."
+             target="_blank" rel="noopener noreferrer nofollow">ChatGPT</a>
+          <a class="ai-compare-btn" data-ai-service="claude"
+             href="https://claude.ai/new?q=Read%20https%3A%2F%2Floricatus.hu%2Fen%2Fblog%2F%20and%20the%20overview%20at%20https%3A%2F%2Floricatus.hu%2Fllms.txt%2C%20then%20summarise%20what%20Loricatus%20writes%20about%20and%20what%20that%20says%20about%20the%20company's%20technical%20approach.%20Use%20only%20what%20the%20site%20actually%20states%2C%20and%20say%20so%20if%20something%20is%20not%20covered."
+             target="_blank" rel="noopener noreferrer nofollow">Claude</a>
+          <a class="ai-compare-btn" data-ai-service="perplexity"
+             href="https://www.perplexity.ai/search?q=Read%20https%3A%2F%2Floricatus.hu%2Fen%2Fblog%2F%20and%20the%20overview%20at%20https%3A%2F%2Floricatus.hu%2Fllms.txt%2C%20then%20summarise%20what%20Loricatus%20writes%20about%20and%20what%20that%20says%20about%20the%20company's%20technical%20approach.%20Use%20only%20what%20the%20site%20actually%20states%2C%20and%20say%20so%20if%20something%20is%20not%20covered."
+             target="_blank" rel="noopener noreferrer nofollow">Perplexity</a>
+        </div>
+        <p class="ai-compare-note" data-edit="footer-ai-note">The assistant opens with a ready-made question, reads this site and summarises it for you.</p>
+      </div>
+    </div>
+    <!-- /ai-compare -->
     <div class="footer-bottom">
       <div class="container footer-bottom-inner">
         <span data-edit="footer-copyright">© 2026 Loricatus. Minden jog fenntartva.</span>
@@ -56,7 +75,7 @@
     </div>
   </footer>
 
-  <script src="/script.js?v=9" defer=""></script>
+  <script src="/script.js?v=10" defer=""></script>
 
 
 </body></html>

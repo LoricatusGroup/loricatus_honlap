@@ -336,4 +336,32 @@
     });
   }
 
+  // ── AI-összehasonlító gombok ────────────────────────────────────────────
+  // A kérdést a <head> egy meta mezője tárolja, mert így a CMS-ből
+  // szerkeszthető anélkül, hogy megjelenne az oldal szövegében -- oda nem
+  // való, és az oldalt olvasó asszisztenst is összezavarná.
+  //
+  // A linkekben publikáláskor már benne van a helyes cím, ez a rész csak
+  // újraszámolja: ha a tulajdonos átírja a kérdést a szerkesztőben, a gombok
+  // JavaScript nélkül is a legutóbb publikált kérdéssel működnek tovább.
+  const aiPrompt = document
+    .querySelector('meta[name="ai-compare-prompt"]')
+    ?.getAttribute('content')
+    ?.trim();
+  if (aiPrompt) {
+    // A hints=search rábírja a ChatGPT-t, hogy tényleg nézze meg az oldalt,
+    // ne emlékezetből válaszoljon. Mindhárom paraméter dokumentálatlan, ezért
+    // a publikáláskor beégetett cím a biztos pont, ez csak ráerősít.
+    const targets = {
+      chatgpt: (q) => `https://chatgpt.com/?hints=search&q=${q}`,
+      claude: (q) => `https://claude.ai/new?q=${q}`,
+      perplexity: (q) => `https://www.perplexity.ai/search?q=${q}`,
+    };
+    const q = encodeURIComponent(aiPrompt);
+    document.querySelectorAll('[data-ai-service]').forEach((a) => {
+      const make = targets[a.getAttribute('data-ai-service')];
+      if (make) a.href = make(q);
+    });
+  }
+
 })();
