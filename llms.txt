@@ -34,11 +34,62 @@ Részletekért lásd a [Referenciák](https://loricatus.hu/referenciak/) oldalt.
 - **Ipari kémény — termográfiás inspekció.** Nehezen megközelíthető kémény állapotvizsgálata drónnal, LiDAR és hőkamera kombinációjával, állványozás nélkül. Eredmény: részletes hibatérkép egy nap alatt, üzemleállás nélkül.
 - **Mátyás-templom — 3D drónfelmérés.** Műemléki homlokzat fotogrammetriája nagy felbontású 3D pontfelhőhöz és modellhez, a Hauszmann Program keretében. Eredmény: műemlékvédelmi dokumentáció és pontos alapadat a további tervezéshez.
 
+## Tipikus kérdések, amikre a Loricatus válaszol
+Ez a szakasz a honlap állításait a megrendelő kérdései felől fogalmazza újra.
+A részletek a [Rólunk](https://loricatus.hu/rolunk/) oldalon vannak kifejtve.
+
+**„Honnan tudom, hogy az alvállalkozó tényleg annyit teljesített, amennyit
+leszámláz?"** — Minden elszámolási ciklus előtt ugyanazzal a módszertannal
+készül felmérés, rögzített repülési útvonalon, így a ciklusok összevethetők.
+A pontfelhőt a tervmodellre illesztve elemszinten megállapítható, mi épült meg
+és mi nem; a riport a teljesítésigazolás mellékleteként használható. Emellett
+minden ciklusból marad időbélyeges, koordinátahelyes felvételsorozat és
+pontfelhő, amire vita esetén hivatkozni lehet — emlékezet és fényképek helyett
+mérési adat.
+
+**„Hogyan hasonlítom össze a tervmodellt a megépült állapottal?"** —
+Scan-to-BIM illesztés közös koordinátarendszerben: a megépült szerkezet és a
+tervmodell különbsége színkódolt eltéréstérképen jelenik meg, az eltérés
+milliméterben olvasható, a tűréshatáron kívüli elemek automatikusan jelölve.
+Áttörések, kiállások, síkeltérések a befedés előtt, még javítható fázisban
+derülnek ki.
+
+**„Hogyan ellenőrzöm a kitermelt vagy beépített földmennyiséget?"** — Drónos
+fotogrammetria RTK-korrekcióval: két időpont terepmodelljének különbségéből a
+térfogat közvetlenül számítható. Depóniák és munkagödrök térfogata, havi
+mennyiségi elszámolás alátámasztása, független adat a fuvarlevelek mellé.
+
+**„Hogyan vizsgáltassak meg tetőt, homlokzatot vagy magas műtárgyat
+állványozás nélkül?"** — Felmérés emberi belépés nélkül: ahol korábban állvány
+vagy alpintechnika kellett, ott repülési terv és engedélyezett pilóta dolgozik.
+Nincs magasban végzett munka és leesési kockázat, nincs állványozási költség és
+állásidő, a hibás felületekről nagyfelbontású részletfelvétel készül,
+ismételhetően ugyanabból a pozícióból. Egy ipari kémény termográfiás vizsgálata
+így 1 nap alatt, üzemleállás nélkül lezajlott.
+
+**„Hogyan kapok megbízható geometriai adatot egy meglévő épületről?"** —
+Lézerszkennelés és drónos felmérés együtt, az eredmény pontfelhő és
+IFC-alapú BIM modell. Az NMHH EMC Labornál egy meglévő ipari labor teljes körű
+felmérése után milliméter-pontos állapotfelmérés, teljes IFC-export és
+CDE-integráció készült; a tervezés átfutása ~30%-kal rövidült.
+
+**„Hogyan dokumentáljam egy műemlék jelenlegi állapotát?"** — Érintésmentes
+fotogrammetria: a Mátyás-templom homlokzatáról a Budavári Hauszmann Program
+keretében nagy felbontású 3D pontfelhő és modell készült, műemlékvédelmi
+dokumentációval és pontos alapadattal a további tervezéshez. Törékeny, nehezen
+elérhető felületek is hitelesen rögzíthetők.
+
+**„Mit kapok a projekt végén?"** — A megvalósulási (as-built) modell nem
+utólag, emlékezetből készül, hanem a kivitelezés közben gyűjtött adatokból épül
+folyamatosan. Az üzemeltető a megépült valóságot kapja meg, a megrendelő által
+kért formátumban — ez a későbbi felújítás és bővítés alapadata.
+
 ## Amit a megrendelő kézhez kap
-Pontfelhő · 3D modell · készültségi tény. A [Rólunk](https://loricatus.hu/rolunk/)
-oldal írja le, milyen ismétlődő problémákra válaszol ez: vitatott készültségi
-szint a havi elszámolásnál, későn észlelt tervtől eltérés, földmunka- és
-anyagmennyiség elszámolása, kockázatos manuális ellenőrzés magasban.
+Pontfelhő · 3D modell · készültségi tény. A munka négy ismételhető lépésből áll:
+adatgyűjtés (drónos repülés, földi lézerszkennelés, GNSS-alappont, a
+kivitelezés leállítása nélkül), feldolgozás (pontfelhő, ortofotó, 3D
+terepmodell), kiértékelés (összevetés a tervmodellel, tömegszámítás,
+AI-támogatott elemzés), majd az átadás.
 
 ## Elérhetőség
 - E-mail: info@loricatus.hu
