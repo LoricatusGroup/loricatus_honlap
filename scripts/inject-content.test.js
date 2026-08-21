@@ -577,10 +577,21 @@ function check(name, cond) {
       prompt.includes('Loricatus Kft.') && prompt.includes('loricatus.hu'))
     // The visitor-facing half: answer what this is good for *me*, and ask back
     // rather than inventing a "you" when there is nothing to go on.
-    check(`base/${loc}: the question asks what this is good for the visitor`,
-      /nekem mire lehet jó|useful for in my case|servirmi concretamente/.test(prompt))
+    // The visitor-facing half. The site speaks in technology; buyers ask in
+    // problems, so the question has to demand that register explicitly.
+    check(`base/${loc}: it asks for problems, not a service list`,
+      /Ne szolgáltatáslistát|Do not give me a service list|Non darmi un elenco di servizi/.test(prompt))
     check(`base/${loc}: it asks back instead of guessing`,
       /kérdezz vissza|ask me one short question|fammi una sola breve domanda/.test(prompt))
+    check(`base/${loc}: it closes with a recommendation and contact details`,
+      /érdemes-e egyeztetni.*elérhetőség|worth talking to them.*contact details|vale la pena parlare.*contatti/s.test(prompt))
+    // Tone is fine; a made-up client relationship is not. If an assistant ever
+    // claims "I worked with them", a prospect quoting that back is a problem.
+    check(`base/${loc}: it must not claim personal experience`,
+      /ne állítsd, hogy személyes tapasztalatod|do not claim any personal experience|non affermare di avere esperienza diretta/.test(prompt))
+    // Long questions are the point, but the link still has to survive a browser.
+    check(`base/${loc}: the link stays comfortably under the URL limit`,
+      encodeURIComponent(prompt).length < 1800, `${encodeURIComponent(prompt).length}`)
   }
 
   // An unknown locale must still produce a usable page, not placeholders.
