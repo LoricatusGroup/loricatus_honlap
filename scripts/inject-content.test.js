@@ -104,7 +104,17 @@ function check(name, cond) {
   const manifest = inj.loadManifest()
   const xml = inj.buildSitemapXml(manifest)
   const locs = (xml.match(/<loc>/g) || []).length
-  check('sitemap: 12 pages (home+rolunk+ref+blog x3) + 3 extras = 15 urls', locs === 15)
+  // A darabszámot a manifestből számoljuk, így egy új extraUrl (pl. a kötelező
+  // pályázati tájékoztató oldalai) nem bukik el rajta, viszont a hiányzó
+  // nyelvi változat továbbra is kiderül.
+  const varhato =
+    manifest.pages.reduce((n, p) => n + Object.keys(p.locales || {}).length, 0) +
+    (manifest.extraUrls || []).length
+  check(`sitemap: ${varhato} url (oldal × nyelv + extraUrls)`, locs === varhato, `${locs}`)
+  check('sitemap: a pályázati tájékoztató benne van',
+    xml.includes('<loc>https://loricatus.hu/palyazatok/</loc>') &&
+    xml.includes('<loc>https://loricatus.hu/palyazatok/ginop/</loc>') &&
+    xml.includes('<loc>https://loricatus.hu/palyazatok/dimop/</loc>'))
   check('sitemap: contains referenciak hu', xml.includes('<loc>https://loricatus.hu/referenciak/</loc>'))
   check('sitemap: contains referenciak it', xml.includes('<loc>https://loricatus.hu/it/referenciak/</loc>'))
   check('sitemap: contains blog index', xml.includes('<loc>https://loricatus.hu/blog/</loc>'))
@@ -205,8 +215,22 @@ function check(name, cond) {
   const doc = makeDoc('<nav><ul class="nav-links" data-navauto></ul></nav>')
   inj.syncNav(doc, merged, '/szolgaltatasok/', 'hu')
   const links = Array.from(doc.querySelectorAll('ul.nav-links li[data-navpage]'))
-  // home + rolunk + referenciak + dynamic(szolgaltatasok) + blog + cta
-  check('navauto: 6 items incl. rolunk + blog + cta', links.length === 6)
+  // home + rolunk + referenciak + dynamic(szolgaltatasok) + blog + navExtra + cta
+  check('navauto: 7 items incl. rolunk + blog + navExtra + cta', links.length === 7, `${links.length}`)
+  // A kötelező pályázati tájékoztató nem CMS-oldal, de a menüből elérhetőnek
+  // kell lennie. A data-navauto menüt minden publikálás újraépíti, úgyhogy ha
+  // ez kiesik a manifestből, a link csendben eltűnik a fél honlapról.
+  const palyazat = links.find((l) => l.getAttribute('data-navpage') === 'palyazatok')
+  check('navauto: a pályázati tájékoztató bekerül a menübe', !!palyazat)
+  check('navauto: a pályázati link a /palyazatok/ oldalra visz',
+    palyazat && palyazat.querySelector('a').getAttribute('href') === '/palyazatok/')
+  check('navauto: magyarul "Pályázatok" a felirat',
+    palyazat && palyazat.querySelector('a').textContent === 'Pályázatok')
+  const docEn = makeDoc('<nav><ul class="nav-links" data-navauto></ul></nav>')
+  inj.syncNav(docEn, merged, '/en/', 'en')
+  const enLink = docEn.querySelector('li[data-navpage="palyazatok"] a')
+  check('navauto: angolul "EU funding" a felirat', enLink && enLink.textContent === 'EU funding')
+  check('navauto: angolul is a magyar oldalra visz', enLink && enLink.getAttribute('href') === '/palyazatok/')
   check('navauto: home link first', links[0].getAttribute('data-navpage') === 'home')
   check('navauto: last is cta (mobile)', links[links.length - 1].getAttribute('data-navpage') === 'cta')
   check('navauto: cta points to home #contact', doc.querySelector('[data-navpage="cta"] a').getAttribute('href') === '/#contact')

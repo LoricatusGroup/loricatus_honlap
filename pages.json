@@ -121,8 +121,23 @@
     }
   ],
   "extraUrls": [
+    "/palyazatok/dimop/",
+    "/palyazatok/ginop/",
+    "/palyazatok/",
     "/tudastar/",
     "/adatvedelem/",
     "/cookie-szabalyzat/"
+  ],
+  "navExtra": [
+    {
+      "id": "palyazatok",
+      "url": "/palyazatok/",
+      "order": 70,
+      "nav": {
+        "hu": "Pályázatok",
+        "en": "EU funding",
+        "it": "Fondi UE"
+      }
+    }
   ]
 }
