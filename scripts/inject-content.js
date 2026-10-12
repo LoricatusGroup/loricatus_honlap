@@ -874,10 +874,24 @@ function syncNav(doc, manifest, currentUrl, locale) {
   const homeLink = home && home.locales[locale]
     ? { id: 'home', url: home.locales[locale].url, label: navLabel(home, locale) }
     : null
+  // A manifest navExtra listája olyan hivatkozásokat ír le, amelyek a
+  // navigációban szerepelnek, de nem CMS-oldalak: nincs bennük szerkeszthető
+  // mező, a szerkesztőnek nem kell tudnia róluk. A kötelező pályázati
+  // tájékoztató ilyen. Enélkül a data-navauto oldalak menüjét minden publikálás
+  // újraépítené -- és a tájékoztató linkje csendben eltűnne róluk.
+  const extra = (manifest.navExtra || []).map((e) => ({
+    id: e.id,
+    url: e.url,
+    label: (e.nav && (e.nav[locale] || e.nav.hu)) || e.id,
+    order: e.order ?? 100,
+    dynamic: false,
+  }))
   const inNav = (manifest.pages || [])
     .filter((p) => p.inNav && p.locales && p.locales[locale])
-    .sort((a, b) => (a.order ?? 100) - (b.order ?? 100))
-    .map((p) => ({ id: p.id, url: p.locales[locale].url, label: navLabel(p, locale), dynamic: !!p._dynamic }))
+    .map((p) => ({ id: p.id, url: p.locales[locale].url, label: navLabel(p, locale),
+                   order: p.order ?? 100, dynamic: !!p._dynamic }))
+    .concat(extra)
+    .sort((a, b) => a.order - b.order)
 
   const mkLi = (link) => {
     const li = doc.createElement('li')

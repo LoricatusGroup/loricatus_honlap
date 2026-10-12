@@ -22,6 +22,7 @@ kérlek jelezd ezt ahelyett, hogy következtetnél rá.
 - [Referenciák](https://loricatus.hu/referenciak/): esettanulmányok feladattal, eredménnyel és üzleti haszonnal
 - [Tudástár](https://loricatus.hu/tudastar/): válogatott szakmai cikkek BIM-ről, felmérésről, drónos dokumentációról
 - [Blog](https://loricatus.hu/blog/): friss cikkek és hírek
+- [Pályázatok](https://loricatus.hu/palyazatok/): európai uniós társfinanszírozású fejlesztések a Széchenyi Terv Plusz programban — [GINOP Plusz](https://loricatus.hu/palyazatok/ginop/) (pontfelhő-feldolgozási innováció) és [DIMOP Plusz](https://loricatus.hu/palyazatok/dimop/) (Építőipar 4.0 SaaS alkalmazás)
 - [Adatkezelési tájékoztató](https://loricatus.hu/adatvedelem/) · [Sütikezelés](https://loricatus.hu/cookie-szabalyzat/)
 
 ## Angol és olasz változat
