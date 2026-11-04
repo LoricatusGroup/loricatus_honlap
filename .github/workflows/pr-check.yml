@@ -1,0 +1,60 @@
+name: PR ellenőrzés
+
+# A main-re push azonnal élesít (deploy.yml), ezért minden változás PR-ből jön,
+# és ez a munkafolyamat a merge előtti kapu. Nem deployol semmit.
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Admin build + CMS-szkript teszt
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: admin/package-lock.json
+
+      - name: Admin függőségek
+        working-directory: admin
+        run: npm ci --no-audit --no-fund
+
+      - name: Admin build (tsc + vite)
+        working-directory: admin
+        # Próbaértékek: a build csak a típusokat és a bundle-t ellenőrzi, élő
+        # Supabase-hez nem csatlakozik.
+        env:
+          VITE_SUPABASE_URL: https://example.supabase.co
+          VITE_SUPABASE_ANON_KEY: ci-placeholder
+        run: npm run build
+
+      - name: CMS-szkript függőségek
+        working-directory: scripts
+        run: npm install --no-audit --no-fund
+
+      - name: inject-content teszt
+        run: node scripts/inject-content.test.js
+
+  lint:
+    # Egyelőre csak tájékoztat (kb. 33 meglévő hiba az adminban).
+    name: Admin lint (tájékoztató)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: admin/package-lock.json
+      - working-directory: admin
+        run: npm ci --no-audit --no-fund && npm run lint
