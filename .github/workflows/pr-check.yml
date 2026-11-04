@@ -48,7 +48,6 @@ jobs:
     name: Admin lint (tájékoztató)
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -57,4 +56,9 @@ jobs:
           cache: npm
           cache-dependency-path: admin/package-lock.json
       - working-directory: admin
-        run: npm ci --no-audit --no-fund && npm run lint
+        run: npm ci --no-audit --no-fund
+      - name: Lint
+        working-directory: admin
+        # Lépésszintű continue-on-error: a check zöld marad, a hibák a naplóban látszanak.
+        continue-on-error: true
+        run: npm run lint
