@@ -1073,6 +1073,49 @@ body:not(:has(.hero)) .logo-svg { filter: var(--logo-antracit); }
 .footer-contact-list li a { color: var(--muted); transition: color 0.2s; }
 .footer-contact-list li a:hover { color: var(--text); }
 .footer-hours { font-style: italic; }
+/* ── Demján Sándor Program védjegy ────────────────────────────────────────
+   A NEUM hiánypótlása szerint a program védjegyének, a Neumann János
+   Nonprofit Közhasznú Kft. logójának és a megadott mondatnak minden oldalon
+   meg kell jelennie. Ezért a footer alján, a copyright fölött ül: ott van
+   minden oldalon, a minimális footerű aloldalakon is.
+
+   A két logó saját, a márkától idegen színvilágú -- fehér lapon ülnek, hogy
+   hivatalos jelzésként olvasódjanak, ne a honlap grafikájaként. Ugyanaz a
+   kezelés, mint a Széchenyi-infoblokknál. */
+.dsp-band { border-top: 1px solid var(--border); padding: 28px 0; }
+.dsp-inner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px 28px;
+}
+.dsp-logos {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 14px 20px;
+  background: #fff;
+  border: 1px solid rgba(43, 59, 70, 0.12);
+}
+.dsp-logo { display: block; width: auto; }
+/* A két védjegy aránya nagyon eltér (a programé közel négyzetes, a Neumanné
+   fekvő), ezért magasságra igazítjuk őket, nem szélességre. */
+.dsp-logo-program { height: 88px; }
+.dsp-logo-neumann { height: 42px; }
+.dsp-text {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.6;
+  max-width: 420px;
+}
+@media (max-width: 760px) {
+  .dsp-inner { gap: 14px; }
+  .dsp-logos { gap: 16px; padding: 12px 14px; width: 100%; justify-content: center; }
+  .dsp-logo-program { height: 68px; }
+  .dsp-logo-neumann { height: 34px; }
+  .dsp-text { max-width: none; }
+}
+
 /* ── Pályázati kötelező közzététel ────────────────────────────────────────
    A kedvezményezetti infoblokk a támogató kötelező arculati eleme: kék-fehér,
    és nem a márka palettájából jön. Ezért mindenhol fehér lapon ül, saját
