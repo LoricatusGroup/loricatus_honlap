@@ -1047,6 +1047,18 @@ export default function EditorPage({ user, membership }: Props) {
                     }}
                   />
                   <MenuItem
+                    icon="📘"
+                    label="Használati útmutató"
+                    hint="Letölthető PDF, új lapon"
+                    onClick={() => {
+                      // A honlappal együtt publikálódik (docs/), így az
+                      // útmutató mindig a szerkesztő aktuális változatát írja
+                      // le. Új lapon nyílik, hogy a mentetlen munka megmaradjon.
+                      window.open('/docs/CMS-utmutato.pdf', '_blank', 'noopener')
+                      close()
+                    }}
+                  />
+                  <MenuItem
                     icon="↩"
                     label="Kijelentkezés"
                     danger
@@ -1208,7 +1220,7 @@ export default function EditorPage({ user, membership }: Props) {
               {
                 target: 'account',
                 title: 'Fiók és súgó',
-                body: 'A jobb felső kezdőbetűs gomb alatt van a kijelentkezés — és innen indíthatod újra bármikor ezt a bemutatót (Bemutató / súgó).',
+                body: 'A jobb felső kezdőbetűs gomb alatt találod a részletes használati útmutatót (PDF), innen indíthatod újra ezt a bemutatót, és itt van a kijelentkezés is.',
               },
               {
                 title: 'Kész! ✓',
