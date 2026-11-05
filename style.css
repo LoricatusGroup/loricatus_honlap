@@ -89,6 +89,15 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 select, input, textarea { font-family: inherit; }
 input, textarea, [contenteditable="true"] { caret-color: var(--text); }
 
+/* A hosszú magyar (és olasz) összetett szavak -- "ÉLETCIKLUSÁN",
+   "projektmenedzsment" -- a nagy címbetűmérettel nem férnek ki a szűk
+   telefonokon. A böngésző ilyenkor nem csak a szót lógatja ki: kiszélesíti a
+   layout viewportot, és ettől az egész oldal vízszintesen elcsúszik -- a
+   színes panelek háttere a 100%-os szélességén megáll, a szöveg viszont
+   túlfut rajta. Ez a sor csak akkor lép életbe, ha a szó valóban nem fér el,
+   egyébként semmit nem változtat. */
+h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
+
 /* ── LAYOUT ─────────────────────────────────────── */
 .section-bg-label {
   display: block;
@@ -1115,6 +1124,14 @@ body:not(:has(.hero)) .logo-svg { filter: var(--logo-antracit); }
   .dsp-logo-neumann { height: 34px; }
   .dsp-text { max-width: none; }
 }
+@media (max-width: 420px) {
+  /* A két védjegy egymás mellett 314 px-et kér (123 + 16 + 147 + 2x14 belső
+     margó), ami a legszűkebb telefonokon (320 px és alatta) nem fér ki. A sor
+     ilyenkor kiszélesítette a layout viewportot, és az egész oldal
+     vízszintesen elcsúszott. Itt egymás alá kerülnek; a méretük marad, mert
+     kötelező arculati elem. */
+  .dsp-logos { flex-wrap: wrap; }
+}
 
 /* ── Pályázati kötelező közzététel ────────────────────────────────────────
    A kedvezményezetti infoblokk a támogató kötelező arculati eleme: kék-fehér,
@@ -1684,7 +1701,11 @@ body:not(:has(.hero)) .logo-svg { filter: var(--logo-antracit); }
   }
   .hero-title { font-size: clamp(2.8rem, 12vw, 4.5rem); }
   .hero-actions { flex-direction: column; }
-  .btn { width: 100%; justify-content: center; }
+  /* Mobilon minden gomb teljes szélességű; a .btn alap white-space:nowrap
+     miatt viszont egy hosszabb (pl. olasz) feliratnál a gomb saját
+     min-szélessége meghaladta a kijelzőt, és kiszélesítette a layout
+     viewportot — az egész oldal vízszintesen elcsúszott. Itt törhet. */
+  .btn { width: 100%; justify-content: center; white-space: normal; text-align: center; }
   .hero-stats { grid-template-columns: repeat(2, 1fr); border-top: 1px solid var(--border); margin-top: 48px; }
 
   .section { padding: 56px 0; }

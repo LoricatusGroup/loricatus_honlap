@@ -17,7 +17,7 @@
   <link rel="icon" href="/favicon.ico" sizes="32x32">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-  <link rel="stylesheet" href="/style.css?v=22">
+  <link rel="stylesheet" href="/style.css?v=23">
   <style>
   /* clear the fixed site navbar, the way .pg-hero does on the other subpages */
   .lor-wrap { background: var(--bg); padding-top: var(--nav-h, 64px); }
@@ -34,6 +34,17 @@
   .lor-tab.is-active { background: #2B3B46; color: #C8FA32; border-color: #2B3B46; }
   .lor-panel[hidden] { display: none; }
   @keyframes lorFade { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+  /* A kéthasábos sorok (data-stack) rácsa inline style-ban minmax(200px,1fr)
+     minmax(320px,2fr) — ennek alsó korlátja a 32 px-es réssel együtt 552 px,
+     a második csoportnál 620 px. Telefonon ez szélesebb a kijelzőnél, ezért a
+     böngésző kiszélesítette a layout viewportot: a panel háttere a 100%-os
+     szélességén állt meg, a szöveg viszont túlfutott rajta — így "kifolyt" a
+     sötét blokk tartalma a világos háttérre. Keskeny kijelzőn egy hasáb.
+     Az !important szükséges, mert a rácsot inline style írja elő. */
+  @media (max-width: 760px) {
+    .lor-wrap [data-stack="1"] { grid-template-columns: 1fr !important; gap: 10px !important; }
+  }
 </style>
 <style id="cms-theme"></style>  <meta name="ai-compare-prompt" data-edit-content="footer-ai-prompt" content="Read the About page of Loricatus Kft. (https://loricatus.hu): https://loricatus.hu/en/rolunk/ — and the overview at https://loricatus.hu/llms.txt, which lists the subpages and the typical buyer questions. Summarise how the company works on a general-contractor project: which recurring problems it addresses, what the process looks like, and what the client actually receives. Do not give me a service list: explain it the way someone familiar with this market would — through concrete situations, when it is worth working with this team and what the client gains. Tailor it to my line of work if you know it; if you do not, ask me one short question. At the end, say whether it is worth talking to them, and give me their contact details. Base everything only on pages under loricatus.hu, say so if something is not covered, and do not claim any personal experience with them.">
 </head>
