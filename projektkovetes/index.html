@@ -1,0 +1,370 @@
+<!DOCTYPE html><html lang="hu"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projektkövetés | Loricatus</title>
+  <meta name="description" content="Kövesse nyomon Loricatus-projektje állapotát a személyes projektkódjával.">
+  <!-- Kódos, személyes oldal: keresőben nincs keresnivalója. -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <link rel="canonical" href="https://loricatus.hu/projektkovetes/">
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="/style.css?v=23">
+  <style>
+  /* ── Projektkövetés (2026-11-18) ──────────────────────────────────────
+     A megrendelő a levélben kapott kóddal (LRCTS2026-85-K7QM) nézi meg, hol
+     tart a projektje. Kód nélkül nem látszik semmi. Az adat a Supabase
+     `kovetes-lekerdez` függvényéből jön — a CRM-hez a böngésző nem fordul. */
+  .pk { background: var(--bg); padding-top: var(--nav-h, 64px); min-height: 100vh; }
+  .pk-in { max-width: 1120px; margin: 0 auto; padding: 0 var(--pad); }
+  .pk h1, .pk h2, .pk h3 { font-family: var(--font-sans); }
+  .pk-eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+
+  .pk-hero { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: clamp(24px, 5vw, 64px);
+    align-items: center; padding: clamp(40px, 7vw, 88px) 0 clamp(32px, 5vw, 64px); }
+  .pk-hero h1 { font-size: clamp(38px, 5.4vw, 68px); line-height: .98; font-weight: 700; letter-spacing: -.025em; margin: 16px 0 20px; text-wrap: balance; }
+  .pk-hero p.lead { font-size: 18px; line-height: 1.55; color: #3a434a; max-width: 46ch; }
+  .pk-illu { position: relative; justify-self: center; width: min(100%, 380px); }
+  .pk-illu img { width: 100%; height: auto; display: block; animation: pkFloat 5s ease-in-out infinite; }
+  @keyframes pkFloat { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-8px) } }
+  .pk-bubble { position: absolute; top: 6%; left: -6%; background: #fff; color: var(--text); font-weight: 700; font-size: 14px;
+    padding: 10px 14px; border-radius: 14px 14px 14px 4px; box-shadow: 0 8px 24px rgba(43,59,70,.12); transform: rotate(-4deg); }
+  @media (prefers-reduced-motion: reduce) { .pk-illu img { animation: none } }
+
+  .pk-form { margin-top: 30px; max-width: 520px; }
+  .pk-form label { display: block; font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .pk-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .pk-input { flex: 1 1 260px; min-width: 0; font-family: var(--font-mono); font-size: 20px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase;
+    padding: 16px 18px; border: 1.5px solid rgba(43,59,70,.35); border-radius: 6px; background: #fff; color: var(--text); outline: none; }
+  .pk-input:focus { border-color: var(--text); box-shadow: 0 0 0 4px rgba(200,250,50,.55); }
+  .pk-input::placeholder { color: #9aa3a8; letter-spacing: .04em; }
+  .pk-btn { flex: 0 0 auto; background: var(--accent); color: var(--text); font-weight: 700; font-size: 16px; padding: 16px 26px; border: 0; border-radius: 6px;
+    cursor: pointer; transition: background .18s var(--ease), color .18s var(--ease); }
+  .pk-btn:hover { background: var(--text); color: var(--accent); }
+  .pk-btn[disabled] { opacity: .6; cursor: wait; }
+  .pk-help { font-size: 14px; color: var(--muted); margin-top: 12px; line-height: 1.5; }
+  .pk-msg { margin-top: 14px; font-size: 15px; padding: 12px 14px; border-radius: 6px; display: none; }
+  .pk-msg.on { display: block; }
+  .pk-msg.err { background: #fde8e6; color: #8a1c12; border: 1px solid #f4b9b1; }
+  .pk-ts { margin-top: 14px; min-height: 0; }
+
+  /* Eredmény */
+  .pk-res { scroll-margin-top: calc(var(--nav-h, 64px) + 16px); display: none; padding: 0 0 clamp(56px, 8vw, 104px); }
+  .pk-res.on { display: block; animation: pkIn .45s var(--ease) both; }
+  @keyframes pkIn { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: none } }
+  .pk-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .pk-card-head { background: var(--text); color: var(--bg); padding: clamp(22px, 4vw, 36px); display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: end; }
+  .pk-card-head h2 { font-size: clamp(26px, 3.4vw, 40px); line-height: 1.05; letter-spacing: -.02em; margin: 10px 0 0; color: #fff; }
+  .pk-card-head .pk-eyebrow { color: #b9c2c7; }
+  .pk-code { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 15px; letter-spacing: .06em; color: var(--accent);
+    border: 1px dashed rgba(200,250,50,.55); border-radius: 6px; padding: 8px 12px; background: transparent; cursor: pointer; }
+  .pk-code svg { width: 16px; height: 16px; }
+  .pk-dates { display: grid; grid-template-columns: 1.4fr 1fr; border-bottom: 1px solid var(--border); }
+  .pk-date { padding: clamp(20px, 3.4vw, 32px); }
+  .pk-date + .pk-date { border-left: 1px solid var(--border); }
+  .pk-date .v { font-weight: 700; letter-spacing: -.02em; line-height: 1; margin-top: 10px; }
+  .pk-date.fo .v { font-size: clamp(34px, 5vw, 58px); }
+  .pk-date.al .v { font-size: clamp(22px, 2.8vw, 30px); }
+  .pk-date .v.ismeretlen { color: #8a949a; }
+  .pk-date .pin { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 8px; vertical-align: 1px; }
+
+  .pk-now { padding: clamp(20px, 3.4vw, 32px); border-bottom: 1px solid var(--border); display: grid; gap: 14px; }
+  .pk-now .cim { font-size: clamp(20px, 2.4vw, 26px); font-weight: 700; letter-spacing: -.01em; }
+  .pk-bar { height: 10px; background: var(--bg2); border-radius: 99px; overflow: hidden; }
+  .pk-bar i { display: block; height: 100%; background: var(--accent); border-radius: 99px; box-shadow: inset 0 0 0 1px rgba(43,59,70,.12); transition: width .8s var(--ease); }
+  .pk-now .meta { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; color: var(--muted); }
+
+  .pk-steps { list-style: none; margin: 0; padding: clamp(16px, 3vw, 28px) clamp(20px, 3.4vw, 32px); display: grid; gap: 0; }
+  .pk-step { display: grid; grid-template-columns: 34px 1fr; gap: 14px; position: relative; padding: 0 0 18px; }
+  .pk-step:last-child { padding-bottom: 0; }
+  .pk-step::before { content: ''; position: absolute; left: 16px; top: 30px; bottom: -2px; width: 2px; background: var(--bg2); }
+  .pk-step:last-child::before { display: none; }
+  .pk-step.kesz::before { background: var(--text); }
+  .pk-dot { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-mono); font-size: 13px; font-weight: 500;
+    background: #fff; color: #8a949a; border: 2px solid var(--bg2); position: relative; z-index: 1; }
+  .pk-step.kesz .pk-dot { background: var(--text); border-color: var(--text); color: #fff; }
+  .pk-step.most .pk-dot { background: var(--accent); border-color: var(--text); color: var(--text); font-weight: 700; box-shadow: 0 0 0 6px rgba(200,250,50,.35); }
+  .pk-step .t { padding-top: 6px; font-size: 16px; line-height: 1.35; color: #8a949a; }
+  .pk-step.kesz .t { color: var(--text); }
+  .pk-step.most .t { color: var(--text); font-weight: 700; font-size: 18px; }
+  .pk-step.most .t small { display: block; font-family: var(--font-mono); font-weight: 400; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+
+  .pk-done { display: none; background: var(--accent); color: var(--text); padding: 16px clamp(20px, 3.4vw, 32px); font-weight: 700; }
+  .pk-done.on { display: block; }
+  .pk-foot { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 18px; font-size: 14px; color: var(--muted); }
+  .pk-link { background: none; border: 0; padding: 0; font: inherit; color: var(--text); text-decoration: underline; cursor: pointer; }
+
+  @media (max-width: 860px) {
+    .pk-hero { grid-template-columns: 1fr; }
+    .pk-illu { width: min(70%, 300px); order: -1; }
+    .pk-bubble { left: auto; right: -8%; }
+  }
+  @media (max-width: 560px) {
+    .pk-card-head { grid-template-columns: 1fr; }
+    .pk-dates { grid-template-columns: 1fr; }
+    .pk-date + .pk-date { border-left: 0; border-top: 1px solid var(--border); }
+    .pk-btn { width: 100%; }
+  }
+  </style>
+</head>
+
+<body>
+
+  <nav id="navbar" class="navbar">
+    <div class="nav-container">
+      <a href="/" class="nav-logo" aria-label="Loricatus"><picture><source media="(min-width: 1261px)" srcset="/assets/logo/horizontalis.svg"><img src="/assets/logo/logotipia.svg" alt="Loricatus" class="logo-svg"></picture></a>
+      <ul class="nav-links" id="navLinks"><li><a href="/">Főoldal</a></li><li><a href="/rolunk/">Rólunk</a></li><li><a href="/referenciak/">Referenciák</a></li><li><a href="/blog/">Blog</a></li><li><a href="/palyazatok/">Pályázatok</a></li>
+<li><a href="/#contact" class="nav-cta-link">Ajánlatkérés</a></li>
+</ul>
+      <button class="nav-cta" onclick="location.href='/#contact'">Ajánlatkérés</button>
+      <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <main class="pk">
+    <div class="pk-in">
+      <section class="pk-hero" id="pkHero">
+        <div>
+          <div class="pk-eyebrow">Projektkövetés</div>
+          <h1>Hol tart a projektje?</h1>
+          <p class="lead">Adja meg a levélben kapott személyes projektkódját, és megmutatjuk, melyik lépésnél tartunk, és mikorra várható a következő határidő.</p>
+
+          <form class="pk-form" id="pkForm" novalidate autocomplete="off">
+            <label for="pkKod">Projektkód</label>
+            <div class="pk-row">
+              <input class="pk-input" id="pkKod" name="kod" inputmode="text" spellcheck="false" autocapitalize="characters"
+                     placeholder="LRCTS2026-123-ABCD" maxlength="32" aria-describedby="pkHelp pkMsg" required>
+              <button class="pk-btn" id="pkBtn" type="submit">Megnézem</button>
+            </div>
+            <div class="pk-ts" id="pkTs"></div>
+            <div class="pk-msg err" id="pkMsg" role="alert"></div>
+            <p class="pk-help" id="pkHelp">A kódot a Loricatus „Projektstátusz frissítés” levelében találja. Ha nem kapott ilyet, keresse projektfelelősét.</p>
+          </form>
+        </div>
+        <div class="pk-illu" aria-hidden="true">
+          <img src="/assets/kovetes/epitesz.svg" alt="" width="320" height="360">
+          <div class="pk-bubble">Már dolgozunk rajta!</div>
+        </div>
+      </section>
+
+      <section class="pk-res" id="pkRes" aria-live="polite">
+        <div class="pk-card">
+          <div class="pk-card-head">
+            <div>
+              <div class="pk-eyebrow">Az Ön projektje</div>
+              <h2 id="pkProjekt"></h2>
+            </div>
+            <button class="pk-code" id="pkCode" type="button" title="Kód másolása">
+              <span id="pkCodeTxt"></span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+          <div class="pk-done" id="pkDone">Projektje lezárult — köszönjük, hogy minket választott!</div>
+          <div class="pk-dates">
+            <div class="pk-date fo">
+              <div class="pk-eyebrow"><span class="pin" style="background:#dc2626"></span>Határidő</div>
+              <div class="v" id="pkHatarido"></div>
+            </div>
+            <div class="pk-date al">
+              <div class="pk-eyebrow"><span class="pin" style="background:#eab308"></span>Részhatáridő</div>
+              <div class="v" id="pkResz"></div>
+            </div>
+          </div>
+          <div class="pk-now">
+            <div class="pk-eyebrow">Jelenlegi lépés</div>
+            <div class="cim" id="pkMost"></div>
+            <div class="pk-bar" role="progressbar" aria-valuemin="1" id="pkBarWrap"><i id="pkBar" style="width:0"></i></div>
+            <div class="meta"><span id="pkSzam"></span><span id="pkValt"></span></div>
+          </div>
+          <ol class="pk-steps" id="pkSteps"></ol>
+        </div>
+        <div class="pk-foot">
+          <span id="pkFriss"></span>
+          <button class="pk-link" type="button" id="pkUj">Másik kód megadása</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="dsp-band">
+      <div class="container dsp-inner">
+        <div class="dsp-logos">
+          <img src="/assets/dsp/demjan-sandor-program.svg" alt="Demján Sándor Program" class="dsp-logo dsp-logo-program" width="500" height="276" loading="lazy">
+          <img src="/assets/dsp/neumann-janos-nonprofit-kft.svg" alt="Neumann János Nonprofit Közhasznú Kft." class="dsp-logo dsp-logo-neumann" width="520" height="120" loading="lazy">
+        </div>
+        <p class="dsp-text">A weboldal a Demján Sándor Program keretében és támogatásával valósult meg.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <span>© 2026 Loricatus. Minden jog fenntartva.</span>
+        <span><a href="/adatvedelem/">Adatvédelem</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/script.js?v=11" defer></script>
+  <script>
+  (function () {
+    'use strict';
+    // Nyilvános értékek: az anon kulcs RLS mögött van, a Turnstile SITE kulcs nyilvánosnak készült.
+    var SUPABASE_URL = 'https://rksqwamubvnxuthumphi.supabase.co';
+    var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrc3F3YW11YnZueHV0aHVtcGhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjcwNjIsImV4cCI6MjA5Mzg0MzA2Mn0.VuZYXK1-cQRcuPh4Q7YIVSg5XtLIT1h1NeqmvluOCmY';
+    var TURNSTILE_SITE_KEY = '0x4AAAAAADyYgSETLNJAc7SW';
+    var LEKERDEZ_URL = SUPABASE_URL + '/functions/v1/kovetes-lekerdez';
+    var KOD_RE = /^LRCTS-?\d{4}-?\d{1,5}-?[ABCDEFGHJKMNPQRSTUVWXYZ2-9]{4}$/;
+
+    var $ = function (id) { return document.getElementById(id); };
+    var form = $('pkForm'), input = $('pkKod'), btn = $('pkBtn'), msg = $('pkMsg');
+    var widgetId = null, token = '', varakozik = false;
+
+    // Ugyanaz, mint a CRM és a függvény normalizálása: „lrcts 2026 085 abcd" → LRCTS2026-85-ABCD.
+    function normal(v) {
+      var s = String(v || '').trim().toUpperCase().replace(/[\s_.–—]+/g, '-').replace(/-+/g, '-');
+      var m = /^LRCTS-?(\d{4})-?(\d{1,5})-?([A-Z0-9]{4})$/.exec(s);
+      return m ? 'LRCTS' + m[1] + '-' + Number(m[2]) + '-' + m[3] : s;
+    }
+    function hiba(szoveg) { msg.textContent = szoveg; msg.classList.add('on'); }
+    function nincsHiba() { msg.textContent = ''; msg.classList.remove('on'); }
+    function datum(iso) {
+      if (!iso) return null;
+      var d = new Date(iso.length === 10 ? iso + 'T12:00:00' : iso);
+      return isNaN(d) ? null : d.toLocaleDateString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    function datumMezo(el, iso) {
+      var d = datum(iso);
+      el.textContent = d || 'Nem ismert';
+      el.classList.toggle('ismeretlen', !d);
+    }
+
+    // A levél gombja #kod=…-dal nyitja meg az oldalt: kitöltjük, majd a kódot
+    // kivesszük a címsorból (ne maradjon az előzményekben, képernyőmegosztáson).
+    var m = /(?:^|[#&])kod=([^&]+)/.exec(location.hash);
+    if (m) {
+      try { input.value = normal(decodeURIComponent(m[1])); } catch (e) { /* hibás link */ }
+      history.replaceState(null, '', location.pathname + location.search);
+    }
+
+    function turnstile() {
+      if (!document.querySelector('script[src*="challenges.cloudflare.com/turnstile"]')) {
+        var s = document.createElement('script');
+        s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        s.async = true; s.defer = true;
+        document.head.appendChild(s);
+      }
+      (function render() {
+        if (window.turnstile && widgetId === null) {
+          widgetId = window.turnstile.render($('pkTs'), {
+            sitekey: TURNSTILE_SITE_KEY, language: 'hu', appearance: 'interaction-only',
+            callback: function (t) { token = t; if (varakozik) { varakozik = false; lekerdez(); } },
+            'expired-callback': function () { token = ''; },
+            'error-callback': function () { token = ''; }
+          });
+        } else if (widgetId === null) { setTimeout(render, 150); }
+      })();
+    }
+    turnstile();
+
+    function ujToken() {
+      token = '';
+      if (window.turnstile && widgetId !== null) window.turnstile.reset(widgetId);
+    }
+
+    function lepesek(adat) {
+      var ol = $('pkSteps');
+      ol.textContent = '';
+      adat.lepesek.forEach(function (cim, i) {
+        var n = i + 1;
+        var li = document.createElement('li');
+        li.className = 'pk-step ' + (n < adat.lepes ? 'kesz' : n === adat.lepes ? 'most' : 'jon');
+        var dot = document.createElement('span');
+        dot.className = 'pk-dot';
+        dot.textContent = n < adat.lepes ? '✓' : String(n);
+        var t = document.createElement('div');
+        t.className = 't';
+        t.textContent = cim;
+        if (n === adat.lepes) {
+          var s = document.createElement('small');
+          s.textContent = 'Itt tartunk most';
+          t.appendChild(s);
+          li.setAttribute('aria-current', 'step');
+        }
+        li.appendChild(dot); li.appendChild(t);
+        ol.appendChild(li);
+      });
+    }
+
+    function mutat(adat, frissitve, teljesKod) {
+      $('pkProjekt').textContent = adat.projekt;
+      $('pkCodeTxt').textContent = teljesKod;
+      datumMezo($('pkHatarido'), adat.hatarido);
+      datumMezo($('pkResz'), adat.reszHatarido);
+      $('pkMost').textContent = adat.lepesek[adat.lepes - 1] || '';
+      var db = adat.lepesek.length;
+      $('pkSzam').textContent = adat.lepes + '. lépés a ' + db + '-ből';
+      $('pkValt').textContent = adat.lepesValtozott ? 'Frissült: ' + datum(adat.lepesValtozott) : '';
+      $('pkBarWrap').setAttribute('aria-valuemax', String(db));
+      $('pkBarWrap').setAttribute('aria-valuenow', String(adat.lepes));
+      $('pkDone').classList.toggle('on', !!adat.lezarva);
+      lepesek(adat);
+      $('pkFriss').textContent = frissitve ? 'Az adatok frissítve: ' + new Date(frissitve).toLocaleString('hu-HU', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+      $('pkRes').classList.add('on');
+      requestAnimationFrame(function () { $('pkBar').style.width = Math.round(adat.lepes / db * 100) + '%'; });
+      $('pkRes').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function lekerdez() {
+      var kod = normal(input.value);
+      input.value = kod;
+      if (!KOD_RE.test(kod)) {
+        hiba('A kód formája: LRCTS, évszám, sorszám és négy betű — például LRCTS2026-123-ABCD.');
+        input.focus();
+        return;
+      }
+      if (!token) { varakozik = true; btn.disabled = true; btn.textContent = 'Ellenőrzés…'; return; }
+      nincsHiba();
+      btn.disabled = true; btn.textContent = 'Keresés…';
+      fetch(LEKERDEZ_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY },
+        body: JSON.stringify({ kod: kod, token: token })
+      }).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (b) { return { status: r.status, body: b }; });
+      }).then(function (v) {
+        if (v.status === 200 && v.body && v.body.adat) { mutat(v.body.adat, v.body.frissitve, kod); return; }
+        $('pkRes').classList.remove('on');
+        if (v.status === 404) hiba('Ehhez a kódhoz nem találtunk projektet. Kérjük, ellenőrizze a levélben kapott kódot.');
+        else if (v.status === 429 && v.body.error === 'zarolva') hiba('Ehhez a projekthez túl sok hibás próbálkozás érkezett. Kérjük, próbálja újra egy óra múlva.');
+        else if (v.status === 429) hiba('Túl sok lekérdezés. Kérjük, próbálja újra néhány perc múlva.');
+        else if (v.status === 403) hiba('A biztonsági ellenőrzés nem sikerült. Kérjük, töltse újra az oldalt.');
+        else hiba('Most nem sikerült lekérdezni az állapotot. Kérjük, próbálja újra később.');
+      }).catch(function () {
+        hiba('Most nem sikerült lekérdezni az állapotot. Kérjük, ellenőrizze az internetkapcsolatot.');
+      }).then(function () {
+        btn.disabled = false; btn.textContent = 'Megnézem';
+        ujToken();
+      });
+    }
+
+    form.addEventListener('submit', function (e) { e.preventDefault(); lekerdez(); });
+    input.addEventListener('input', nincsHiba);
+
+    $('pkCode').addEventListener('click', function () {
+      var kod = $('pkCodeTxt').textContent;
+      var kesz = function () { var el = $('pkCode'); el.setAttribute('title', 'Másolva!'); el.style.borderStyle = 'solid'; setTimeout(function () { el.style.borderStyle = ''; el.setAttribute('title', 'Kód másolása'); }, 1400); };
+      if (navigator.clipboard) navigator.clipboard.writeText(kod).then(kesz, function () {});
+    });
+    $('pkUj').addEventListener('click', function () {
+      $('pkRes').classList.remove('on');
+      input.value = ''; nincsHiba();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      input.focus();
+    });
+
+    // A levélből jött: a kód kész, a captcha után magától lekérdez.
+    if (input.value) lekerdez(); else input.focus();
+  })();
+  </script>
+</body></html>
