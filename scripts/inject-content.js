@@ -715,7 +715,7 @@ async function loadDynamicPages() {
 const RESERVED_PAGE_IDS = new Set([
   'home', 'index', 'en', 'it', 'admin', 'admin-app', 'assets', 'sections',
   'scripts', 'supabase', 'page-templates', 'tudastar', 'adatvedelem',
-  'cookie-szabalyzat', 'referenciak', 'epiteskovetes-hu-mentes', 'node_modules',
+  'cookie-szabalyzat', 'referenciak', 'palyazatok', 'epiteskovetes-hu-mentes', 'node_modules',
 ])
 
 // Delete a deleted page's HTML files (all three locales). Guarded by the same
@@ -1259,6 +1259,13 @@ async function main() {
   }
 
   const target = resolveTarget(merged, PAGE, LOCALE)
+  // Egynyelvű oldal (pl. a csak magyar pályázati tájékoztatók): egy
+  // locale:'all' futás a hiányzó nyelvnél ne bukjon el, csak lépje át.
+  const knownPage = (merged.pages || []).find((p) => p.id === PAGE)
+  if (!target && knownPage) {
+    console.log(`Page '${PAGE}' has no '${LOCALE}' locale — skipping`)
+    return
+  }
   if (!target) {
     console.error(`Unknown page/locale: page=${PAGE} locale=${LOCALE}`)
     process.exit(1)
