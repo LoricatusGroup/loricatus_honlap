@@ -633,4 +633,29 @@ function check(name, cond) {
   check('stat: the number is readable without JavaScript', el.textContent === '640')
 }
 
+// A pályázati oldalak CMS-oldalak (csak magyarul): a szerkesztő és a publikálás
+// megtalálja őket, a fájlban minden tárolt kulcsnak van célpontja, és az angol
+// / olasz változat hiánya nem hiba.
+{
+  const fs = require('fs')
+  const path = require('path')
+  const { JSDOM } = require('jsdom')
+  const manifest = inj.loadManifest()
+  for (const id of ['palyazatok', 'palyazatok-ginop', 'palyazatok-dimop']) {
+    const t = inj.resolveTarget(manifest, id, 'hu')
+    check(`pályázat: ${id} hu feloldható`, !!t && fs.existsSync(path.join(__dirname, '..', t.filePath)))
+    check(`pályázat: ${id} en nincs`, inj.resolveTarget(manifest, id, 'en') === null)
+    const html = fs.readFileSync(path.join(__dirname, '..', t.filePath), 'utf-8')
+    const doc = new JSDOM(html).window.document
+    const keys = Array.from(doc.querySelectorAll('[data-edit]')).map((e) => e.getAttribute('data-edit'))
+    check(`pályázat: ${id} kulcsai egyediek`, keys.length > 5 && new Set(keys).size === keys.length)
+    const { applied, missing } = inj.applyContent(doc, { 'palyazat-focim-1': 'Teszt cím' })
+    check(`pályázat: ${id} cím szerkeszthető`, applied === 1 && missing.length === 0 &&
+      doc.querySelector('h1').textContent === 'Teszt cím')
+  }
+  const xml = inj.buildSitemapXml(manifest)
+  check('sitemap: a pályázati oldal egyszer szerepel',
+    (xml.match(/<loc>https:\/\/loricatus\.hu\/palyazatok\/<\/loc>/g) || []).length === 1)
+}
+
 console.log(`\n${passed} checks passed`)

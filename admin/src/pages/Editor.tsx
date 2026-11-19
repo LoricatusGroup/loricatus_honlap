@@ -420,6 +420,11 @@ export default function EditorPage({ user, membership }: Props) {
     }
     localStorage.setItem(LOCALE_STORAGE_KEY, next)
     setStatus(null)
+    // Egynyelvű oldal (pl. a csak magyar pályázati oldalak): ha az oldal nem
+    // létezik a választott nyelven, a főoldalra váltunk. Enélkül a nézet a
+    // főoldalra esne vissza, a mentés és a publikálás viszont a régi oldalra menne.
+    const cur = pagesManifest?.pages.find((p) => p.id === page)
+    if (cur && !cur.locales[next]) setPage('home')
     setLocaleState(next)
   }
 
@@ -813,7 +818,7 @@ export default function EditorPage({ user, membership }: Props) {
 
             {pagesManifest && pagesManifest.pages.length > 1 && (
               <div className="cms-segment" title="Oldal kiválasztása" data-tour="pages">
-                {pagesManifest.pages.map((p) => (
+                {pagesManifest.pages.filter((p) => p.locales[locale]).map((p) => (
                   <button
                     key={p.id}
                     onClick={() => switchPage(p.id)}

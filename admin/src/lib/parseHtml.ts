@@ -30,6 +30,7 @@ const SECTION_LABELS: Record<string, string> = {
   contact: 'Kapcsolat',
   footer: 'Footer',
   rolunk: 'Rólunk oldal',
+  palyazat: 'Pályázati oldal',
 }
 
 function readValue(el: Element, type: FieldType): string {
@@ -70,6 +71,7 @@ const WORD_HU: Record<string, string> = {
   cta: 'gomb', button: 'gomb', badge: 'jelvény',
   primary: 'elsődleges', secondary: 'másodlagos',
   bg: 'háttér', background: 'háttér',
+  cel: 'cél', vissza: 'vissza-link',
   menu: 'menü', phone: 'telefon', email: 'e-mail', address: 'cím',
   hours: 'nyitvatartás', meta: 'meta', stat: 'statisztika', hint: 'tipp',
   ph: 'mintaszöveg (szürke segédszöveg)',

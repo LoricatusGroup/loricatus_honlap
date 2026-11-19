@@ -118,12 +118,54 @@
           "url": "/it/blog/"
         }
       }
+    },
+    {
+      "id": "palyazatok",
+      "nav": {
+        "hu": "Pályázatok"
+      },
+      "inNav": false,
+      "order": 70,
+      "locales": {
+        "hu": {
+          "slug": "palyazatok",
+          "file": "palyazatok/index.html",
+          "url": "/palyazatok/"
+        }
+      }
+    },
+    {
+      "id": "palyazatok-ginop",
+      "nav": {
+        "hu": "GINOP Plusz"
+      },
+      "inNav": false,
+      "order": 71,
+      "locales": {
+        "hu": {
+          "slug": "palyazatok-ginop",
+          "file": "palyazatok/ginop/index.html",
+          "url": "/palyazatok/ginop/"
+        }
+      }
+    },
+    {
+      "id": "palyazatok-dimop",
+      "nav": {
+        "hu": "DIMOP Plusz"
+      },
+      "inNav": false,
+      "order": 72,
+      "locales": {
+        "hu": {
+          "slug": "palyazatok-dimop",
+          "file": "palyazatok/dimop/index.html",
+          "url": "/palyazatok/dimop/"
+        }
+      }
     }
   ],
   "extraUrls": [
-    "/palyazatok/dimop/",
-    "/palyazatok/ginop/",
-    "/palyazatok/",
     "/tudastar/",
     "/adatvedelem/",
     "/cookie-szabalyzat/"
